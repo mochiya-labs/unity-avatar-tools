@@ -1,0 +1,23 @@
+{
+  "name": "Mochiya.LilToon.Exporter.Editor.Tests",
+  "rootNamespace": "Mochiya.LilToon.Exporter.Editor.Tests",
+  "references": [
+    "Mochiya.LilToon.Exporter.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

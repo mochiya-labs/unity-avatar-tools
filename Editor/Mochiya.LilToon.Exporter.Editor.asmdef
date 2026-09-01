@@ -1,0 +1,21 @@
+{
+  "name": "Mochiya.LilToon.Exporter.Editor",
+  "rootNamespace": "Mochiya.LilToon.Exporter.Editor",
+  "references": [
+    "UniGLTF",
+    "UniGLTF.Editor",
+    "VRM10",
+    "VrmLib"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

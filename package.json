@@ -1,0 +1,22 @@
+{
+  "name": "com.mochiya.liltoon-exporter",
+  "version": "0.1.0",
+  "displayName": "Mochiya lilToon Exporter",
+  "description": "Exports Unity models and VRM 1.0 avatars with the MOCHIYA_materials_liltoon glTF material extension.",
+  "unity": "2022.3",
+  "license": "MIT",
+  "author": {
+    "name": "Mochiya"
+  },
+  "keywords": [
+    "gltf",
+    "glb",
+    "vrm",
+    "liltoon",
+    "three.js"
+  ],
+  "dependencies": {
+    "com.vrmc.gltf": "0.131.2",
+    "com.vrmc.vrm": "0.131.2"
+  }
+}
