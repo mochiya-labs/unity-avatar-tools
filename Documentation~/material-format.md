@@ -44,9 +44,9 @@ The extension is attached to each supported glTF material and listed once in the
 - `lilToonVersion`: detected Unity lilToon package version, or `unknown` for legacy asset-folder installations.
 - `shaderVariant`: exact Unity shader name used by the material.
 - `renderMode`: `opaque`, `cutout`, or `transparent`.
-- `properties`: all non-texture properties exposed by the Unity shader, using original lilToon names. Colors are stored as linear RGBA vectors.
+- `properties`: all non-texture properties exposed by the Unity shader, using original lilToon names. Colors and `[Gamma]` scalar properties such as metallic and reflectance are stored as linear values.
 - `textures`: assigned texture properties mapped to glTF texture indices. `texCoord` is currently `0`.
 
-Texture scale and offset are emitted as the corresponding lilToon `_ST` vector after Unity-to-glTF vertical UV conversion. Textures with a Unity `[Normal]` attribute use UniVRM's normal-map conversion. Mask, bump, normal, noise, dither, parallax, UDIM, and AudioLink-named textures are exported as linear data; other textures use sRGB.
+Texture scale and offset are emitted as the corresponding lilToon `_ST` vector after Unity-to-glTF vertical UV conversion. Textures with a Unity `[Normal]` attribute use UniVRM's normal-map conversion. Mask, metallic, smoothness, bump, normal, noise, dither, parallax, UDIM, and AudioLink-named textures are exported as linear data; other textures use sRGB.
 
 The extension is optional and is not placed in `extensionsRequired`. Unknown readers can use the PBR fallback.

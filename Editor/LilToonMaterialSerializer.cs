@@ -15,7 +15,7 @@ namespace Mochiya.LilToon.Exporter.Editor
         public const string SpecVersion = "1.0";
 
         private static readonly Regex DataTextureName = new Regex(
-            "(_Mask|Mask$|Normal|Bump|Dither|Parallax|Noise|UDIM|AudioLink)",
+            "(_Mask|Mask$|Normal|Bump|Dither|Parallax|Noise|UDIM|AudioLink|Metallic|Smoothness)",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         public static void Attach(glTFMaterial destination, Material source, ITextureExporter textureExporter)
@@ -69,6 +69,7 @@ namespace Mochiya.LilToon.Exporter.Editor
                 var name = shader.GetPropertyName(index);
                 var type = shader.GetPropertyType(index);
                 if (type == ShaderPropertyType.Texture) continue;
+                var attributes = shader.GetPropertyAttributes(index);
 
                 formatter.Key(name);
                 serializedNames.Add(name);
@@ -89,6 +90,12 @@ namespace Mochiya.LilToon.Exporter.Editor
                     }
                     case ShaderPropertyType.Float:
                     case ShaderPropertyType.Range:
+                    {
+                        var value = material.GetFloat(name);
+                        if (HasAttribute(attributes, "Gamma")) value = Mathf.GammaToLinearSpace(value);
+                        formatter.Value(value);
+                        break;
+                    }
                     case ShaderPropertyType.Int:
                         formatter.Value(material.GetFloat(name));
                         break;
@@ -147,10 +154,15 @@ namespace Mochiya.LilToon.Exporter.Editor
 
         private static bool HasNormalAttribute(string[] attributes)
         {
+            return HasAttribute(attributes, "Normal");
+        }
+
+        private static bool HasAttribute(string[] attributes, string expected)
+        {
             if (attributes == null) return false;
             foreach (var attribute in attributes)
             {
-                if (string.Equals(attribute, "Normal", StringComparison.OrdinalIgnoreCase)) return true;
+                if (string.Equals(attribute, expected, StringComparison.OrdinalIgnoreCase)) return true;
             }
             return false;
         }
