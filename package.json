@@ -1,6 +1,6 @@
 {
   "name": "com.mochiya.liltoon-exporter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Mochiya lilToon Exporter",
   "description": "Exports Unity models and VRM 1.0 avatars with the MOCHIYA_materials_liltoon glTF material extension.",
   "unity": "2022.3",

@@ -37,4 +37,4 @@ Adjust the relative path from the Unity project's `Packages` directory. When thi
 
 ## Version policy
 
-Version 0.1.0 is compiled against UniVRM 0.131.2 public APIs and requires Unity 2022.3. Upgrade UniVRM deliberately and run an Editor export smoke test before changing the package dependency versions.
+Version 0.1.1 is compiled against UniVRM 0.131.2 public APIs and requires Unity 2022.3. Upgrade UniVRM deliberately and run an Editor export smoke test before changing the package dependency versions.

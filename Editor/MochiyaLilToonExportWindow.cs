@@ -42,8 +42,10 @@ namespace Mochiya.LilToon.Exporter.Editor
             if (_vrmExportSettings == null)
             {
                 _vrmExportSettings = CreateInstance<VRM10ExportSettings>();
-                _vrmExportSettings.hideFlags = HideFlags.HideAndDontSave;
             }
+            // HideAndDontSave also includes NotEditable, which causes Unity's
+            // default inspector to disable every VRM export setting.
+            _vrmExportSettings.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
             _vrmExportSettingsEditor = UnityEditor.Editor.CreateEditor(_vrmExportSettings);
             _serializedWindow = new SerializedObject(this);
             if (_root == null) _root = Selection.activeGameObject;
