@@ -5,6 +5,7 @@
     "UniGLTF",
     "UniGLTF.Editor",
     "VRM10",
+    "VRM10.Editor",
     "VrmLib"
   ],
   "includePlatforms": [

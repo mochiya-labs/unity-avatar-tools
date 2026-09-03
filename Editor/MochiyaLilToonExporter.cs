@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UniGLTF;
+using UniGLTF.MeshUtility;
 using UniVRM10;
 using UnityEditor;
 using UnityEngine;
@@ -46,22 +47,40 @@ namespace Mochiya.LilToon.Exporter.Editor
             VRM10ObjectMeta meta = null,
             bool useSparseMorphTargets = true)
         {
+            var exportSettings = ScriptableObject.CreateInstance<VRM10ExportSettings>();
+            exportSettings.MorphTargetUseSparse = useSparseMorphTargets;
+            try
+            {
+                ExportVrm(root, path, meta, exportSettings);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(exportSettings);
+            }
+        }
+
+        public static void ExportVrm(
+            GameObject root,
+            string path,
+            VRM10ObjectMeta meta,
+            VRM10ExportSettings exportSettings)
+        {
             RequireExtension(path, ".vrm");
             meta = ResolveMeta(root, meta);
             MochiyaExportValidation.ThrowIfInvalid(root, true, meta);
-
-            var settings = new GltfExportSettings
-            {
-                UseSparseAccessorForMorphTarget = useSparseMorphTargets,
-                ExportOnlyBlendShapePosition = true,
-                DivideVertexBuffer = true,
-            };
+            if (exportSettings == null) throw new ArgumentNullException(nameof(exportSettings));
+            var settings = exportSettings.MeshExportSettings;
 
             var exportRoot = UnityEngine.Object.Instantiate(root);
             exportRoot.name = root.name;
             exportRoot.hideFlags = HideFlags.HideAndDontSave;
             try
             {
+                if (exportSettings.FreezeMesh)
+                {
+                    FreezeVrmMesh(exportRoot, exportSettings);
+                }
+
                 using (var arrayManager = new NativeArrayManager())
                 {
                     var converter = new ModelExporter();
@@ -79,7 +98,7 @@ namespace Mochiya.LilToon.Exporter.Editor
                             exportRoot,
                             model,
                             converter,
-                            new ExportArgs { sparse = useSparseMorphTargets },
+                            new ExportArgs { sparse = exportSettings.MorphTargetUseSparse },
                             meta);
                         AddExtensionUsed(exporter.Storage.Gltf, materialExporter.HasExportedLilToonMaterial);
                         File.WriteAllBytes(path, exporter.Storage.ToGlbBytes());
@@ -92,6 +111,37 @@ namespace Mochiya.LilToon.Exporter.Editor
             }
 
             RefreshAssetDatabase(path);
+        }
+
+        private static void FreezeVrmMesh(GameObject exportRoot, VRM10ExportSettings settings)
+        {
+            var vrmInstance = exportRoot.GetComponent<Vrm10Instance>();
+            if (vrmInstance != null)
+            {
+                vrmInstance.UpdateType = Vrm10Instance.UpdateTypes.None;
+            }
+
+            Action freeze = () =>
+            {
+                var newMeshMap = BoneNormalizer.NormalizeHierarchyFreezeMesh(
+                    exportRoot,
+                    settings.FreezeMeshUseCurrentBlendShapeWeight);
+                BoneNormalizer.Replace(exportRoot, newMeshMap, settings.FreezeMeshKeepRotation);
+            };
+
+            // UniVRM protects coordinate-dependent VRM data while transforms
+            // are baked. Plain Humanoid exports have no such data to restore.
+            if (vrmInstance != null && vrmInstance.Vrm != null)
+            {
+                using (new Vrm10GeometryBackup(exportRoot))
+                {
+                    freeze();
+                }
+            }
+            else
+            {
+                freeze();
+            }
         }
 
         private static VRM10ObjectMeta ResolveMeta(GameObject root, VRM10ObjectMeta explicitMeta)

@@ -22,9 +22,11 @@ The package is intentionally a companion to UniVRM, not a fork. UniGLTF/UniVRM c
 2. Put the model or avatar in a scene and select its root.
 3. Open **Mochiya > Export GLB or VRM with lilToon...**.
 4. Choose GLB for a general model or VRM for a humanoid avatar.
-5. Resolve any blocking material or avatar validation errors and export.
+5. For VRM, optionally enable **Freeze Mesh**, **Freeze Mesh Keep Rotation**, or **Freeze Mesh Use Current Blend Shape Weight**, matching UniVRM's VRM 1.0 exporter.
+6. Resolve any blocking material or avatar validation errors and export.
 
 VRM export reuses metadata and avatar behavior from an attached `Vrm10Instance` when present. A plain humanoid can also be exported after entering VRM 1.0 metadata in the window.
+Mesh freezing uses UniVRM's own `BoneNormalizer` and VRM geometry backup, so look-at and spring-bone coordinates remain valid after transforms are baked.
 
 See [package documentation](Documentation~/index.md) for installation, supported shaders, the extension schema, web loading, and the public API.
 

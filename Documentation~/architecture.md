@@ -16,6 +16,8 @@
 - validate that the Three.js implementation can reproduce their shader variant;
 - enumerate Unity shader properties and textures;
 - register textures through UniVRM's `ITextureExporter`;
+- reuse UniVRM's `VRM10ExportSettings` and its Editor inspector directly;
+- optionally freeze VRM meshes through UniVRM's `BoneNormalizer` and `Vrm10GeometryBackup`;
 - attach `MOCHIYA_materials_liltoon` to each material;
 - add the extension name to root `extensionsUsed` only when used.
 

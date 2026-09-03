@@ -21,11 +21,12 @@ namespace Mochiya.LilToon.Exporter.Editor
         [SerializeField] private GameObject _root;
         [SerializeField] private ExportFormat _format;
         [SerializeField] private GltfExportSettings _glbSettings = new GltfExportSettings();
-        [SerializeField] private bool _useSparseMorphTargets = true;
+        [SerializeField] private VRM10ExportSettings _vrmExportSettings;
         [SerializeField] private bool _useAttachedVrmMeta = true;
         [SerializeField] private VRM10ObjectMeta _vrmMeta = new VRM10ObjectMeta();
 
         private SerializedObject _serializedWindow;
+        private UnityEditor.Editor _vrmExportSettingsEditor;
 
         [MenuItem("Mochiya/Export GLB or VRM with lilToon...")]
         public static void Open()
@@ -38,8 +39,28 @@ namespace Mochiya.LilToon.Exporter.Editor
 
         private void OnEnable()
         {
+            if (_vrmExportSettings == null)
+            {
+                _vrmExportSettings = CreateInstance<VRM10ExportSettings>();
+                _vrmExportSettings.hideFlags = HideFlags.HideAndDontSave;
+            }
+            _vrmExportSettingsEditor = UnityEditor.Editor.CreateEditor(_vrmExportSettings);
             _serializedWindow = new SerializedObject(this);
             if (_root == null) _root = Selection.activeGameObject;
+        }
+
+        private void OnDisable()
+        {
+            if (_vrmExportSettingsEditor != null)
+                DestroyImmediate(_vrmExportSettingsEditor);
+            _vrmExportSettingsEditor = null;
+        }
+
+        private void OnDestroy()
+        {
+            if (_vrmExportSettings != null)
+                DestroyImmediate(_vrmExportSettings);
+            _vrmExportSettings = null;
         }
 
         private void OnGUI()
@@ -72,7 +93,7 @@ namespace Mochiya.LilToon.Exporter.Editor
         private void DrawVrmSettings()
         {
             EditorGUILayout.LabelField("VRM 1.0 settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(_serializedWindow.FindProperty(nameof(_useSparseMorphTargets)));
+            _vrmExportSettingsEditor.OnInspectorGUI();
 
             var attachedMeta = GetAttachedMeta();
             if (attachedMeta != null)
@@ -128,7 +149,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             {
                 EditorUtility.DisplayProgressBar("Mochiya lilToon Export", "Exporting with UniVRM...", 0.5f);
                 if (asVrm)
-                    MochiyaLilToonExporter.ExportVrm(_root, path, GetSelectedMeta(), _useSparseMorphTargets);
+                    MochiyaLilToonExporter.ExportVrm(_root, path, GetSelectedMeta(), _vrmExportSettings);
                 else
                     MochiyaLilToonExporter.ExportGlb(_root, path, _glbSettings);
 
