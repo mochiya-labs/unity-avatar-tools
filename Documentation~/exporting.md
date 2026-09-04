@@ -16,7 +16,7 @@ If the root is an imported or configured UniVRM avatar with a `Vrm10Instance`, t
 
 The export operates on a temporary clone, so preparing the VRM humanoid data does not add components to the selected scene object.
 
-The VRM panel mirrors UniVRM 0.131.2's implemented mesh export settings:
+The VRM panel exposes UniVRM's supported mesh export settings:
 
 - **Morph Target Use Sparse** uses sparse glTF accessors for morph targets.
 - **Freeze Mesh** bakes transform rotation and scale into the exported meshes.

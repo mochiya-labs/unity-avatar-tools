@@ -34,5 +34,5 @@ Convert a material to the regular lilToon shader before export, or extend both `
 - Only 2D material textures can be represented by core glTF texture objects.
 - Material UV channel selection is currently UV0.
 - The extension reproduces shader properties, not Unity-specific scene lighting, probes, cameras, or post-processing.
-- The package targets lilToon 2.3.4 and UniVRM 0.131.2.
+- The package supports lilToon 2.3.4 or newer and UniVRM 0.131.2 or newer.
 - Viewers without `three-liltoon` see the embedded base-color/main-texture PBR fallback, not the lilToon look.
