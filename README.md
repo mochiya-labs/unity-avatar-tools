@@ -1,37 +1,125 @@
-# Mochiya lilToon Exporter for Unity
+# Mochiya Avatar Tools
 
-An Editor-only Unity package that exports `.glb` models and VRM 1.0 `.vrm` avatars containing the `MOCHIYA_materials_liltoon` glTF material extension used by [`three-liltoon`](../three-liltoon/README.md).
+Convert Unity avatars and attachments into VRM 1.0 or GLB for Mochiya's web tools. Supported VRChat and Modular Avatar (MA) settings become standard VRM components and portable Mochiya data. Supported lilToon materials keep their settings and textures.
 
-The package is intentionally a companion to UniVRM, not a fork. UniGLTF/UniVRM continue to own meshes, skins, morph targets, animations, textures, VRM humanoid data, expressions, look-at, first-person settings, and spring bones. This package adds only:
+**Mochiya converts assets; Modular Avatar merges them in Unity.** Conversion preserves separate armatures, skin bindings and poses. It works on a duplicate and leaves the original setup unchanged.
 
-- lilToon material validation;
-- lilToon property and texture serialization;
-- root `extensionsUsed` registration;
-- a small export window and programmatic API.
+## Install
 
-## Requirements
+Use **Unity 2022.3+** and **UniVRM/UniGLTF 0.131.2+**. Add these entries to the existing `dependencies` object in your project's `Packages/manifest.json`:
 
-- Unity 2022.3 LTS or newer
-- lilToon 2.3.4
-- UniVRM 0.131.2 packages `com.vrmc.gltf` and `com.vrmc.vrm`
-- `three-liltoon` 0.1.0 or newer on the web
+```json
+"com.vrmc.gltf": "https://github.com/vrm-c/UniVRM.git?path=/Packages/UniGLTF#v0.131.2",
+"com.vrmc.vrm": "https://github.com/vrm-c/UniVRM.git?path=/Packages/VRM10#v0.131.2",
+"com.mochiya.liltoon-exporter": "https://github.com/zekailin00/liltoon-unity-exporter.git"
+```
 
-## Quick start
+This example pins the verified UniVRM version. For a local copy, use **Window → Package Manager → Add package from disk** and select this package's `package.json`.
 
-1. Install lilToon and UniVRM, then install this folder as a local Unity package.
-2. Put the model or avatar in a scene and select its root.
-3. Open **Mochiya > Export GLB or VRM with lilToon...**.
-4. Choose GLB for a general model or VRM for a humanoid avatar.
-5. For VRM, optionally enable **Freeze Mesh**, **Freeze Mesh Keep Rotation**, or **Freeze Mesh Use Current Blend Shape Weight**, matching UniVRM's VRM 1.0 exporter.
-6. Resolve any blocking material or avatar validation errors and export.
+Install **VRChat SDK Avatars**, **Modular Avatar** and **lilToon 2.3.4+** only when your source assets use them. They are optional integrations. Missing scripts or shaders on an asset still need repairing.
 
-VRM export reuses metadata and avatar behavior from an attached `Vrm10Instance` when present. A plain humanoid can also be exported after entering VRM 1.0 metadata in the window.
-Mesh freezing uses UniVRM's own `BoneNormalizer` and VRM geometry backup, so look-at and spring-bone coordinates remain valid after transforms are baked.
+## Use the Unity window
 
-See [package documentation](Documentation~/index.md) for installation, supported shaders, the extension schema, web loading, and the public API.
+1. Place your prefab in a scene. Keep an unbaked attachment directly under its reference avatar when it needs that avatar.
+2. Open **Mochiya → Avatar Tools** and assign **Avatar or attachment**.
+3. Read **Detected asset** and its reason. Invalid input shows an error. Expand **Compatibility warnings (optional)** to inspect omissions; acceptance is never required.
+4. Choose **Convert to VRM GameObject** for an editable scene duplicate without writing files, or **Export VRM / GLB…** to write a file directly. Direct export removes its temporary conversion.
 
-## Scope
+Selecting a complete avatar includes its existing children with their armatures still separate. Mochiya does not run MA Merge Armature, reparent Bone Proxies, or apply attachment snapping. For a Unity-side merge, use [Modular Avatar](https://modular-avatar.nadena.dev/docs/reference/merge-armature) before converting. For portable web composition, export attachments separately from their unbaked setup.
 
-The first release supports the regular lilToon shader's opaque, cutout, transparent, and outline variants. Specialized variants fail validation instead of silently degrading. See [compatibility](Documentation~/compatibility.md).
+**No metadata entry is required.** The default profile uses the object's name, version `1.0`, the single author **Mochiya VRM Exporter**, sparse morph targets, and no mesh freezing. Under **Export settings (optional)**, select a profile or create an editable copy. **Assets → Create → Mochiya → Export Profile** creates additional profiles. They contain metadata and native UniVRM/UniGLTF settings; enable **Use Attached Vrm Metadata** to reuse an existing VRM's metadata.
 
-This is an unofficial Mochiya integration. `MOCHIYA_materials_liltoon` is not a Khronos, VRM Consortium, or lilToon standard.
+**Mochiya → Export GLB or VRM with lilToon…** accepts the same profiles and also exports ordinary props as GLB.
+
+## Avatar or attachment?
+
+A parent alone does not make a target an attachment. The deciding factor is **dependency**:
+
+Attachments include clothing, accessories, hair and other assets that depend on a base avatar. There is no separate Accessory category.
+
+- **Avatar:** its own humanoid can be exported as VRM, and its MA setup has no dependency outside the selected subtree.
+- **Attachment:** it needs its direct parent's humanoid, or MA components inside it reference/change the parent, its other descendants, or avatar settings. The direct parent must be a valid independent avatar.
+- **Neither:** neither rule can be satisfied, or required authoring references are broken.
+
+External dependencies include MA armature targets, Bone Proxies, blendshape sync/changes, object/material changes and avatar controller/settings references. Internal references do not create a parent dependency. An attachment with its own humanoid keeps it. Otherwise, conversion copies the required parent reference skeleton/context without parent or sibling meshes; the attachment bones remain separate.
+
+```mermaid
+flowchart TD
+    A[Selected scene GameObject] --> B{Has mesh content?}
+    B -- No --> X[Neither: show error]
+    B -- Yes --> P{Already converted Mochiya asset?}
+    P -- Yes --> K[Keep saved avatar/attachment kind]
+    P -- No --> C{Own valid VRM humanoid?}
+    C -- Yes --> D{MA dependency outside target subtree?}
+    D -- No --> V[Avatar: ignore parent]
+    D -- Yes --> E{Direct parent is a valid independent avatar?}
+    C -- No --> E
+    E -- Yes --> O[Attachment: retain parent dependency as data]
+    E -- No --> X
+```
+
+The humanoid check uses the root Animator's valid Humanoid Avatar, required unique bone mappings and contained skin bones. An incomplete rig or a VRM/VRC component alone does not qualify. Broken MA references produce an error before classification. Prepared assets still undergo export validation.
+
+## Use from a script
+
+Put this in an Editor script. `selected` is a scene GameObject, `path` ends in `.vrm` or `.glb`, and `profile` is an optional export profile.
+
+```csharp
+using Mochiya.LilToon.Exporter.Editor;
+
+var detected = MochiyaAvatarWorkflow.Detect(selected);
+var report = MochiyaAvatarWorkflow.Validate(selected);
+if (!report.CanConvert)
+    throw new System.InvalidOperationException(string.Join("\n", report.Errors));
+
+// Direct conversion, export and temporary-object cleanup:
+var exportReport = MochiyaAvatarWorkflow.Export(selected, path, profile);
+
+// Or keep an editable duplicate in the scene:
+var converted = MochiyaAvatarWorkflow.ConvertToVrmGameObject(selected, profile);
+MochiyaLilToonExporter.ExportWithProfile(converted.Root, path, profile);
+```
+
+Omit the profile argument or pass `null` for the bundled default. Reports contain errors, warnings and unsupported features. The explicit `ConvertAvatarInScene` and `ConvertAttachmentInScene` APIs enforce the same classification rules. Dispose a conversion result only to remove its duplicate. Use `MochiyaLilToonExporter.ExportGlb(prop, path)` for a general model without a humanoid.
+
+## Architecture and web playback
+
+| Package | Responsibility |
+| --- | --- |
+| Modular Avatar | Authors attachment relationships and performs Unity-side merges when requested. |
+| Mochiya Avatar Tools | Converts the selected asset, records supported MA intent, and adds Mochiya extensions during export. |
+| UniVRM / UniGLTF | Provides standard VRM components, geometry/material conversion and VRM/GLB file writing. |
+| `@pixiv/three-vrm` | Loads and updates standard VRM humanoids, expressions and spring bones in the browser. |
+| `three-liltoon` | Renders materials carrying `MOCHIYA_materials_liltoon`. |
+| `@mochiya/avatar-asset-runtime` | Reads `MOCHIYA_avatar_asset`, fits separate attachments by names, applies supported actions and restores the base on removal. |
+
+The host registers `VRMLoaderPlugin`, `GLTFLilToonExtension` and `MochiyaAvatarAssetLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. The runtime's optional lilToon bridge handles material changes. Its `examples/viewer` demonstrates local-file loading, fitting, controls and removal.
+
+Both Mochiya extensions are optional additions to standard files. Ordinary viewers display standalone geometry and fallback materials without attachment actions. Matching uses bone, armature, mesh and blendshape names; missing names warn and skip only affected operations. It does not check base identity or reshape garments to fit different bodies.
+
+Both converted avatars and attachments carry `MOCHIYA_avatar_asset`, with `assetKind: "avatar"` or `"attachment"`. New attachment exports use `rig.role: "attachmentReference"`. Saved Unity Outfit/Accessory kinds migrate to Attachment; update script enum references to `AssetKind.Attachment`. `ConvertOutfitInScene` remains an obsolete alias of `ConvertAttachmentInScene` for existing scripts. The current web runtime also reads older exported names.
+
+## Supported behavior and limits
+
+**VRM** means `VRMC_vrm` unless another extension is named; **Mochiya** means `MOCHIYA_avatar_asset`.
+
+| Output feature | Converted from | Main limitation |
+| --- | --- | --- |
+| VRM expressions | VRC visemes/eyelids; existing VRM expressions | VRC conversion covers five vowels and blink only. |
+| VRM look-at | VRC eye rotations/View Position; existing VRM look-at | VRC eye ranges are approximated. |
+| VRM first-person | Existing VRM settings or generated defaults | VRC-specific visibility is not translated. |
+| Spring bones and colliders (`VRMC_springBone`) | VRC PhysBones/colliders; existing VRM physics | Approximate active-preset simulation and sphere/capsule collisions; no VRC interactions or angle limits. |
+| Node constraints (`VRMC_node_constraint`) | Existing UniVRM constraints | No VRC constraint conversion. |
+| Mochiya `rig.bind` | MA Merge Armature and attachment skin bones | Best-effort bone matching; no Unity armature merge. |
+| Mochiya `rig.attach` | MA Bone Proxy; external base-collider anchors | External targets only; keep-world or snap, without partial-pose/scale matching. |
+| Mochiya `morph.sync` | MA Blendshape Sync | Linear remaps; no synchronization chains or cycles. |
+| Mochiya `morph.override` | MA Shape Changer | Set only; no geometry deletion. |
+| Mochiya `node.active` | MA Object Toggle and Menu Item activation | No cyclic visibility rules. |
+| Mochiya `material.swap` | MA Material Setter | Whole-material replacement only. |
+| Mochiya controls | MA automatic Toggle/Button menu items | Independent binary controls; no shared parameters or menu hierarchy. |
+| Mochiya `collider.link` | Explicit Mochiya data | No automatic VRC/MA adapter or global cross-asset collision. |
+| lilToon materials (`MOCHIYA_materials_liltoon`) | Regular opaque/cutout/transparent lilToon, including outlines | No specialized variants; 2D textures/UV0 only. Browser appearance can differ. |
+
+Other VRC/MA behavior, including Animator programs, Contacts and mesh processing, is omitted. Ordinary GLB omits VRM behavior. Texture export requires graphics-enabled Unity.
+
+MIT-licensed; see [LICENSE](LICENSE). UniVRM/UniGLTF (VRM Consortium) and lilToon (lilxyzw) are separate MIT-licensed projects whose source is not redistributed here. Models and textures retain their own licenses.

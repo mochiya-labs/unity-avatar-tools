@@ -1,8 +1,8 @@
 {
   "name": "com.mochiya.liltoon-exporter",
   "version": "0.1.1",
-  "displayName": "Mochiya lilToon Exporter",
-  "description": "Exports Unity models and VRM 1.0 avatars with the MOCHIYA_materials_liltoon glTF material extension.",
+  "displayName": "Mochiya Avatar Tools",
+  "description": "Scene avatar/attachment conversion and VRM/GLB export with MOCHIYA_avatar_asset and MOCHIYA_materials_liltoon. Optional VRChat, Modular Avatar and lilToon adapters.",
   "unity": "2022.3",
   "license": "MIT",
   "author": {

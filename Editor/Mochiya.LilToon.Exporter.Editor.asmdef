@@ -2,6 +2,7 @@
   "name": "Mochiya.LilToon.Exporter.Editor",
   "rootNamespace": "Mochiya.LilToon.Exporter.Editor",
   "references": [
+    "Mochiya.AvatarAssets",
     "UniGLTF",
     "UniGLTF.Editor",
     "VRM10",

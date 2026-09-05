@@ -39,8 +39,13 @@ namespace Mochiya.LilToon.Exporter.Editor
                 return issues;
             }
 
-            var renderers = root.GetComponentsInChildren<Renderer>(false)
-                .Where(x => x.enabled && x.gameObject.activeInHierarchy)
+            root.GetComponent<Mochiya.AvatarAssets.MochiyaSceneResources>()?.RestoreIfNeeded();
+            var composition = root.GetComponent<Mochiya.AvatarAssets.MochiyaAvatarAsset>();
+            if (root.GetComponentsInChildren<Component>(true).Any(x => x != null &&
+                (x.GetType().Namespace == "nadena.dev.modular_avatar.core" || (x.GetType().Namespace ?? "").StartsWith("VRC.", StringComparison.Ordinal))))
+                issues.Add(new MochiyaExportIssue(MochiyaExportIssueSeverity.Error, "Convert the VRChat/MA setup to a Mochiya scene duplicate before export."));
+            var renderers = root.GetComponentsInChildren<Renderer>(true)
+                .Where(x => composition != null || x.enabled && x.gameObject.activeInHierarchy)
                 .ToArray();
             if (renderers.Length == 0)
             {
@@ -48,7 +53,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             }
 
             var lilToonCount = 0;
-            foreach (var material in renderers.SelectMany(x => x.sharedMaterials).Distinct())
+            foreach (var material in renderers.SelectMany(x => x.sharedMaterials).Concat(MochiyaAvatarAssetSerializer.ExtraMaterials(composition)).Distinct())
             {
                 if (material == null)
                 {
@@ -73,17 +78,16 @@ namespace Mochiya.LilToon.Exporter.Editor
             {
                 issues.Add(new MochiyaExportIssue(
                     MochiyaExportIssueSeverity.Warning,
-                    "No lilToon materials were found. The file will be a normal UniVRM export without the Mochiya extension."));
+                    "No lilToon materials were found. Standard materials will be exported; Mochiya avatar data is included when attached."));
             }
 
             if (asVrm)
             {
-                var animator = root.GetComponent<Animator>();
-                if (animator == null || animator.avatar == null || !animator.avatar.isValid || !animator.avatar.isHuman)
+                if (!MochiyaAvatarConverter.HasValidHumanoid(root))
                 {
                     issues.Add(new MochiyaExportIssue(
                         MochiyaExportIssueSeverity.Error,
-                        "VRM export requires an Animator with a valid Humanoid avatar on the export root."));
+                        "VRM export requires a valid Humanoid Animator with all required bones present and uniquely mapped beneath the export root."));
                 }
                 if (meta == null)
                 {

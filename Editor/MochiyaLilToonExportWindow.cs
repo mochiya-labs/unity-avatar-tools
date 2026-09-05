@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using UniGLTF;
 using UniVRM10;
 using UnityEditor;
 using UnityEngine;
@@ -10,177 +9,74 @@ namespace Mochiya.LilToon.Exporter.Editor
 {
     public sealed class MochiyaLilToonExportWindow : EditorWindow
     {
-        private enum ExportFormat
-        {
-            Glb,
-            Vrm,
-        }
-
-        private const string LastDirectoryKey = "Mochiya.LilToonExporter.LastDirectory";
-
+        private enum ExportFormat { Glb, Vrm }
         [SerializeField] private GameObject _root;
         [SerializeField] private ExportFormat _format;
-        [SerializeField] private GltfExportSettings _glbSettings = new GltfExportSettings();
-        [SerializeField] private VRM10ExportSettings _vrmExportSettings;
-        [SerializeField] private bool _useAttachedVrmMeta = true;
-        [SerializeField] private VRM10ObjectMeta _vrmMeta = new VRM10ObjectMeta();
-
-        private SerializedObject _serializedWindow;
-        private UnityEditor.Editor _vrmExportSettingsEditor;
+        [SerializeField] private MochiyaExportProfile _profile;
+        [SerializeField] private bool _showProfile;
+        private Vector2 _scroll;
+        private string _status;
+        private bool _failed;
 
         [MenuItem("Mochiya/Export GLB or VRM with lilToon...")]
         public static void Open()
         {
-            var window = GetWindow<MochiyaLilToonExportWindow>();
-            window.titleContent = new GUIContent("Mochiya lilToon Export");
-            window.minSize = new Vector2(480, 520);
+            var window = GetWindow<MochiyaLilToonExportWindow>("Mochiya lilToon Export");
+            window.minSize = new Vector2(440, 280);
             window.Show();
         }
-
+        public static void OpenFor(GameObject root)
+        {
+            Open();
+            var window = GetWindow<MochiyaLilToonExportWindow>();
+            window._root = root;
+            window._format = root != null && root.GetComponent<Vrm10Instance>() != null ? ExportFormat.Vrm : ExportFormat.Glb;
+        }
         private void OnEnable()
         {
-            if (_vrmExportSettings == null)
-            {
-                _vrmExportSettings = CreateInstance<VRM10ExportSettings>();
-            }
-            // HideAndDontSave also includes NotEditable, which causes Unity's
-            // default inspector to disable every VRM export setting.
-            _vrmExportSettings.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
-            _vrmExportSettingsEditor = UnityEditor.Editor.CreateEditor(_vrmExportSettings);
-            _serializedWindow = new SerializedObject(this);
+            if (_profile == null) _profile = MochiyaExportProfile.Default;
             if (_root == null) _root = Selection.activeGameObject;
-        }
-
-        private void OnDisable()
-        {
-            if (_vrmExportSettingsEditor != null)
-                DestroyImmediate(_vrmExportSettingsEditor);
-            _vrmExportSettingsEditor = null;
-        }
-
-        private void OnDestroy()
-        {
-            if (_vrmExportSettings != null)
-                DestroyImmediate(_vrmExportSettings);
-            _vrmExportSettings = null;
         }
 
         private void OnGUI()
         {
-            _serializedWindow.Update();
-            EditorGUILayout.LabelField("Mochiya lilToon Exporter", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "UniVRM exports the model/avatar. Mochiya adds the lilToon material extension consumed by three-liltoon.",
-                MessageType.Info);
-
-            EditorGUILayout.PropertyField(_serializedWindow.FindProperty(nameof(_root)));
-            EditorGUILayout.PropertyField(_serializedWindow.FindProperty(nameof(_format)));
-            EditorGUILayout.Space();
-
-            if (_format == ExportFormat.Glb)
-            {
-                EditorGUILayout.LabelField("UniGLTF settings", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(_serializedWindow.FindProperty(nameof(_glbSettings)), true);
-            }
-            else
-            {
-                DrawVrmSettings();
-            }
-
-            _serializedWindow.ApplyModifiedProperties();
-            EditorGUILayout.Space();
-            DrawValidationAndExport();
-        }
-
-        private void DrawVrmSettings()
-        {
-            EditorGUILayout.LabelField("VRM 1.0 settings", EditorStyles.boldLabel);
-            _vrmExportSettingsEditor.OnInspectorGUI();
-
-            var attachedMeta = GetAttachedMeta();
-            if (attachedMeta != null)
-            {
-                EditorGUILayout.PropertyField(_serializedWindow.FindProperty(nameof(_useAttachedVrmMeta)));
-                if (_useAttachedVrmMeta)
-                {
-                    EditorGUILayout.HelpBox(
-                        "Using the VRM metadata already attached to the selected Vrm10Instance. Expressions, look-at, first-person, and spring bones are also preserved by UniVRM.",
-                        MessageType.Info);
-                    return;
-                }
-            }
-
-            EditorGUILayout.LabelField("VRM metadata", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(_serializedWindow.FindProperty(nameof(_vrmMeta)), true);
-        }
-
-        private void DrawValidationAndExport()
-        {
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            EditorGUILayout.LabelField("Export your model", EditorStyles.boldLabel);
+            EditorGUI.BeginChangeCheck();
+            _root = (GameObject)EditorGUILayout.ObjectField("Model", _root, typeof(GameObject), true);
+            _format = (ExportFormat)EditorGUILayout.EnumPopup("Format", _format);
+            if (EditorGUI.EndChangeCheck()) _status = null;
+            if (_profile == null) _profile = MochiyaExportProfile.Default;
             var asVrm = _format == ExportFormat.Vrm;
-            var issues = MochiyaExportValidation.Validate(_root, asVrm, asVrm ? GetSelectedMeta() : null);
-            foreach (var issue in issues)
-            {
-                EditorGUILayout.HelpBox(
-                    issue.Message,
-                    issue.Severity == MochiyaExportIssueSeverity.Error ? MessageType.Error : MessageType.Warning);
-            }
-
-            var hasErrors = issues.Any(x => x.Severity == MochiyaExportIssueSeverity.Error);
-            using (new EditorGUI.DisabledScope(hasErrors))
-            {
-                if (GUILayout.Button(asVrm ? "Export .vrm" : "Export .glb", GUILayout.Height(34)))
-                {
-                    ExportSelected();
-                }
-            }
+            // Raw authoring setups use the same automatic workflow as Avatar Tools.
+            var convert = _root != null && MochiyaAvatarWorkflow.HasAuthoringComponents(_root);
+            var errors = convert ? MochiyaAvatarWorkflow.Validate(_root, asVrm, _profile).Errors.ToArray()
+                : MochiyaExportValidation.Validate(_root, asVrm, _profile.CreateMetadata(_root))
+                    .Where(issue => issue.Severity == MochiyaExportIssueSeverity.Error).Select(issue => issue.Message).ToArray();
+            foreach (var error in errors) EditorGUILayout.HelpBox(error, MessageType.Error);
+            using (new EditorGUI.DisabledScope(errors.Length > 0 || EditorApplication.isPlayingOrWillChangePlaymode))
+                if (GUILayout.Button(asVrm ? "Export VRM…" : "Export GLB…", GUILayout.Height(36))) ExportSelected(convert);
+            if (!string.IsNullOrEmpty(_status)) EditorGUILayout.HelpBox(_status, _failed ? MessageType.Error : MessageType.Info);
+            EditorGUILayout.Space(12);
+            _showProfile = EditorGUILayout.Foldout(_showProfile, "Export settings (optional)", true);
+            if (_showProfile) MochiyaExportProfileGUI.Draw(ref _profile);
+            EditorGUILayout.EndScrollView();
         }
 
-        private void ExportSelected()
+        private void ExportSelected(bool convert)
         {
-            var asVrm = _format == ExportFormat.Vrm;
-            var extension = asVrm ? "vrm" : "glb";
-            var directory = EditorPrefs.GetString(LastDirectoryKey, Application.dataPath);
-            var path = EditorUtility.SaveFilePanel(
-                asVrm ? "Export VRM 1.0 with Mochiya lilToon" : "Export GLB with Mochiya lilToon",
-                directory,
-                _root.name,
-                extension);
+            var path = MochiyaExportDialog.ChoosePath(_root, _format == ExportFormat.Vrm ? "vrm" : "glb");
             if (string.IsNullOrEmpty(path)) return;
-
             try
             {
-                EditorUtility.DisplayProgressBar("Mochiya lilToon Export", "Exporting with UniVRM...", 0.5f);
-                if (asVrm)
-                    MochiyaLilToonExporter.ExportVrm(_root, path, GetSelectedMeta(), _vrmExportSettings);
-                else
-                    MochiyaLilToonExporter.ExportGlb(_root, path, _glbSettings);
-
-                EditorPrefs.SetString(LastDirectoryKey, Path.GetDirectoryName(path) ?? Application.dataPath);
-                Debug.Log($"Mochiya lilToon export complete: {path}");
-                EditorUtility.RevealInFinder(path);
+                EditorUtility.DisplayProgressBar("Mochiya Export", "Exporting " + _root.name + "…", .5f);
+                if (convert) MochiyaAvatarWorkflow.Export(_root, path, _profile);
+                else MochiyaLilToonExporter.ExportWithProfile(_root, path, _profile);
+                MochiyaExportDialog.RememberPath(path);
+                _status = "Exported " + Path.GetFileName(path) + "\n" + path; _failed = false;
             }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
-                EditorUtility.DisplayDialog("Mochiya export failed", exception.Message, "OK");
-            }
-            finally
-            {
-                EditorUtility.ClearProgressBar();
-            }
-        }
-
-        private VRM10ObjectMeta GetSelectedMeta()
-        {
-            var attached = GetAttachedMeta();
-            return _useAttachedVrmMeta && attached != null ? attached : _vrmMeta;
-        }
-
-        private VRM10ObjectMeta GetAttachedMeta()
-        {
-            if (_root != null && _root.TryGetComponent<Vrm10Instance>(out var instance) && instance.Vrm != null)
-                return instance.Vrm.Meta;
-            return null;
+            catch (Exception exception) { _status = exception.Message; _failed = true; Debug.LogException(exception); }
+            finally { EditorUtility.ClearProgressBar(); }
         }
     }
 }

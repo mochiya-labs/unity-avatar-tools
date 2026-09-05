@@ -15,24 +15,30 @@ namespace Mochiya.LilToon.Exporter.Editor
     /// </summary>
     public static class MochiyaLilToonExporter
     {
+        /// <summary>Export a prepared model with a reusable profile, or the bundled defaults.</summary>
+        public static void ExportWithProfile(GameObject root, string path, MochiyaExportProfile profile = null)
+        {
+            profile = profile != null ? profile : MochiyaExportProfile.Default;
+            if (string.Equals(Path.GetExtension(path), ".vrm", StringComparison.OrdinalIgnoreCase))
+                ExportVrm(root, path, profile.CreateMetadata(root), profile);
+            else if (string.Equals(Path.GetExtension(path), ".glb", StringComparison.OrdinalIgnoreCase))
+                ExportGlb(root, path, profile.GlbSettings);
+            else throw new ArgumentException("Choose a .vrm or .glb output path.", nameof(path));
+        }
+
         public static void ExportGlb(GameObject root, string path, GltfExportSettings settings = null)
         {
             RequireExtension(path, ".glb");
             MochiyaExportValidation.ThrowIfInvalid(root, false);
-            settings = settings ?? new GltfExportSettings();
+            settings = settings ?? new GltfExportSettings { UseSparseAccessorForMorphTarget = true };
 
             var data = new ExportingGltfData();
             var materialExporter = new MochiyaLilToonMaterialExporter(
                 MaterialExporterUtility.GetValidGltfMaterialExporter());
-            using (var exporter = new gltfExporter(
-                data,
-                settings,
-                progress: new EditorProgress(),
-                animationExporter: new EditorAnimationExporter(),
-                materialExporter: materialExporter,
-                textureSerializer: new EditorTextureSerializer()))
+            using (var exporter = new MochiyaGltfExporter(data, settings, materialExporter))
             {
                 exporter.Prepare(root);
+                MochiyaAvatarAssetSerializer.PrepareCopy(exporter.Copy);
                 exporter.Export();
             }
 
@@ -76,6 +82,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             exportRoot.hideFlags = HideFlags.HideAndDontSave;
             try
             {
+                MochiyaAvatarAssetSerializer.PrepareCopy(exportRoot);
                 if (exportSettings.FreezeMesh)
                 {
                     FreezeVrmMesh(exportRoot, exportSettings);
@@ -85,6 +92,9 @@ namespace Mochiya.LilToon.Exporter.Editor
                 {
                     var converter = new ModelExporter();
                     var model = converter.Export(settings, arrayManager, exportRoot);
+                    var asset = exportRoot.GetComponent<Mochiya.AvatarAssets.MochiyaAvatarAsset>();
+                    foreach (var material in MochiyaAvatarAssetSerializer.ExtraMaterials(asset))
+                        if (!converter.Materials.Contains(material)) { converter.Materials.Add(material); model.Materials.Add(material); }
                     model.ConvertCoordinate(Coordinates.Vrm1, ignoreVrm: false);
 
                     var materialExporter = new MochiyaLilToonMaterialExporter(
@@ -100,6 +110,8 @@ namespace Mochiya.LilToon.Exporter.Editor
                             converter,
                             new ExportArgs { sparse = exportSettings.MorphTargetUseSparse },
                             meta);
+                        MochiyaAvatarAssetSerializer.Attach(exporter.Storage.Gltf, asset,
+                            converter.Nodes.ToDictionary(x => x.Key.transform, x => model.Nodes.IndexOf(x.Value)), converter.Materials);
                         AddExtensionUsed(exporter.Storage.Gltf, materialExporter.HasExportedLilToonMaterial);
                         File.WriteAllBytes(path, exporter.Storage.ToGlbBytes());
                     }
@@ -133,10 +145,21 @@ namespace Mochiya.LilToon.Exporter.Editor
             // are baked. Plain Humanoid exports have no such data to restore.
             if (vrmInstance != null && vrmInstance.Vrm != null)
             {
+                // VRM gravity is world-space. UniVRM 0.131.2's geometry backup
+                // treats it as joint-local and rotates it when bones are frozen.
+                var gravity = exportRoot.GetComponentsInChildren<VRM10SpringBoneJoint>(true)
+                    .ToDictionary(joint => joint, joint => joint.m_gravityDir);
+                // The same backup preserves collider offsets/radii but omits
+                // capsule tails. Preserve that second endpoint in world space.
+                var capsuleTails = exportRoot.GetComponentsInChildren<VRM10SpringBoneCollider>(true)
+                    .Where(collider => collider.ColliderType == VRM10SpringBoneColliderTypes.Capsule || collider.ColliderType == VRM10SpringBoneColliderTypes.CapsuleInside)
+                    .ToDictionary(collider => collider, collider => collider.transform.TransformPoint(collider.Tail));
                 using (new Vrm10GeometryBackup(exportRoot))
                 {
                     freeze();
                 }
+                foreach (var pair in gravity) pair.Key.m_gravityDir = pair.Value;
+                foreach (var pair in capsuleTails) pair.Key.Tail = pair.Key.transform.InverseTransformPoint(pair.Value);
             }
             else
             {
@@ -146,12 +169,12 @@ namespace Mochiya.LilToon.Exporter.Editor
 
         private static VRM10ObjectMeta ResolveMeta(GameObject root, VRM10ObjectMeta explicitMeta)
         {
-            if (explicitMeta != null) return explicitMeta;
+            if (explicitMeta != null) return MochiyaExportProfile.CompleteMetadata(root, explicitMeta);
             if (root != null && root.TryGetComponent<Vrm10Instance>(out var instance))
             {
-                return instance.Vrm != null ? instance.Vrm.Meta : null;
+                if (instance.Vrm != null) return MochiyaExportProfile.CompleteMetadata(root, instance.Vrm.Meta);
             }
-            return null;
+            return MochiyaExportProfile.Default.CreateMetadata(root);
         }
 
         private static void AddExtensionUsed(glTF gltf, bool used)
