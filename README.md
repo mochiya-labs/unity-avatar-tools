@@ -11,7 +11,7 @@ Use **Unity 2022.3+** and **UniVRM/UniGLTF 0.131.2+**. Add these entries to the 
 ```json
 "com.vrmc.gltf": "https://github.com/vrm-c/UniVRM.git?path=/Packages/UniGLTF#v0.131.2",
 "com.vrmc.vrm": "https://github.com/vrm-c/UniVRM.git?path=/Packages/VRM10#v0.131.2",
-"com.mochiya.liltoon-exporter": "https://github.com/zekailin00/liltoon-unity-exporter.git"
+"org.mochiya.liltoon-exporter": "https://github.com/zekailin00/liltoon-unity-exporter.git"
 ```
 
 This example pins the verified UniVRM version. For a local copy, use **Window → Package Manager → Add package from disk** and select this package's `package.json`.
