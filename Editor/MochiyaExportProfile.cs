@@ -5,7 +5,7 @@ using UniVRM10;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     /// <summary>Reusable metadata and native export settings shared by both Mochiya windows.</summary>
     [CreateAssetMenu(menuName = "Mochiya/Export Profile", fileName = "Mochiya Export Profile")]

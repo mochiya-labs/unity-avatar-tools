@@ -6,7 +6,7 @@ using UniVRM10;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     public enum MochiyaTargetKind { Invalid, Avatar, Attachment }
 

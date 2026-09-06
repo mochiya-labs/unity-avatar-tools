@@ -1,5 +1,5 @@
 {
-  "name": "org.mochiya.liltoon-exporter",
+  "name": "org.mochiya.avatar-tools",
   "version": "0.1.1",
   "displayName": "Mochiya Avatar Tools",
   "description": "Scene avatar/attachment conversion and VRM/GLB export with MOCHIYA_avatar_composition and MOCHIYA_materials_liltoon. Optional VRChat, Modular Avatar and lilToon adapters.",

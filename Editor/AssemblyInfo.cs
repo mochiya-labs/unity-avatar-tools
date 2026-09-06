@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Mochiya.LilToon.Exporter.Editor.Tests")]
+[assembly: InternalsVisibleTo("Mochiya.AvatarTools.Editor.Tests")]

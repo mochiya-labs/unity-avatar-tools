@@ -1,6 +1,6 @@
 {
-  "name": "Mochiya.LilToon.Exporter.Editor",
-  "rootNamespace": "Mochiya.LilToon.Exporter.Editor",
+  "name": "Mochiya.AvatarTools.Editor",
+  "rootNamespace": "Mochiya.AvatarTools.Editor",
   "references": [
     "Mochiya.AvatarComposition",
     "UniGLTF",

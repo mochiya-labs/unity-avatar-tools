@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Mochiya.LilToon.Exporter.Editor.Tests
+namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class LilToonMaterialSupportTests
     {

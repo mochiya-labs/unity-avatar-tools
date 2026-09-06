@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     public sealed class MochiyaConversionOptions
     {

@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using VrmLib;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     /// <summary>
     /// Public editor API for deterministic GLB and VRM 1.0 exports.

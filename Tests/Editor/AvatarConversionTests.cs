@@ -11,7 +11,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mochiya.LilToon.Exporter.Editor.Tests
+namespace Mochiya.AvatarTools.Editor.Tests
 {
     public class AvatarConversionTests
     {

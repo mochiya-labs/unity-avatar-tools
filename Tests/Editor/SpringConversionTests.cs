@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 using UnityEditor.TestTools;
 using UnityEditor.SceneManagement;
 
-namespace Mochiya.LilToon.Exporter.Editor.Tests
+namespace Mochiya.AvatarTools.Editor.Tests
 {
     public class SpringConversionTests
     {

@@ -5,9 +5,9 @@ using Mochiya.AvatarComposition;
 using UniVRM10;
 using UnityEditor;
 using UnityEngine;
-using static Mochiya.LilToon.Exporter.Editor.OptionalAvatarReaders;
+using static Mochiya.AvatarTools.Editor.OptionalAvatarReaders;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     internal static class VrcAvatarReader
     {

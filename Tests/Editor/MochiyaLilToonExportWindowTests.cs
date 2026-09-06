@@ -2,7 +2,7 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor.Tests
+namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class MochiyaLilToonExportWindowTests
     {

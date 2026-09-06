@@ -2,7 +2,7 @@ using System;
 using UniGLTF;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     internal sealed class MochiyaLilToonMaterialExporter : IMaterialExporter
     {

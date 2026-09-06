@@ -11,12 +11,12 @@ Use **Unity 2022.3+** and **UniVRM/UniGLTF 0.131.2+**. Add these entries to the 
 ```json
 "com.vrmc.gltf": "https://github.com/vrm-c/UniVRM.git?path=/Packages/UniGLTF#v0.131.2",
 "com.vrmc.vrm": "https://github.com/vrm-c/UniVRM.git?path=/Packages/VRM10#v0.131.2",
-"org.mochiya.liltoon-exporter": "https://github.com/zekailin00/liltoon-unity-exporter.git"
+"org.mochiya.avatar-tools": "https://github.com/zekailin00/liltoon-unity-exporter.git"
 ```
 
 This example pins the verified UniVRM version. For a local copy, use **Window → Package Manager → Add package from disk** and select this package's `package.json`.
 
-The package ID is `org.mochiya.liltoon-exporter`. When updating an older installation, replace the `com.mochiya.liltoon-exporter` key in `Packages/manifest.json` (and `testables`, if present); keep only the new entry. Existing Mochiya components and export profiles retain their script GUIDs.
+The package ID is `org.mochiya.avatar-tools`. Existing Mochiya components and export profiles retain their script GUIDs when the package is updated.
 
 Install **VRChat SDK Avatars**, **Modular Avatar** and **lilToon 2.3.4+** only when your source assets use them. They are optional integrations. Missing scripts or shaders on an asset still need repairing.
 
@@ -67,7 +67,7 @@ The humanoid check uses the root Animator's valid Humanoid Avatar, required uniq
 Put this in an Editor script. `selected` is a scene GameObject, `path` ends in `.vrm` or `.glb`, and `profile` is an optional export profile.
 
 ```csharp
-using Mochiya.LilToon.Exporter.Editor;
+using Mochiya.AvatarTools.Editor;
 
 var detected = MochiyaAvatarWorkflow.Detect(selected);
 var report = MochiyaAvatarWorkflow.Validate(selected);

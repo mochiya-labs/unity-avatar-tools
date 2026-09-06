@@ -5,7 +5,7 @@ using UniVRM10;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     public enum MochiyaExportIssueSeverity
     {

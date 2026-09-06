@@ -2,7 +2,7 @@ using Mochiya.AvatarComposition;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     [InitializeOnLoad]
     internal static class MochiyaScenePersistence

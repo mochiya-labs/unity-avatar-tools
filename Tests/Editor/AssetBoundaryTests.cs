@@ -11,7 +11,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Mochiya.LilToon.Exporter.Editor.Tests
+namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class AssetBoundaryTests
     {

@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     // Read authoring references without invoking MA's build, reference setters or component callbacks.
     internal static class MochiyaParentDependency

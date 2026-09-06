@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     [CustomEditor(typeof(MochiyaExportProfile))]
     public sealed class MochiyaExportProfileEditor : UnityEditor.Editor

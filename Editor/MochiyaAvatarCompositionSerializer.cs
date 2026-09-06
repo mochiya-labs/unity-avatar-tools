@@ -6,7 +6,7 @@ using UniGLTF;
 using UniJSON;
 using UnityEngine;
 
-namespace Mochiya.LilToon.Exporter.Editor
+namespace Mochiya.AvatarTools.Editor
 {
     internal static class MochiyaAvatarCompositionSerializer
     {
