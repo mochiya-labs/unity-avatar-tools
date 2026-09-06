@@ -1,4 +1,4 @@
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 

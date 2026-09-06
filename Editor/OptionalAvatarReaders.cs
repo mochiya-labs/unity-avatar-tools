@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using UniVRM10;
 using UnityEditor;
 using UnityEngine;
@@ -16,12 +16,12 @@ namespace Mochiya.LilToon.Exporter.Editor
         public readonly GameObject Source, Scope, RigRoot;
         public readonly bool Attachment;
         public readonly Dictionary<Object, Object> Map;
-        public readonly MochiyaAvatarAsset Asset;
+        public readonly MochiyaAvatarComposition Asset;
         public readonly Vrm10Instance Vrm;
         public readonly MochiyaConversionReport Report;
         public readonly List<Object> Allocated;
         public ConversionContext(GameObject source, GameObject scope, bool attachment, Dictionary<Object, Object> map,
-            MochiyaAvatarAsset asset, Vrm10Instance vrm, MochiyaConversionReport report, List<Object> allocated, GameObject rigRoot = null)
+            MochiyaAvatarComposition asset, Vrm10Instance vrm, MochiyaConversionReport report, List<Object> allocated, GameObject rigRoot = null)
         { Source = source; Scope = scope; RigRoot = rigRoot != null ? rigRoot : source; Attachment = attachment; Map = map; Asset = asset; Vrm = vrm; Report = report; Allocated = allocated; }
         public Transform Local(Transform t) => t != null && Map.TryGetValue(t, out var local) ? (Transform)local : null;
         public AssetSelector Select(Transform target, string shape = null, bool forceBase = false, bool bone = false)

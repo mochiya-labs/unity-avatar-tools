@@ -3,7 +3,7 @@
   "rootNamespace": "Mochiya.LilToon.Exporter.Editor.Tests",
   "references": [
     "Mochiya.LilToon.Exporter.Editor",
-    "Mochiya.AvatarAssets", "UniGLTF", "VRM10", "VRM10.Editor"
+    "Mochiya.AvatarComposition", "UniGLTF", "VRM10", "VRM10.Editor"
   ],
   "includePlatforms": [
     "Editor"

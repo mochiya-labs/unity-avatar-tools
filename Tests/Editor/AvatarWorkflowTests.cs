@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using NUnit.Framework;
 using UniGLTF;
 using UniVRM10;
@@ -45,7 +45,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
         [TestCase(2, AssetKind.Attachment)]
         public void LoadsSavedKindsUsingOnlyAvatarAndAttachmentChoices(int storedKind, AssetKind expected)
         {
-            var data = Avatar().AddComponent<MochiyaAvatarAsset>();
+            var data = Avatar().AddComponent<MochiyaAvatarComposition>();
             JsonUtility.FromJsonOverwrite("{\"Kind\":" + storedKind + "}", data);
             Assert.That(data.Kind, Is.EqualTo(expected));
             Assert.That(new SerializedObject(data).FindProperty("Kind").enumDisplayNames,
@@ -138,7 +138,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             var avatar = Avatar(); var attachment = Attachment(avatar);
             using (var result = MochiyaAvatarWorkflow.ConvertToVrmGameObject(attachment))
             {
-                var data = result.Root.GetComponent<MochiyaAvatarAsset>();
+                var data = result.Root.GetComponent<MochiyaAvatarComposition>();
                 data.Actions.Add(new AssetAction { Id = "fit", Kind = ActionKind.MorphOverride,
                     Target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .4f });
                 Assert.That(MochiyaAvatarWorkflow.Detect(result.Root).Kind, Is.EqualTo(MochiyaTargetKind.Attachment));

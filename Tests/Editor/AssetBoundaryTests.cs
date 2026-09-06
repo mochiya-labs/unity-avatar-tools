@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using NUnit.Framework;
 using UniVRM10;
 using UnityEditor;
@@ -57,7 +57,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(target))
             {
                 Assert.That(copy.Root.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length, Is.EqualTo(1));
-                Assert.That(copy.Root.GetComponent<MochiyaAvatarAsset>().Joints, Is.Empty);
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Joints, Is.Empty);
                 Assert.That(copy.Root.transform.Find("Parent"), Is.Null);
             }
             Assert.Throws<InvalidOperationException>(() => MochiyaAvatarConverter.ConvertAttachmentInScene(parent, target));
@@ -82,7 +82,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
                 Assert.That(copy.Root.transform.Find("Armature"), Is.Not.Null);
                 Assert.That(copy.Root.transform.Find("Dependent"), Is.Null, "No parent scaffold is needed for an owned humanoid.");
                 Assert.That(copy.Root.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length, Is.EqualTo(1));
-                var action = copy.Root.GetComponent<MochiyaAvatarAsset>().Actions.Single();
+                var action = copy.Root.GetComponent<MochiyaAvatarComposition>().Actions.Single();
                 Assert.That(action.Target.Base, Is.True); Assert.That(action.Target.MeshKeywords, Does.Contain("Sibling Body"));
                 Directory.CreateDirectory("MochiyaTests");
                 foreach (var extension in new[] { "vrm", "glb" })
@@ -104,7 +104,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             Shape(target, target.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
             Assert.That(MochiyaAvatarWorkflow.Detect(target).Kind, Is.EqualTo(MochiyaTargetKind.Avatar));
             using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(target))
-                Assert.That(copy.Root.GetComponent<MochiyaAvatarAsset>().Actions.Single().Target.Base, Is.False);
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Actions.Single().Target.Base, Is.False);
         }
 
         [Test] public void InvalidOrDependentParentCannotSupplyAnAttachmentReference()
@@ -140,14 +140,14 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
                 }
                 var mesh = copy.Root.transform.Find("Clothing/Body").GetComponent<SkinnedMeshRenderer>();
                 Assert.That(mesh.bones[0], Is.SameAs(copy.Root.transform.Find("Clothing/Armature/Hips")));
-                Assert.That(copy.Root.GetComponent<MochiyaAvatarAsset>().Joints, Is.Empty);
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Joints, Is.Empty);
                 Assert.That(copy.Report.Warnings.Any(w => w.Contains("armatures remain separate")), Is.True);
             }
             Assert.That(sourceHips.parent, Is.SameAs(clothing.transform.Find("Armature")));
             using (var attachment = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
             {
                 Assert.That(attachment.Root.transform.Find("Clothing/Armature/Hips"), Is.Not.Null);
-                Assert.That(attachment.Root.GetComponent<MochiyaAvatarAsset>().Joints.Count, Is.GreaterThan(0));
+                Assert.That(attachment.Root.GetComponent<MochiyaAvatarComposition>().Joints.Count, Is.GreaterThan(0));
             }
         }
 

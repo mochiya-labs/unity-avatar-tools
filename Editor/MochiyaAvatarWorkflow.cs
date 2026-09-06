@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using UniVRM10;
 using UnityEditor;
 using UnityEngine;
@@ -33,7 +33,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             if (!root.GetComponentsInChildren<Renderer>(true).Any(r => r is MeshRenderer || r is SkinnedMeshRenderer))
             { result.Error = "This object has no avatar or attachment meshes. Select the model's root."; return result; }
 
-            var asset = root.GetComponent<MochiyaAvatarAsset>();
+            var asset = root.GetComponent<MochiyaAvatarComposition>();
             if (asset != null && !HasAuthoringComponents(root))
             {
                 // Extracted attachments carry a full reference humanoid. Their explicit kind wins over that Animator.
@@ -91,7 +91,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             profile = profile != null ? profile : MochiyaExportProfile.Default;
             foreach (var issue in MochiyaExportValidation.Validate(root, asVrm, profile.CreateMetadata(root)))
                 (issue.Severity == MochiyaExportIssueSeverity.Error ? report.Errors : report.Warnings).Add(issue.Message);
-            var saved = root.GetComponent<MochiyaAvatarAsset>()?.ConversionReport;
+            var saved = root.GetComponent<MochiyaAvatarComposition>()?.ConversionReport;
             if (!string.IsNullOrEmpty(saved)) report.Warnings.AddRange(saved.Split('\n').Where(line => line.StartsWith("Warning:") || line.StartsWith("Unsupported:")));
             return report;
         }

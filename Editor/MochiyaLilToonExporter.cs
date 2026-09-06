@@ -38,7 +38,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             using (var exporter = new MochiyaGltfExporter(data, settings, materialExporter))
             {
                 exporter.Prepare(root);
-                MochiyaAvatarAssetSerializer.PrepareCopy(exporter.Copy);
+                MochiyaAvatarCompositionSerializer.PrepareCopy(exporter.Copy);
                 exporter.Export();
             }
 
@@ -82,7 +82,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             exportRoot.hideFlags = HideFlags.HideAndDontSave;
             try
             {
-                MochiyaAvatarAssetSerializer.PrepareCopy(exportRoot);
+                MochiyaAvatarCompositionSerializer.PrepareCopy(exportRoot);
                 if (exportSettings.FreezeMesh)
                 {
                     FreezeVrmMesh(exportRoot, exportSettings);
@@ -92,8 +92,8 @@ namespace Mochiya.LilToon.Exporter.Editor
                 {
                     var converter = new ModelExporter();
                     var model = converter.Export(settings, arrayManager, exportRoot);
-                    var asset = exportRoot.GetComponent<Mochiya.AvatarAssets.MochiyaAvatarAsset>();
-                    foreach (var material in MochiyaAvatarAssetSerializer.ExtraMaterials(asset))
+                    var asset = exportRoot.GetComponent<Mochiya.AvatarComposition.MochiyaAvatarComposition>();
+                    foreach (var material in MochiyaAvatarCompositionSerializer.ExtraMaterials(asset))
                         if (!converter.Materials.Contains(material)) { converter.Materials.Add(material); model.Materials.Add(material); }
                     model.ConvertCoordinate(Coordinates.Vrm1, ignoreVrm: false);
 
@@ -110,7 +110,7 @@ namespace Mochiya.LilToon.Exporter.Editor
                             converter,
                             new ExportArgs { sparse = exportSettings.MorphTargetUseSparse },
                             meta);
-                        MochiyaAvatarAssetSerializer.Attach(exporter.Storage.Gltf, asset,
+                        MochiyaAvatarCompositionSerializer.Attach(exporter.Storage.Gltf, asset,
                             converter.Nodes.ToDictionary(x => x.Key.transform, x => model.Nodes.IndexOf(x.Value)), converter.Materials);
                         AddExtensionUsed(exporter.Storage.Gltf, materialExporter.HasExportedLilToonMaterial);
                         File.WriteAllBytes(path, exporter.Storage.ToGlbBytes());

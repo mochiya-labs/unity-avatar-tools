@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using UniGLTF;
 using UniJSON;
 using UnityEngine;
 
 namespace Mochiya.LilToon.Exporter.Editor
 {
-    internal static class MochiyaAvatarAssetSerializer
+    internal static class MochiyaAvatarCompositionSerializer
     {
-        public const string ExtensionName = "MOCHIYA_avatar_asset";
-        public static IEnumerable<Material> ExtraMaterials(MochiyaAvatarAsset asset) => asset == null ? Enumerable.Empty<Material>() : asset.Actions.Where(a => a.Kind == ActionKind.MaterialSwap && a.Material != null).Select(a => a.Material).Distinct();
+        public const string ExtensionName = "MOCHIYA_avatar_composition";
+        public static IEnumerable<Material> ExtraMaterials(MochiyaAvatarComposition asset) => asset == null ? Enumerable.Empty<Material>() : asset.Actions.Where(a => a.Kind == ActionKind.MaterialSwap && a.Material != null).Select(a => a.Material).Distinct();
 
         // Only called on the private export copy. Inactive variants must remain in the file for portable toggles.
         public static void PrepareCopy(GameObject root)
@@ -19,7 +19,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             root.GetComponent<MochiyaSceneResources>()?.RestoreIfNeeded();
             var instance = root.GetComponent<UniVRM10.Vrm10Instance>();
             if (instance != null) instance.UpdateType = UniVRM10.Vrm10Instance.UpdateTypes.None;
-            var asset = root.GetComponent<MochiyaAvatarAsset>();
+            var asset = root.GetComponent<MochiyaAvatarComposition>();
             if (asset == null) return;
             foreach (var node in root.GetComponentsInChildren<Transform>(true))
             {
@@ -33,7 +33,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             }
             root.SetActive(true);
         }
-        public static void Attach(glTF gltf, MochiyaAvatarAsset asset, IReadOnlyDictionary<Transform, int> nodes, IList<Material> materials)
+        public static void Attach(glTF gltf, MochiyaAvatarComposition asset, IReadOnlyDictionary<Transform, int> nodes, IList<Material> materials)
         {
             if (asset == null) return;
             int Node(Transform node)
@@ -146,13 +146,13 @@ namespace Mochiya.LilToon.Exporter.Editor
         public override void ExportExtensions(ITextureSerializer textureSerializer)
         {
             base.ExportExtensions(textureSerializer);
-            var asset = Copy.GetComponent<MochiyaAvatarAsset>();
-            foreach (var material in MochiyaAvatarAssetSerializer.ExtraMaterials(asset))
+            var asset = Copy.GetComponent<MochiyaAvatarComposition>();
+            foreach (var material in MochiyaAvatarCompositionSerializer.ExtraMaterials(asset))
             {
                 if (Materials.Contains(material)) continue;
                 Materials.Add(material); _gltf.materials.Add(materialExporter.ExportMaterial(material, TextureExporter, settings));
             }
-            MochiyaAvatarAssetSerializer.Attach(_gltf, asset, Nodes.Select((node, index) => (node, index)).ToDictionary(x => x.node, x => x.index), Materials);
+            MochiyaAvatarCompositionSerializer.Attach(_gltf, asset, Nodes.Select((node, index) => (node, index)).ToDictionary(x => x.node, x => x.index), Materials);
         }
     }
 }

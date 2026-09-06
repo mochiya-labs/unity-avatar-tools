@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UniVRM10;
 
-namespace Mochiya.AvatarAssets
+namespace Mochiya.AvatarComposition
 {
     /// <summary>Serializes generated VRM objects inside the scene, without creating .asset files.</summary>
     [ExecuteAlways, DisallowMultipleComponent, AddComponentMenu("")]

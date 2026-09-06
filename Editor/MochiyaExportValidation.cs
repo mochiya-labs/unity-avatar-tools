@@ -39,8 +39,8 @@ namespace Mochiya.LilToon.Exporter.Editor
                 return issues;
             }
 
-            root.GetComponent<Mochiya.AvatarAssets.MochiyaSceneResources>()?.RestoreIfNeeded();
-            var composition = root.GetComponent<Mochiya.AvatarAssets.MochiyaAvatarAsset>();
+            root.GetComponent<Mochiya.AvatarComposition.MochiyaSceneResources>()?.RestoreIfNeeded();
+            var composition = root.GetComponent<Mochiya.AvatarComposition.MochiyaAvatarComposition>();
             if (root.GetComponentsInChildren<Component>(true).Any(x => x != null &&
                 (x.GetType().Namespace == "nadena.dev.modular_avatar.core" || (x.GetType().Namespace ?? "").StartsWith("VRC.", StringComparison.Ordinal))))
                 issues.Add(new MochiyaExportIssue(MochiyaExportIssueSeverity.Error, "Convert the VRChat/MA setup to a Mochiya scene duplicate before export."));
@@ -53,7 +53,7 @@ namespace Mochiya.LilToon.Exporter.Editor
             }
 
             var lilToonCount = 0;
-            foreach (var material in renderers.SelectMany(x => x.sharedMaterials).Concat(MochiyaAvatarAssetSerializer.ExtraMaterials(composition)).Distinct())
+            foreach (var material in renderers.SelectMany(x => x.sharedMaterials).Concat(MochiyaAvatarCompositionSerializer.ExtraMaterials(composition)).Distinct())
             {
                 if (material == null)
                 {

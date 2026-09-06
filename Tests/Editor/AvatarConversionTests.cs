@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using NUnit.Framework;
 using UniGLTF;
 using UniVRM10;
@@ -86,7 +86,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             var assetsBefore = AssetDatabase.GetAllAssetPaths().Length;
             var result = MochiyaAvatarConverter.ConvertAvatarInScene(source); Keep(result.Root);
             Assert.That(result.Root.GetComponent<Vrm10Instance>(), Is.Not.Null);
-            Assert.That(result.Root.GetComponent<MochiyaAvatarAsset>().Kind, Is.EqualTo(AssetKind.Avatar));
+            Assert.That(result.Root.GetComponent<MochiyaAvatarComposition>().Kind, Is.EqualTo(AssetKind.Avatar));
             Assert.That(result.Root.GetComponent<Animator>().avatar.isHuman, Is.True);
             Assert.That(EditorJsonUtility.ToJson(source.GetComponent<Animator>()), Is.EqualTo(before));
             Assert.That(source.GetComponent<Vrm10Instance>(), Is.Null);
@@ -103,7 +103,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             var result = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(result.Root);
             Assert.That(result.Root.GetComponentsInChildren<Renderer>(true).Select(x => x.name), Is.EqualTo(new[] { renderer.name }));
             Assert.That(result.Root.GetComponent<Animator>().avatar.isHuman, Is.True);
-            Assert.That(result.Root.GetComponent<MochiyaAvatarAsset>().Joints.Count, Is.GreaterThan(0));
+            Assert.That(result.Root.GetComponent<MochiyaAvatarComposition>().Joints.Count, Is.GreaterThan(0));
             Assert.That(attachment.transform.parent, Is.SameAs(source.transform));
         }
         [Test] public void InvalidHumanoidIsNotAnAvatarAndOrdinaryPropsUseGlbExporter()
@@ -143,7 +143,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
         [Test] public void ExportsRealGlbAndVrmWithInactiveVariantsAlternateMaterialsAndFinalReferences()
         {
             var source = Keep(CreateAvatar()); var result = MochiyaAvatarConverter.ConvertAvatarInScene(source); Keep(result.Root);
-            var asset = result.Root.GetComponent<MochiyaAvatarAsset>(); var mesh = result.Root.GetComponentInChildren<SkinnedMeshRenderer>();
+            var asset = result.Root.GetComponent<MochiyaAvatarComposition>(); var mesh = result.Root.GetComponentInChildren<SkinnedMeshRenderer>();
             mesh.gameObject.SetActive(false);
             var alternate = new Material(Shader.Find("Standard")) { name = "Alternate", color = Color.magenta }; objects.Add(alternate);
             asset.Actions.Add(new AssetAction { Id = "fit", Kind = ActionKind.MorphOverride, Target = new AssetSelector { Node = mesh.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .5f });
@@ -156,7 +156,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
                 else MochiyaLilToonExporter.ExportVrm(result.Root, path, meta);
                 var bytes = File.ReadAllBytes(path); Assert.That(BitConverter.ToUInt32(bytes, 0), Is.EqualTo(0x46546c67));
                 var json = System.Text.Encoding.UTF8.GetString(bytes, 20, BitConverter.ToInt32(bytes, 12));
-                StringAssert.Contains("MOCHIYA_avatar_asset", json); StringAssert.Contains("\"morphIndex\":0", json); StringAssert.Contains("\"active\":false", json); StringAssert.Contains("Alternate", json);
+                StringAssert.Contains("MOCHIYA_avatar_composition", json); StringAssert.Contains("\"morphIndex\":0", json); StringAssert.Contains("\"active\":false", json); StringAssert.Contains("Alternate", json);
                 if (extension == ".vrm") StringAssert.Contains("VRMC_vrm", json);
             }
             Assert.That(mesh.gameObject.activeSelf, Is.False);
@@ -186,11 +186,11 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
                 Assert.That(EditorSceneManager.SaveScene(scene, path), Is.True);
                 EditorSceneManager.CloseScene(scene, true);
                 scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
-                var restored = scene.GetRootGameObjects().First(x => x.GetComponent<MochiyaAvatarAsset>() != null);
+                var restored = scene.GetRootGameObjects().First(x => x.GetComponent<MochiyaAvatarComposition>() != null);
                 Assert.That(restored.GetComponent<Animator>().avatar.isHuman, Is.True);
                 Assert.That(restored.GetComponent<Vrm10Instance>().Vrm, Is.Not.Null);
                 Assert.That(restored.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh, Is.Not.Null);
-                Assert.That(restored.GetComponent<MochiyaAvatarAsset>().Nodes.All(x => x.Node != null), Is.True);
+                Assert.That(restored.GetComponent<MochiyaAvatarComposition>().Nodes.All(x => x.Node != null), Is.True);
             }
             finally { if (scene.isLoaded) EditorSceneManager.CloseScene(scene, true); }
         }
@@ -203,7 +203,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             var hips = source.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
             AddMesh(attachment.transform, hips, "Vest", Color.blue, 1.1f);
             var converted = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(converted.Root);
-            var asset = converted.Root.GetComponent<MochiyaAvatarAsset>(); var mesh = converted.Root.GetComponentInChildren<SkinnedMeshRenderer>();
+            var asset = converted.Root.GetComponent<MochiyaAvatarComposition>(); var mesh = converted.Root.GetComponentInChildren<SkinnedMeshRenderer>();
             asset.Actions.Add(new AssetAction { Id = "fit", Kind = ActionKind.MorphOverride, Target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .4f });
             asset.Actions.Add(new AssetAction { Id = "sync", Kind = ActionKind.MorphSync, Driver = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Target = new AssetSelector { Node = mesh.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } } });
             MochiyaLilToonExporter.ExportVrm(converted.Root, Path.Combine(output, "viewer-outfit.vrm"), meta);
@@ -224,7 +224,7 @@ namespace Mochiya.LilToon.Exporter.Editor.Tests
             changed.GetType().GetField("ChangeType").SetValue(changed, Enum.Parse(changed.GetType().GetField("ChangeType").FieldType, "Set"));
             changed.GetType().GetField("Value").SetValue(changed, 65f); list.Add(changed);
             var result = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(result.Root);
-            var action = result.Root.GetComponent<MochiyaAvatarAsset>().Actions.Single();
+            var action = result.Root.GetComponent<MochiyaAvatarComposition>().Actions.Single();
             Assert.That(action.Target.Base, Is.True); Assert.That(action.Value, Is.EqualTo(.65f)); Assert.That(action.UseCondition, Is.True);
             Assert.That(attachment.GetComponent(shapeType), Is.SameAs(component)); Assert.That(result.Root.GetComponentInChildren(shapeType), Is.Null);
         }

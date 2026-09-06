@@ -1,6 +1,0 @@
-{
-  "name": "Mochiya.AvatarAssets",
-  "rootNamespace": "Mochiya.AvatarAssets",
-  "references": ["VRM10", "UniGLTF"],
-  "autoReferenced": true
-}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniVRM10;
 
-namespace Mochiya.AvatarAssets
+namespace Mochiya.AvatarComposition
 {
     public enum AssetKind { Avatar = 0, Attachment = 1 }
     public enum ActionKind { MorphSync, MorphOverride, NodeActive, MaterialSwap, ColliderLink }
@@ -76,8 +76,8 @@ namespace Mochiya.AvatarAssets
     }
 
     /// <summary>Scene-owned authoring data. No VRChat, Modular Avatar or lilToon assembly is required.</summary>
-    [DisallowMultipleComponent, AddComponentMenu("Mochiya/Avatar Asset")]
-    public sealed class MochiyaAvatarAsset : MonoBehaviour, ISerializationCallbackReceiver
+    [DisallowMultipleComponent, AddComponentMenu("Mochiya/Avatar Composition")]
+    public sealed class MochiyaAvatarComposition : MonoBehaviour, ISerializationCallbackReceiver
     {
         public AssetKind Kind;
         public string[] ArmatureKeywords = Array.Empty<string>();

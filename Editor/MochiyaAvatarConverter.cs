@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mochiya.AvatarAssets;
+using Mochiya.AvatarComposition;
 using UniVRM10;
 using UnityEditor;
 using UnityEngine;
@@ -189,7 +189,7 @@ namespace Mochiya.LilToon.Exporter.Editor
                     animator.avatar = sourceAnimator.avatar;
                     animator.applyRootMotion = false;
                 }
-                var asset = duplicate.AddComponent<MochiyaAvatarAsset>();
+                var asset = duplicate.AddComponent<MochiyaAvatarComposition>();
                 asset.Kind = attachment != null ? AssetKind.Attachment : AssetKind.Avatar;
                 asset.ArmatureKeywords = report.CanExportVrm ? new[] { sourceAnimator.GetBoneTransform(HumanBodyBones.Hips)?.parent?.name ?? "Armature" } : Array.Empty<string>();
                 foreach (var pair in map.Where(x => x.Key is Transform && x.Key != rigRoot.transform))

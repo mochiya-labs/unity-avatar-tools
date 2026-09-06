@@ -1,0 +1,6 @@
+{
+  "name": "Mochiya.AvatarComposition",
+  "rootNamespace": "Mochiya.AvatarComposition",
+  "references": ["VRM10", "UniGLTF"],
+  "autoReferenced": true
+}

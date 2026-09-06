@@ -1,6 +1,6 @@
 # Mochiya Avatar Tools
 
-Convert Unity avatars and attachments into VRM 1.0 or GLB for Mochiya's web tools. Supported VRChat and Modular Avatar (MA) settings become standard VRM components and portable Mochiya data. Supported lilToon materials keep their settings and textures.
+Convert Unity avatars and attachments into VRM 1.0 or GLB for [Mochiya](https://mochiya.org)'s web tools. Supported VRChat and Modular Avatar (MA) settings become standard VRM components and portable Mochiya data. Supported lilToon materials keep their settings and textures.
 
 **Mochiya converts assets; Modular Avatar merges them in Unity.** Conversion preserves separate armatures, skin bindings and poses. It works on a duplicate and leaves the original setup unchanged.
 
@@ -15,6 +15,8 @@ Use **Unity 2022.3+** and **UniVRM/UniGLTF 0.131.2+**. Add these entries to the 
 ```
 
 This example pins the verified UniVRM version. For a local copy, use **Window → Package Manager → Add package from disk** and select this package's `package.json`.
+
+The package ID is `org.mochiya.liltoon-exporter`. When updating an older installation, replace the `com.mochiya.liltoon-exporter` key in `Packages/manifest.json` (and `testables`, if present); keep only the new entry. Existing Mochiya components and export profiles retain their script GUIDs.
 
 Install **VRChat SDK Avatars**, **Modular Avatar** and **lilToon 2.3.4+** only when your source assets use them. They are optional integrations. Missing scripts or shaders on an asset still need repairing.
 
@@ -91,17 +93,17 @@ Omit the profile argument or pass `null` for the bundled default. Reports contai
 | UniVRM / UniGLTF | Provides standard VRM components, geometry/material conversion and VRM/GLB file writing. |
 | `@pixiv/three-vrm` | Loads and updates standard VRM humanoids, expressions and spring bones in the browser. |
 | `three-liltoon` | Renders materials carrying `MOCHIYA_materials_liltoon`. |
-| `@mochiya/avatar-asset-runtime` | Reads `MOCHIYA_avatar_asset`, fits separate attachments by names, applies supported actions and restores the base on removal. |
+| `@mochiya/avatar-composition` | Reads `MOCHIYA_avatar_composition`, fits separate attachments by names, applies supported actions and restores the base on removal. |
 
-The host registers `VRMLoaderPlugin`, `GLTFLilToonExtension` and `MochiyaAvatarAssetLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. The runtime's optional lilToon bridge handles material changes. Its `examples/viewer` demonstrates local-file loading, fitting, controls and removal.
+The host registers `VRMLoaderPlugin`, `GLTFLilToonExtension` and `MochiyaAvatarCompositionLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. Its `examples/viewer` demonstrates local-file loading, fitting, controls and removal.
 
 Both Mochiya extensions are optional additions to standard files. Ordinary viewers display standalone geometry and fallback materials without attachment actions. Matching uses bone, armature, mesh and blendshape names; missing names warn and skip only affected operations. It does not check base identity or reshape garments to fit different bodies.
 
-Both converted avatars and attachments carry `MOCHIYA_avatar_asset`, with `assetKind: "avatar"` or `"attachment"`. New attachment exports use `rig.role: "attachmentReference"`. Saved Unity Outfit/Accessory kinds migrate to Attachment; update script enum references to `AssetKind.Attachment`. `ConvertOutfitInScene` remains an obsolete alias of `ConvertAttachmentInScene` for existing scripts. The current web runtime also reads older exported names.
+Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with `assetKind: "avatar"` or `"attachment"`. New attachment exports use `rig.role: "attachmentReference"`. Saved Unity Outfit/Accessory kinds migrate to Attachment; update script enum references to `AssetKind.Attachment`. `ConvertOutfitInScene` remains an obsolete alias of `ConvertAttachmentInScene` for existing scripts.
 
 ## Supported behavior and limits
 
-**VRM** means `VRMC_vrm` unless another extension is named; **Mochiya** means `MOCHIYA_avatar_asset`.
+**VRM** means `VRMC_vrm` unless another extension is named; **Mochiya** means `MOCHIYA_avatar_composition`.
 
 | Output feature | Converted from | Main limitation |
 | --- | --- | --- |
