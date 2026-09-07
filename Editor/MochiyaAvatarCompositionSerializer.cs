@@ -167,13 +167,25 @@ namespace Mochiya.AvatarTools.Editor
     {
         private readonly IMaterialExporter materialExporter;
         private readonly GltfExportSettings settings;
+        internal GameObject PreparedRoot { get; private set; }
         public MochiyaGltfExporter(ExportingGltfData data, GltfExportSettings settings, IMaterialExporter materialExporter)
             : base(data, settings, progress: new EditorProgress(), animationExporter: new EditorAnimationExporter(), materialExporter: materialExporter, textureSerializer: new EditorTextureSerializer())
         { this.materialExporter = materialExporter; this.settings = settings; }
+        public override void Prepare(GameObject go)
+        {
+            var isSingleObject = go.transform.childCount == 0;
+            base.Prepare(go);
+
+            // UniGLTF wraps a single object in a temporary container. Normalize
+            // the selected object's private copy so scene placement is never
+            // serialized as part of the asset, while leaving the source intact.
+            PreparedRoot = isSingleObject ? Copy.transform.GetChild(0).gameObject : Copy;
+            PreparedRoot.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
         public override void ExportExtensions(ITextureSerializer textureSerializer)
         {
             base.ExportExtensions(textureSerializer);
-            var asset = Copy.GetComponent<MochiyaAvatarComposition>();
+            var asset = PreparedRoot.GetComponent<MochiyaAvatarComposition>();
             foreach (var material in MochiyaAvatarCompositionSerializer.ExtraMaterials(asset))
             {
                 if (Materials.Contains(material)) continue;

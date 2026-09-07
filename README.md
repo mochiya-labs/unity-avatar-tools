@@ -27,6 +27,8 @@ Install **VRChat SDK Avatars**, **Modular Avatar** and **lilToon 2.3.4+** only w
 3. Read **Detected asset** and its reason. Invalid input shows an error. Expand **Compatibility warnings (optional)** to inspect omissions; acceptance is never required.
 4. Choose **Convert to VRM GameObject** for an editable scene duplicate without writing files, or **Export VRM / GLB…** to write a file directly. Direct export removes its temporary conversion.
 
+File export is independent of Unity scene placement. Mochiya normalizes a private export copy to the world origin and identity rotation before invoking UniVRM/UniGLTF; the selected source object is not moved. **Convert to VRM GameObject** instead places the editable duplicate at the reference avatar's current world position and rotation. Creators do not need to reposition an avatar to the origin before export.
+
 Selecting a complete avatar includes its existing children with their armatures still separate. Mochiya does not run MA Merge Armature, reparent Bone Proxies, or apply attachment snapping. For a Unity-side merge, use [Modular Avatar](https://modular-avatar.nadena.dev/docs/reference/merge-armature) before converting. For portable web composition, export attachments separately from their unbaked setup.
 
 **No metadata entry is required.** The default profile uses the object's name, version `1.0`, the single author **Mochiya VRM Exporter**, sparse morph targets, and no mesh freezing. Under **Export settings (optional)**, select a profile or create an editable copy. **Assets → Create → Mochiya → Export Profile** creates additional profiles. They contain metadata and native UniVRM/UniGLTF settings; enable **Use Attached Vrm Metadata** to reuse an existing VRM's metadata.

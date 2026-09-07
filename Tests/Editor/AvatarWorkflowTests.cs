@@ -31,6 +31,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
             Assert.That(BitConverter.ToUInt32(bytes, 0), Is.EqualTo(0x46546c67));
             return Encoding.UTF8.GetString(bytes, 20, BitConverter.ToInt32(bytes, 12));
         }
+        private static glTF Gltf(string path) => GltfDeserializer.Deserialize(UniJSON.JsonParser.Parse(Json(path)));
         [SetUp] public void SetUp() => Directory.CreateDirectory("MochiyaTests");
         [TearDown] public void TearDown()
         {
@@ -93,6 +94,49 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 Assert.That(AssetDatabase.GetAllAssetPaths(), Is.EquivalentTo(before));
                 Assert.That(avatar.GetComponent<Vrm10Instance>(), Is.Null);
             }
+        }
+
+        [Test] public void ConversionDuplicateRetainsTheReferenceAvatarsScenePlacement()
+        {
+            var avatar = Avatar(); var attachment = Attachment(avatar);
+            avatar.transform.SetPositionAndRotation(new Vector3(3.25f, 0.5f, -2.75f), Quaternion.Euler(0, 35, 0));
+            using (var convertedAvatar = MochiyaAvatarWorkflow.ConvertToVrmGameObject(avatar))
+            using (var convertedAttachment = MochiyaAvatarWorkflow.ConvertToVrmGameObject(attachment))
+            {
+                Assert.That(convertedAvatar.Root.transform.position, Is.EqualTo(avatar.transform.position));
+                Assert.That(convertedAvatar.Root.transform.rotation, Is.EqualTo(avatar.transform.rotation));
+                Assert.That(convertedAttachment.Root.transform.position, Is.EqualTo(avatar.transform.position));
+                Assert.That(convertedAttachment.Root.transform.rotation, Is.EqualTo(avatar.transform.rotation));
+            }
+        }
+
+        [TestCase("vrm", false)] [TestCase("glb", false)]
+        [TestCase("vrm", true)] [TestCase("glb", true)]
+        public void DirectExportIsIndependentOfUnityScenePlacement(string extension, bool extractAttachment)
+        {
+            var avatar = Avatar(); var attachment = Attachment(avatar); var source = extractAttachment ? attachment : avatar;
+            var originPath = Path.GetFullPath("MochiyaTests/origin-" + (extractAttachment ? "attachment" : "avatar") + "." + extension);
+            var placedPath = Path.GetFullPath("MochiyaTests/placed-" + (extractAttachment ? "attachment" : "avatar") + "." + extension);
+            MochiyaAvatarWorkflow.Export(source, originPath);
+
+            var position = new Vector3(3.25f, 0.5f, -2.75f);
+            var rotation = Quaternion.Euler(0, 35, 0);
+            avatar.transform.SetPositionAndRotation(position, rotation);
+            MochiyaAvatarWorkflow.Export(source, placedPath);
+
+            var origin = Gltf(originPath); var placed = Gltf(placedPath);
+            Assert.That(placed.scenes[placed.scene].nodes, Is.EqualTo(origin.scenes[origin.scene].nodes));
+            Assert.That(placed.nodes.Count, Is.EqualTo(origin.nodes.Count));
+            for (var index = 0; index < origin.nodes.Count; ++index)
+            {
+                Assert.That(placed.nodes[index].name, Is.EqualTo(origin.nodes[index].name));
+                Assert.That(placed.nodes[index].translation, Is.EqualTo(origin.nodes[index].translation).Within(.00001f), "translation: " + origin.nodes[index].name);
+                Assert.That(placed.nodes[index].rotation, Is.EqualTo(origin.nodes[index].rotation).Within(.00001f), "rotation: " + origin.nodes[index].name);
+                Assert.That(placed.nodes[index].scale, Is.EqualTo(origin.nodes[index].scale).Within(.00001f), "scale: " + origin.nodes[index].name);
+            }
+            Assert.That(avatar.transform.position, Is.EqualTo(position));
+            Assert.That(avatar.transform.rotation, Is.EqualTo(rotation));
+            Assert.That(attachment.transform.parent, Is.SameAs(avatar.transform));
         }
 
         [TestCase("vrm", false)] [TestCase("glb", false)]

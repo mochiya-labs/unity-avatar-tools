@@ -39,7 +39,7 @@ namespace Mochiya.AvatarTools.Editor
             using (var exporter = new MochiyaGltfExporter(data, settings, materialExporter))
             {
                 exporter.Prepare(root);
-                MochiyaAvatarCompositionSerializer.PrepareCopy(exporter.Copy);
+                MochiyaAvatarCompositionSerializer.PrepareCopy(exporter.PreparedRoot);
                 exporter.Export();
             }
 
@@ -79,9 +79,7 @@ namespace Mochiya.AvatarTools.Editor
             var settings = exportSettings.MeshExportSettings;
             WarnShapeDeletionLimits(root, exportSettings.FreezeMesh, exportSettings.FreezeMeshUseCurrentBlendShapeWeight);
 
-            var exportRoot = UnityEngine.Object.Instantiate(root);
-            exportRoot.name = root.name;
-            exportRoot.hideFlags = HideFlags.HideAndDontSave;
+            var exportRoot = CreateOriginNormalizedExportCopy(root);
             try
             {
                 MochiyaAvatarCompositionSerializer.PrepareCopy(exportRoot);
@@ -125,6 +123,18 @@ namespace Mochiya.AvatarTools.Editor
             }
 
             RefreshAssetDatabase(path);
+        }
+
+        private static GameObject CreateOriginNormalizedExportCopy(GameObject root)
+        {
+            var exportRoot = UnityEngine.Object.Instantiate(root);
+            exportRoot.name = root.name;
+            exportRoot.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
+            // Scene placement is not asset data. UniVRM's lower-level model
+            // conversion assumes that its omitted container root is at the
+            // world origin with identity rotation.
+            exportRoot.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            return exportRoot;
         }
 
         private static void WarnShapeDeletionLimits(GameObject root, bool freezeMesh, bool currentWeights)
