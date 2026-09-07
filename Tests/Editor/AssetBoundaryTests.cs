@@ -82,6 +82,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
         {
             var parent = Avatar("Base"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
             var ma = Shape(clothing, parent.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
+            ma.GetType().GetProperty("Threshold").SetValue(ma, .03f);
             var list = (IList)ma.GetType().GetProperty("Shapes").GetValue(ma);
             var deleted = Activator.CreateInstance(list[0].GetType());
             foreach (var field in deleted.GetType().GetFields()) field.SetValue(deleted, field.GetValue(list[0]));
@@ -90,6 +91,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
             {
                 var record = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single();
                 Assert.That(record.Kind, Is.EqualTo(ComponentKind.ShapeChanger)); Assert.That(record.Entries.Count, Is.EqualTo(2));
+                Assert.That(record.Threshold, Is.EqualTo(.03f));
                 Assert.That(record.Entries[0].ChangeType, Is.EqualTo(ShapeChangeType.Set));
                 Assert.That(record.Entries[1].ChangeType, Is.EqualTo(ShapeChangeType.Delete));
                 Assert.That(record.Entries[1].Value, Is.EqualTo(.65f)); Assert.That(record.Entries[0].Target.Path, Is.EqualTo(new[] { "Body" }));
@@ -97,8 +99,63 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 Directory.CreateDirectory("MochiyaTests"); var path = Path.GetFullPath("MochiyaTests/grouped-shapes.vrm"); MochiyaAvatarWorkflow.Export(copy.Root, path);
                 var bytes = File.ReadAllBytes(path); var json = System.Text.Encoding.UTF8.GetString(bytes, 20, BitConverter.ToInt32(bytes, 12));
                 StringAssert.Contains("\"changeType\":\"delete\"", json); StringAssert.Contains("\"sourceNode\":", json);
+                StringAssert.Contains("\"threshold\":0.03", json);
+                WriteDeletionOracle(parent.GetComponentInChildren<SkinnedMeshRenderer>(), .03f, "grouped-shapes");
             }
             Assert.That(list.Count, Is.EqualTo(2));
+        }
+
+        [Serializable] private sealed class DeletionOracle { public int originalTriangles, remainingTriangles; public float threshold; }
+        private static void WriteDeletionOracle(SkinnedMeshRenderer renderer, float threshold, string name)
+        {
+            Type Find(string type) => AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("nadena.dev.modular_avatar.core.editor." + type)).FirstOrDefault(t => t != null);
+            var selectorType = Find("VertexFilterByShape");
+            var constructor = selectorType.GetConstructors().Single(c => c.GetParameters().Length == 3 && c.GetParameters()[0].ParameterType == typeof(string));
+            var modeType = constructor.GetParameters()[2].ParameterType;
+            var selector = constructor.Invoke(new object[] { "Body_Slim", threshold, Enum.Parse(modeType, "AnyVertex") });
+            var selectors = Array.CreateInstance(Find("IMeshSelector"), 1); selectors.SetValue(selector, 0);
+            var filtered = (Mesh)Find("RemoveVerticesFromMesh").GetMethod("FilterPrimitivesOnly").Invoke(null, new object[] { renderer, renderer.sharedMesh, selectors });
+            try
+            {
+                // MA inserts [0,0,0] for an empty submesh. Three uses a zero draw count.
+                var remaining = Enumerable.Range(0, filtered.subMeshCount).Sum(sm => {
+                    var indices = filtered.GetIndices(sm);
+                    return indices.Length == 3 && indices.All(i => i == 0) ? 0 : indices.Length / 3;
+                });
+                var oracle = new DeletionOracle { originalTriangles = renderer.sharedMesh.triangles.Length / 3, remainingTriangles = remaining, threshold = threshold };
+                Assert.That(oracle.remainingTriangles, Is.LessThan(oracle.originalTriangles));
+                File.WriteAllText(Path.GetFullPath("MochiyaTests/" + name + ".json"), JsonUtility.ToJson(oracle));
+            }
+            finally { Object.DestroyImmediate(filtered); }
+        }
+
+        [TestCase(false, false, .01f)] [TestCase(false, true, .03f)]
+        [TestCase(true, false, .03f)] [TestCase(true, true, .01f)]
+        public void DeleteThresholdSurvivesPreparedCopyAndSparseFrozenExport(bool freeze, bool sparse, float threshold)
+        {
+            var avatar = Avatar("Deletion Base"); var renderer = avatar.GetComponentInChildren<SkinnedMeshRenderer>();
+            var ma = Shape(avatar, renderer.gameObject); ma.GetType().GetProperty("Threshold").SetValue(ma, threshold);
+            var entry = ((IList)ma.GetType().GetProperty("Shapes").GetValue(ma))[0];
+            Field(entry, "ChangeType", Enum.Parse(entry.GetType().GetField("ChangeType").FieldType, "Delete"));
+            var sourceMesh = renderer.sharedMesh; var sourceIndices = sourceMesh.triangles; var before = EditorJsonUtility.ToJson(ma);
+            Directory.CreateDirectory("MochiyaTests"); var name = "delete-" + freeze + "-" + sparse;
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(avatar))
+            {
+                var record = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single();
+                Assert.That(record.Threshold, Is.EqualTo(threshold));
+                var settings = ScriptableObject.CreateInstance<VRM10ExportSettings>();
+                try
+                {
+                    settings.FreezeMesh = freeze; settings.FreezeMeshUseCurrentBlendShapeWeight = false; settings.MorphTargetUseSparse = sparse;
+                    MochiyaLilToonExporter.ExportVrm(copy.Root, Path.GetFullPath("MochiyaTests/" + name + ".vrm"), null, settings);
+                    MochiyaLilToonExporter.ExportGlb(copy.Root, Path.GetFullPath("MochiyaTests/" + name + ".glb"));
+                }
+                finally { Object.DestroyImmediate(settings); }
+                Assert.That(record.Threshold, Is.EqualTo(threshold));
+            }
+            WriteDeletionOracle(renderer, threshold, name);
+            Assert.That(renderer.sharedMesh, Is.SameAs(sourceMesh)); Assert.That(sourceMesh.triangles, Is.EqualTo(sourceIndices));
+            Assert.That(EditorJsonUtility.ToJson(ma), Is.EqualTo(before));
         }
 
         [Test] public void IndependentNestedHumanoidIsAvatarAndDoesNotCopyParent()

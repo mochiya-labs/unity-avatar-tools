@@ -92,8 +92,6 @@ namespace Mochiya.AvatarTools.Editor
                 if (type.Namespace == MaNamespace)
                 {
                     if (!SupportedMa.Contains(type.Name)) report.Unsupported.Add($"{component.name}: {type.Name} has no portable conversion adapter.");
-                    if (type.Name == "ModularAvatarShapeChanger" && List(component, "Shapes").Any(s => String(s, "ChangeType") == "Delete"))
-                        report.Warnings.Add($"{component.name}: Shape Changer Delete is preserved; the web runtime uses blendshape weight zero instead of geometry deletion.");
                     if (type.Name == "ModularAvatarBoneProxy" && (String(component, "attachmentMode") == "AsChildKeepRotation" || String(component, "attachmentMode") == "AsChildKeepPosition" || Bool(component, "matchScale")))
                         report.Warnings.Add($"{component.name}: Bone Proxy partial-pose/scale settings are preserved; the web runtime falls back to Keep World Pose.");
                     if (type.Name == "ModularAvatarMenuItem")
@@ -167,6 +165,7 @@ namespace Mochiya.AvatarTools.Editor
                     break;
                 case "ModularAvatarShapeChanger":
                     var changer = Record(component, c, ComponentKind.ShapeChanger);
+                    changer.Threshold = Number(component, "Threshold", 0.01f);
                     foreach (var shape in List(component, "Shapes"))
                         changer.Entries.Add(new AssetEntry { ChangeType = String(shape, "ChangeType") == "Delete" ? ShapeChangeType.Delete : ShapeChangeType.Set, Target = c.Select(Reference(Read(shape, "Object"), c, component), String(shape, "ShapeName")), Value = Number(shape, "Value") / 100 });
                     break;

@@ -58,6 +58,7 @@ namespace Mochiya.AvatarComposition
         public bool UseCondition;
         public AssetCondition Condition;
         public List<AssetEntry> Entries = new List<AssetEntry>();
+        [Min(0)] public float Threshold = 0.01f;
         public AssetSelector Target = new AssetSelector { Base = true };
         public string Prefix = "", Suffix = "";
         public PositionLockMode LockMode = PositionLockMode.Unidirectional;

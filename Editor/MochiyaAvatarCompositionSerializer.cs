@@ -126,6 +126,12 @@ namespace Mochiya.AvatarTools.Editor
                         if (!string.IsNullOrEmpty(component.Parameter)) Text("parameter", component.Parameter);
                         Float("value", component.Value); Float("defaultValue", component.DefaultValue); Bool("automatic", component.Automatic); break;
                     default:
+                        if (component.Kind == ComponentKind.ShapeChanger)
+                        {
+                            if (float.IsNaN(component.Threshold) || float.IsInfinity(component.Threshold) || component.Threshold < 0)
+                                throw new InvalidOperationException("Shape Changer threshold must be finite and non-negative.");
+                            Float("threshold", component.Threshold);
+                        }
                         f.Key(component.Kind == ComponentKind.ShapeChanger ? "shapes" : component.Kind == ComponentKind.BlendshapeSync ? "bindings" : "objects"); f.BeginList();
                         foreach (var entry in component.Entries)
                         {

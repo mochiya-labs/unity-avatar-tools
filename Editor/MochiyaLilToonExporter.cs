@@ -31,6 +31,7 @@ namespace Mochiya.AvatarTools.Editor
             RequireExtension(path, ".glb");
             MochiyaExportValidation.ThrowIfInvalid(root, false);
             settings = settings ?? new GltfExportSettings { UseSparseAccessorForMorphTarget = true };
+            WarnShapeDeletionLimits(root, false, false);
 
             var data = new ExportingGltfData();
             var materialExporter = new MochiyaLilToonMaterialExporter(
@@ -76,6 +77,7 @@ namespace Mochiya.AvatarTools.Editor
             MochiyaExportValidation.ThrowIfInvalid(root, true, meta);
             if (exportSettings == null) throw new ArgumentNullException(nameof(exportSettings));
             var settings = exportSettings.MeshExportSettings;
+            WarnShapeDeletionLimits(root, exportSettings.FreezeMesh, exportSettings.FreezeMeshUseCurrentBlendShapeWeight);
 
             var exportRoot = UnityEngine.Object.Instantiate(root);
             exportRoot.name = root.name;
@@ -123,6 +125,20 @@ namespace Mochiya.AvatarTools.Editor
             }
 
             RefreshAssetDatabase(path);
+        }
+
+        private static void WarnShapeDeletionLimits(GameObject root, bool freezeMesh, bool currentWeights)
+        {
+            foreach (var renderer in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                var mesh = renderer.sharedMesh;
+                if (mesh == null || mesh.blendShapeCount == 0) continue;
+                if (Enumerable.Range(0, mesh.blendShapeCount).Any(i => mesh.GetBlendShapeFrameCount(i) > 1))
+                    Debug.LogWarning($"[Mochiya] {renderer.name}: multi-frame blendshapes cannot retain every Unity frame in glTF. Shape Changer Delete uses exported position deltas and may select different triangles.", renderer);
+                var scale = renderer.transform.lossyScale;
+                if (freezeMesh && (Mathf.Abs(Mathf.Abs(scale.x) - 1) > 0.0001f || Mathf.Abs(Mathf.Abs(scale.y) - 1) > 0.0001f || Mathf.Abs(Mathf.Abs(scale.z) - 1) > 0.0001f || currentWeights))
+                    Debug.LogWarning($"[Mochiya] {renderer.name}: Freeze Mesh bakes scale or current blendshape weights. Shape Changer Delete thresholds use exported mesh-local distances; selection may differ from MA. Disable these bake settings when original distances must be preserved.", renderer);
+            }
         }
 
         private static void FreezeVrmMesh(GameObject exportRoot, VRM10ExportSettings settings)
