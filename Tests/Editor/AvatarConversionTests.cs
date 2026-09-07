@@ -103,7 +103,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
             var result = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(result.Root);
             Assert.That(result.Root.GetComponentsInChildren<Renderer>(true).Select(x => x.name), Is.EqualTo(new[] { renderer.name }));
             Assert.That(result.Root.GetComponent<Animator>().avatar.isHuman, Is.True);
-            Assert.That(result.Root.GetComponent<MochiyaAvatarComposition>().Joints.Count, Is.GreaterThan(0));
+            Assert.That(result.Root.GetComponent<MochiyaAvatarComposition>().Components.Where(c => c.Kind == ComponentKind.MergeArmature).Count(), Is.GreaterThan(0));
             Assert.That(attachment.transform.parent, Is.SameAs(source.transform));
         }
         [Test] public void InvalidHumanoidIsNotAnAvatarAndOrdinaryPropsUseGlbExporter()
@@ -146,8 +146,8 @@ namespace Mochiya.AvatarTools.Editor.Tests
             var asset = result.Root.GetComponent<MochiyaAvatarComposition>(); var mesh = result.Root.GetComponentInChildren<SkinnedMeshRenderer>();
             mesh.gameObject.SetActive(false);
             var alternate = new Material(Shader.Find("Standard")) { name = "Alternate", color = Color.magenta }; objects.Add(alternate);
-            asset.Actions.Add(new AssetAction { Id = "fit", Kind = ActionKind.MorphOverride, Target = new AssetSelector { Node = mesh.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .5f });
-            asset.Actions.Add(new AssetAction { Id = "swap", Kind = ActionKind.MaterialSwap, Target = new AssetSelector { Node = mesh.transform }, Material = alternate });
+            asset.Components.Add(new AssetComponent { Id = "fit", Kind = ComponentKind.ShapeChanger, Source = asset.transform, Entries = new List<AssetEntry> { new AssetEntry { Target = new AssetSelector { Node = mesh.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .5f } } });
+            asset.Components.Add(new AssetComponent { Id = "swap", Kind = ComponentKind.MaterialSetter, Source = asset.transform, Entries = new List<AssetEntry> { new AssetEntry { Target = new AssetSelector { Node = mesh.transform }, Material = alternate } } });
             var meta = result.Root.GetComponent<Vrm10Instance>().Vrm.Meta; meta.Authors = new List<string> { "Mochiya test fixture" };
             foreach (var extension in new[] { ".glb", ".vrm" })
             {
@@ -204,8 +204,8 @@ namespace Mochiya.AvatarTools.Editor.Tests
             AddMesh(attachment.transform, hips, "Vest", Color.blue, 1.1f);
             var converted = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(converted.Root);
             var asset = converted.Root.GetComponent<MochiyaAvatarComposition>(); var mesh = converted.Root.GetComponentInChildren<SkinnedMeshRenderer>();
-            asset.Actions.Add(new AssetAction { Id = "fit", Kind = ActionKind.MorphOverride, Target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .4f });
-            asset.Actions.Add(new AssetAction { Id = "sync", Kind = ActionKind.MorphSync, Driver = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Target = new AssetSelector { Node = mesh.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } } });
+            asset.Components.Add(new AssetComponent { Id = "fit", Kind = ComponentKind.ShapeChanger, Source = asset.transform, Entries = new List<AssetEntry> { new AssetEntry { Target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .4f } } });
+            asset.Components.Add(new AssetComponent { Id = "sync", Kind = ComponentKind.BlendshapeSync, Source = asset.transform, Entries = new List<AssetEntry> { new AssetEntry { Driver = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Target = new AssetSelector { Node = mesh.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } } } } });
             MochiyaLilToonExporter.ExportVrm(converted.Root, Path.Combine(output, "viewer-outfit.vrm"), meta);
             MochiyaLilToonExporter.ExportGlb(converted.Root, Path.Combine(output, "viewer-outfit.glb"));
         }
@@ -224,8 +224,9 @@ namespace Mochiya.AvatarTools.Editor.Tests
             changed.GetType().GetField("ChangeType").SetValue(changed, Enum.Parse(changed.GetType().GetField("ChangeType").FieldType, "Set"));
             changed.GetType().GetField("Value").SetValue(changed, 65f); list.Add(changed);
             var result = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(result.Root);
-            var action = result.Root.GetComponent<MochiyaAvatarComposition>().Actions.Single();
-            Assert.That(action.Target.Base, Is.True); Assert.That(action.Value, Is.EqualTo(.65f)); Assert.That(action.UseCondition, Is.True);
+            var record = result.Root.GetComponent<MochiyaAvatarComposition>().Components.Single(c => c.Kind == ComponentKind.ShapeChanger);
+            var action = record.Entries.Single();
+            Assert.That(action.Target.Base, Is.True); Assert.That(action.Value, Is.EqualTo(.65f)); Assert.That(record.UseCondition, Is.True);
             Assert.That(attachment.GetComponent(shapeType), Is.SameAs(component)); Assert.That(result.Root.GetComponentInChildren(shapeType), Is.Null);
         }
         [TestCase("empty")]

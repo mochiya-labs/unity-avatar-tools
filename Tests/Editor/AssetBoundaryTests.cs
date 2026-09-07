@@ -49,6 +49,58 @@ namespace Mochiya.AvatarTools.Editor.Tests
         }
         [TearDown] public void Cleanup() { foreach (var root in roots) if (root != null) Object.DestroyImmediate(root); roots.Clear(); }
 
+        [TestCase("BaseToMerge", PositionLockMode.Unidirectional)]
+        [TestCase("BidirectionalExact", PositionLockMode.Bidirectional)]
+        [TestCase("NotLocked", PositionLockMode.NotLocked)]
+        public void MergeExportsAuthoredRootSettingsWithoutPrecomputingBonePairs(string mode, PositionLockMode expected)
+        {
+            var parent = Avatar("Base"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
+            var source = clothing.transform.Find("Armature"); var target = parent.transform.Find("Armature");
+            var ma = Merge(source.gameObject, target);
+            Field(ma, "prefix", "Coat_"); Field(ma, "suffix", "_end"); Field(ma, "mangleNames", false);
+            Field(ma, "LockMode", Enum.Parse(ma.GetType().GetField("LockMode").FieldType, mode));
+            var before = EditorJsonUtility.ToJson(ma);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
+            {
+                var record = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single();
+                Assert.That(record.Kind, Is.EqualTo(ComponentKind.MergeArmature));
+                Assert.That(record.Source, Is.SameAs(copy.Root.transform.Find("Armature")));
+                Assert.That(record.Target.Path, Is.EqualTo(new[] { "Armature" }));
+                Assert.That(record.Target.Base, Is.True); Assert.That(record.Prefix, Is.EqualTo("Coat_"));
+                Assert.That(record.Suffix, Is.EqualTo("_end")); Assert.That(record.MangleNames, Is.False);
+                Assert.That(record.LockMode, Is.EqualTo(expected)); Assert.That(record.Entries, Is.Empty);
+                Directory.CreateDirectory("MochiyaTests");
+                var path = Path.GetFullPath("MochiyaTests/merge-" + mode + ".glb"); MochiyaAvatarWorkflow.Export(copy.Root, path);
+                var bytes = File.ReadAllBytes(path); var json = System.Text.Encoding.UTF8.GetString(bytes, 20, BitConverter.ToInt32(bytes, 12));
+                StringAssert.Contains("\"type\":\"mergeArmature\"", json); StringAssert.Contains("\"origin\":\"modularAvatar\"", json);
+                StringAssert.DoesNotContain("jointMappings", json); StringAssert.DoesNotContain("\"actions\"", json);
+            }
+            Assert.That(EditorJsonUtility.ToJson(ma), Is.EqualTo(before));
+        }
+
+        [Test] public void ShapeChangerPreservesGroupedDeleteAndSetEntriesWithTheirSourceCondition()
+        {
+            var parent = Avatar("Base"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
+            var ma = Shape(clothing, parent.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
+            var list = (IList)ma.GetType().GetProperty("Shapes").GetValue(ma);
+            var deleted = Activator.CreateInstance(list[0].GetType());
+            foreach (var field in deleted.GetType().GetFields()) field.SetValue(deleted, field.GetValue(list[0]));
+            Field(deleted, "ChangeType", Enum.Parse(deleted.GetType().GetField("ChangeType").FieldType, "Delete")); list.Add(deleted);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
+            {
+                var record = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single();
+                Assert.That(record.Kind, Is.EqualTo(ComponentKind.ShapeChanger)); Assert.That(record.Entries.Count, Is.EqualTo(2));
+                Assert.That(record.Entries[0].ChangeType, Is.EqualTo(ShapeChangeType.Set));
+                Assert.That(record.Entries[1].ChangeType, Is.EqualTo(ShapeChangeType.Delete));
+                Assert.That(record.Entries[1].Value, Is.EqualTo(.65f)); Assert.That(record.Entries[0].Target.Path, Is.EqualTo(new[] { "Body" }));
+                Assert.That(record.Source, Is.SameAs(copy.Root.transform)); Assert.That(record.Condition.Node, Is.SameAs(record.Source));
+                Directory.CreateDirectory("MochiyaTests"); var path = Path.GetFullPath("MochiyaTests/grouped-shapes.vrm"); MochiyaAvatarWorkflow.Export(copy.Root, path);
+                var bytes = File.ReadAllBytes(path); var json = System.Text.Encoding.UTF8.GetString(bytes, 20, BitConverter.ToInt32(bytes, 12));
+                StringAssert.Contains("\"changeType\":\"delete\"", json); StringAssert.Contains("\"sourceNode\":", json);
+            }
+            Assert.That(list.Count, Is.EqualTo(2));
+        }
+
         [Test] public void IndependentNestedHumanoidIsAvatarAndDoesNotCopyParent()
         {
             var parent = Avatar("Parent"); var target = Avatar("Independent"); target.transform.SetParent(parent.transform, false);
@@ -57,10 +109,55 @@ namespace Mochiya.AvatarTools.Editor.Tests
             using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(target))
             {
                 Assert.That(copy.Root.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length, Is.EqualTo(1));
-                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Joints, Is.Empty);
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Where(c => c.Kind == ComponentKind.MergeArmature), Is.Empty);
                 Assert.That(copy.Root.transform.Find("Parent"), Is.Null);
             }
             Assert.Throws<InvalidOperationException>(() => MochiyaAvatarConverter.ConvertAttachmentInScene(parent, target));
+        }
+
+        [TestCase("Toggle", "Shared", 2f)]
+        [TestCase("Button", "Shared", 2f)]
+        [TestCase("Button", "", 1f)]
+        public void MenuItemPreservesControlTypeParameterValueAndDefaults(string mode, string parameter, float value)
+        {
+            var avatar = Avatar("Avatar"); var owner = new GameObject("Option"); owner.transform.SetParent(avatar.transform, false);
+            var menu = owner.AddComponent(Ma("ModularAvatarMenuItem")); var field = menu.GetType().GetField("Control");
+            if (field == null) Assert.Ignore("VRChat expression menu backing is not installed.");
+            var control = Activator.CreateInstance(field.FieldType);
+            Field(control, "type", Enum.Parse(control.GetType().GetField("type").FieldType, mode)); Field(control, "value", value);
+            var input = Activator.CreateInstance(control.GetType().GetField("parameter").FieldType); Field(input, "name", parameter); Field(control, "parameter", input);
+            field.SetValue(menu, control); Field(menu, "label", "Option Label"); Field(menu, "isDefault", true);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(avatar))
+            {
+                var record = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single();
+                Assert.That(record.ControlType.ToString(), Is.EqualTo(mode)); Assert.That(record.Parameter, Is.EqualTo(parameter));
+                Assert.That(record.Value, Is.EqualTo(value)); Assert.That(record.Label, Is.EqualTo("Option Label"));
+                Assert.That(record.Automatic, Is.EqualTo(parameter.Length == 0)); Assert.That(record.DefaultValue, Is.EqualTo(mode == "Button" ? 0 : value));
+            }
+        }
+
+        [Test] public void BlendshapeSyncPreservesGroupedReferenceDirectionAndMaLinearPoints()
+        {
+            var parent = Avatar("Base"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
+            var mesh = clothing.GetComponentInChildren<SkinnedMeshRenderer>(); var sync = mesh.gameObject.AddComponent(Ma("ModularAvatarBlendshapeSync"));
+            var bindings = (IList)sync.GetType().GetField("Bindings").GetValue(sync);
+            var binding = Activator.CreateInstance(bindings.GetType().GetGenericArguments()[0]);
+            Field(binding, "ReferenceMesh", Reference(binding.GetType().GetField("ReferenceMesh").FieldType, parent.GetComponentInChildren<SkinnedMeshRenderer>().gameObject));
+            Field(binding, "Blendshape", "Body_Slim"); Field(binding, "LocalBlendshape", "Body_Slim"); Field(binding, "RemapCurveIsValid", true);
+            Field(binding, "RemapCurve", new AnimationCurve(new Keyframe(0, 10, 7, 8), new Keyframe(50, 20, 9, 10), new Keyframe(100, 80, 11, 12)));
+            bindings.Add(binding);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
+            {
+                var record = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single(); var entry = record.Entries.Single();
+                Assert.That(record.Kind, Is.EqualTo(ComponentKind.BlendshapeSync)); Assert.That(record.UseCondition, Is.False);
+                Assert.That(entry.Driver.Base, Is.True); Assert.That(entry.Driver.Path, Is.EqualTo(new[] { "Body" }));
+                Assert.That(entry.Target.Base, Is.False); Assert.That(entry.Target.MorphIndex, Is.EqualTo(0));
+                Assert.That(entry.Curve.keys.Select(k => k.time), Is.EqualTo(new[] { 0f, .5f, 1f }));
+                Assert.That(entry.Curve.keys.Select(k => k.value), Is.EqualTo(new[] { .1f, .2f, .8f }));
+                Directory.CreateDirectory("MochiyaTests"); var path = Path.GetFullPath("MochiyaTests/ma-sync.glb"); MochiyaAvatarWorkflow.Export(copy.Root, path);
+                var bytes = File.ReadAllBytes(path); var json = System.Text.Encoding.UTF8.GetString(bytes, 20, BitConverter.ToInt32(bytes, 12));
+                StringAssert.Contains("\"interpolation\":\"linear\"", json); StringAssert.DoesNotContain("\"tangents\"", json);
+            }
         }
 
         [TestCase(false)] [TestCase(true)]
@@ -82,7 +179,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 Assert.That(copy.Root.transform.Find("Armature"), Is.Not.Null);
                 Assert.That(copy.Root.transform.Find("Dependent"), Is.Null, "No parent scaffold is needed for an owned humanoid.");
                 Assert.That(copy.Root.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length, Is.EqualTo(1));
-                var action = copy.Root.GetComponent<MochiyaAvatarComposition>().Actions.Single();
+                var action = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single().Entries.Single();
                 Assert.That(action.Target.Base, Is.True); Assert.That(action.Target.MeshKeywords, Does.Contain("Sibling Body"));
                 Directory.CreateDirectory("MochiyaTests");
                 foreach (var extension in new[] { "vrm", "glb" })
@@ -104,7 +201,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
             Shape(target, target.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
             Assert.That(MochiyaAvatarWorkflow.Detect(target).Kind, Is.EqualTo(MochiyaTargetKind.Avatar));
             using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(target))
-                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Actions.Single().Target.Base, Is.False);
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single().Entries.Single().Target.Base, Is.False);
         }
 
         [Test] public void InvalidOrDependentParentCannotSupplyAnAttachmentReference()
@@ -140,14 +237,13 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 }
                 var mesh = copy.Root.transform.Find("Clothing/Body").GetComponent<SkinnedMeshRenderer>();
                 Assert.That(mesh.bones[0], Is.SameAs(copy.Root.transform.Find("Clothing/Armature/Hips")));
-                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Joints, Is.Empty);
-                Assert.That(copy.Report.Warnings.Any(w => w.Contains("armatures remain separate")), Is.True);
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single(c => c.Kind == ComponentKind.MergeArmature).Target.Base, Is.False);
             }
             Assert.That(sourceHips.parent, Is.SameAs(clothing.transform.Find("Armature")));
             using (var attachment = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
             {
                 Assert.That(attachment.Root.transform.Find("Clothing/Armature/Hips"), Is.Not.Null);
-                Assert.That(attachment.Root.GetComponent<MochiyaAvatarComposition>().Joints.Count, Is.GreaterThan(0));
+                Assert.That(attachment.Root.GetComponent<MochiyaAvatarComposition>().Components.Where(c => c.Kind == ComponentKind.MergeArmature).Count(), Is.GreaterThan(0));
             }
         }
 

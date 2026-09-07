@@ -42,7 +42,6 @@ namespace Mochiya.AvatarTools.Editor.Tests
 
         [TestCase(0, AssetKind.Avatar)]
         [TestCase(1, AssetKind.Attachment)]
-        [TestCase(2, AssetKind.Attachment)]
         public void LoadsSavedKindsUsingOnlyAvatarAndAttachmentChoices(int storedKind, AssetKind expected)
         {
             var data = Avatar().AddComponent<MochiyaAvatarComposition>();
@@ -139,15 +138,15 @@ namespace Mochiya.AvatarTools.Editor.Tests
             using (var result = MochiyaAvatarWorkflow.ConvertToVrmGameObject(attachment))
             {
                 var data = result.Root.GetComponent<MochiyaAvatarComposition>();
-                data.Actions.Add(new AssetAction { Id = "fit", Kind = ActionKind.MorphOverride,
-                    Target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .4f });
+                data.Components.Add(new AssetComponent { Id = "fit", Kind = ComponentKind.ShapeChanger, Source = data.transform, Entries = new List<AssetEntry> { new AssetEntry { Target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } }, Value = .4f } } });
                 Assert.That(MochiyaAvatarWorkflow.Detect(result.Root).Kind, Is.EqualTo(MochiyaTargetKind.Attachment));
                 Assert.That(MochiyaAvatarWorkflow.Detect(result.Root).IsPrepared, Is.True);
                 var path = Path.GetFullPath("MochiyaTests/prepared-attachment.vrm");
                 MochiyaAvatarWorkflow.Export(result.Root, path);
                 StringAssert.Contains("\"assetKind\":\"attachment\"", Json(path));
-                StringAssert.Contains("morph.override", Json(path));
-                Assert.That(data.Actions.Count, Is.EqualTo(1));
+                StringAssert.Contains("shapeChanger", Json(path));
+                Assert.That(data.Components.Count(c => c.Kind == ComponentKind.ShapeChanger), Is.EqualTo(1));
+                Assert.That(data.Components.Count(c => c.Origin == ComponentOrigin.ReferenceRig), Is.EqualTo(1));
             }
         }
 

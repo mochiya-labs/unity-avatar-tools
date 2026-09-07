@@ -231,13 +231,12 @@ namespace Mochiya.AvatarTools.Editor
                 finalizeVrmPaths?.Invoke();
                 if (attachment != null)
                 {
-                    var mappedBones = new HashSet<Transform>(asset.Joints.Select(x => x.Source));
-                    foreach (var bone in scope.GetComponentsInChildren<SkinnedMeshRenderer>(true).SelectMany(x => x.bones).Where(x => x != null).Distinct())
-                        if (map.TryGetValue(bone, out var local) && mappedBones.Add((Transform)local))
-                            asset.Joints.Add(new AssetJointMapping { Source = (Transform)local, Target = context.Select(bone, forceBase: true, bone: true) });
-                    foreach (var original in included.Where(t => t != source.transform && !t.IsChildOf(scope.transform)))
-                        if (map.TryGetValue(original, out var reference) && mappedBones.Add((Transform)reference))
-                            asset.Joints.Add(new AssetJointMapping { Source = (Transform)reference, Target = context.Select(original, forceBase: true, bone: true) });
+                    // Only generated parent reference roots need implicit following. Authored MA roots remain instructions.
+                    var external = new HashSet<Transform>(included.Where(t => t != source.transform && !t.IsChildOf(scope.transform)));
+                    foreach (var original in external.Where(t => !external.Contains(t.parent)))
+                        if (map.TryGetValue(original, out var reference))
+                            context.Add(new AssetComponent { Kind = ComponentKind.MergeArmature, Source = (Transform)reference, Target = context.Select(original, forceBase: true, bone: true), Origin = ComponentOrigin.ReferenceRig });
+
                 }
                 asset.ConversionReport = report.ToString();
                 var resources = duplicate.AddComponent<MochiyaSceneResources>(); resources.Capture();

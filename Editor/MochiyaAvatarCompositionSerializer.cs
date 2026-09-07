@@ -11,7 +11,7 @@ namespace Mochiya.AvatarTools.Editor
     internal static class MochiyaAvatarCompositionSerializer
     {
         public const string ExtensionName = "MOCHIYA_avatar_composition";
-        public static IEnumerable<Material> ExtraMaterials(MochiyaAvatarComposition asset) => asset == null ? Enumerable.Empty<Material>() : asset.Actions.Where(a => a.Kind == ActionKind.MaterialSwap && a.Material != null).Select(a => a.Material).Distinct();
+        public static IEnumerable<Material> ExtraMaterials(MochiyaAvatarComposition asset) => asset == null ? Enumerable.Empty<Material>() : asset.Components.Where(c => c.Kind == ComponentKind.MaterialSetter).SelectMany(c => c.Entries).Where(a => a.Material != null).Select(a => a.Material).Distinct();
 
         // Only called on the private export copy. Inactive variants must remain in the file for portable toggles.
         public static void PrepareCopy(GameObject root)
@@ -36,8 +36,22 @@ namespace Mochiya.AvatarTools.Editor
         public static void Attach(glTF gltf, MochiyaAvatarComposition asset, IReadOnlyDictionary<Transform, int> nodes, IList<Material> materials)
         {
             if (asset == null) return;
+            var rootIndex = -1;
             int Node(Transform node)
             {
+                // UniGLTF omits the scene container. Materialize an identity node only
+                // when a component actually addresses it; existing indices stay stable.
+                if (node == asset.transform && (!nodes.TryGetValue(node, out var root) || root < 0))
+                {
+                    if (rootIndex < 0)
+                    {
+                        rootIndex = gltf.nodes.Count;
+                        var scene = gltf.scenes[gltf.scene];
+                        gltf.nodes.Add(new glTFNode { name = asset.name, children = scene.nodes });
+                        scene.nodes = new[] { rootIndex };
+                    }
+                    return rootIndex;
+                }
                 if (node == null || !nodes.TryGetValue(node, out var index) || index < 0 || index >= gltf.nodes.Count)
                     throw new InvalidOperationException("A Mochiya local target did not survive export. Check root targets, mesh pruning and reference scope.");
                 return index;
@@ -75,58 +89,65 @@ namespace Mochiya.AvatarTools.Editor
                 Words("boneKeywords", selector.BoneKeywords); Words("meshKeywords", selector.MeshKeywords);
                 Words("nodeKeywords", selector.NodeKeywords); Words("blendshapeKeywords", selector.BlendshapeKeywords);
                 Words("parentKeywords", selector.ParentKeywords);
+                if (selector.Base && (selector.BaseRoot || selector.Path?.Length > 0)) { f.Key("path"); f.BeginList(); foreach (var segment in selector.Path ?? Array.Empty<string>()) f.Value(segment); f.EndList(); }
                 if (!string.IsNullOrEmpty(selector.HumanBone)) Text("humanBone", selector.HumanBone);
+                if (!string.IsNullOrEmpty(selector.HumanBone) && selector.HumanBonePath != null) { f.Key("humanBonePath"); f.BeginList(); foreach (var segment in selector.HumanBonePath) f.Value(segment); f.EndList(); }
                 f.EndMap();
             }
-            var kinds = new Dictionary<ActionKind, string> { [ActionKind.MorphSync] = "morph.sync", [ActionKind.MorphOverride] = "morph.override", [ActionKind.NodeActive] = "node.active", [ActionKind.MaterialSwap] = "material.swap", [ActionKind.ColliderLink] = "collider.link" };
-            f.BeginMap(); Text("specVersion", "0.1"); Text("assetKind", asset.Kind.ToString().ToLowerInvariant());
-            Words("requiredCapabilities", asset.Actions.Select(x => kinds[x.Kind]).Concat(asset.Joints.Count > 0 ? new[] { "rig.bind", "rig.attach" } : Array.Empty<string>()).Concat(asset.Controls.Count > 0 ? new[] { "control" } : Array.Empty<string>()));
+            string Camel(object value) { var text = value.ToString(); return char.ToLowerInvariant(text[0]) + text.Substring(1); }
+            f.BeginMap(); Text("specVersion", "0.1"); Text("assetKind", Camel(asset.Kind));
+            Words("requiredCapabilities", asset.Components.Select(x => Camel(x.Kind)));
             f.Key("matching"); f.BeginMap(); Text("mode", "keywordBestEffort"); Text("onUnresolved", "warnAndContinue"); Words("armatureKeywords", asset.ArmatureKeywords); f.EndMap();
-            f.Key("rig"); f.BeginMap(); Text("role", asset.Kind == AssetKind.Avatar ? "avatar" : "attachmentReference");
-            foreach (var attachments in new[] { false, true })
-            {
-                f.Key(attachments ? "attachmentRoots" : "jointMappings"); f.BeginList();
-                foreach (var joint in asset.Joints.Where(x => x.Attachment == attachments))
-                { f.BeginMap(); Int("sourceNode", Node(joint.Source)); Selector("target", joint.Target); if (attachments) Text("mode", joint.Snap ? "snap" : "preserveWorld"); f.EndMap(); }
-                f.EndList();
-            }
-            f.EndMap();
+            f.Key("rig"); f.BeginMap(); Text("role", asset.Kind == AssetKind.Avatar ? "avatar" : "attachmentReference"); f.EndMap();
             f.Key("nodes"); f.BeginList();
             foreach (var node in asset.Nodes.Where(x => x.Node != null && nodes.ContainsKey(x.Node) && nodes[x.Node] >= 0))
             { f.BeginMap(); Int("node", Node(node.Node)); Words("aliases", node.Aliases); Bool("active", node.Active); f.EndMap(); }
             f.EndList();
-            f.Key("controls"); f.BeginList();
-            foreach (var control in asset.Controls)
-            { f.BeginMap(); Text("id", control.Id); Text("label", control.Label ?? control.Id); Float("defaultValue", control.DefaultValue); Float("min", control.Min); Float("max", control.Max); f.EndMap(); }
-            f.EndList();
-            f.Key("actions"); f.BeginList();
-            foreach (var action in asset.Actions)
+            f.Key("components"); f.BeginList();
+            foreach (var component in asset.Components)
             {
-                f.BeginMap(); Text("id", action.Id); Text("type", kinds[action.Kind]); Int("sourceOrder", action.SourceOrder);
-                if (action.UseCondition && action.Condition != null)
+                f.BeginMap(); Text("id", component.Id); Text("type", Camel(component.Kind)); Int("sourceNode", Node(component.Source)); Text("origin", Camel(component.Origin));
+                if (component.UseCondition && component.Condition != null)
                 {
-                    f.Key("condition"); f.BeginMap(); var control = !string.IsNullOrEmpty(action.Condition.Control);
-                    Text("type", control ? "control" : "nodeActive"); Bool("inverse", action.Condition.Inverse);
-                    if (control) { Text("control", action.Condition.Control); Float("value", action.Condition.Value); }
-                    else { Text("asset", "self"); Int("node", Node(action.Condition.Node)); }
+                    f.Key("condition"); f.BeginMap(); var control = !string.IsNullOrEmpty(component.Condition.Control);
+                    Text("type", control ? "control" : "nodeActive"); Bool("inverse", component.Condition.Inverse);
+                    if (control) { Text("control", component.Condition.Control); Float("value", component.Condition.Value); }
+                    else { Text("asset", "self"); Int("node", Node(component.Condition.Node)); }
                     f.EndMap();
                 }
-                Selector(action.Kind == ActionKind.MorphSync ? "driven" : "target", action.Target);
-                switch (action.Kind)
+                switch (component.Kind)
                 {
-                    case ActionKind.MorphSync:
-                        Selector("driver", action.Driver);
-                        f.Key("curve"); f.BeginMap(); Text("interpolation", "linear"); f.Key("points"); f.BeginList();
-                        var curve = action.Curve ?? AnimationCurve.Linear(0, 0, 1, 1);
-                        if (curve.length < 2) throw new InvalidOperationException("A sync curve requires two or more points.");
-                        foreach (var key in curve.keys) { f.BeginList(); f.Value(key.time); f.Value(key.value); f.EndList(); }
-                        f.EndList(); f.EndMap(); break;
-                    case ActionKind.MorphOverride: Float("value", action.Value); break;
-                    case ActionKind.NodeActive: Bool("value", action.Active); break;
-                    case ActionKind.MaterialSwap:
-                        var material = materials.IndexOf(action.Material); if (material < 0) throw new InvalidOperationException("An alternate material was not registered with the exporter.");
-                        Int("slot", action.MaterialSlot); Int("material", material); break;
-                    case ActionKind.ColliderLink: Selector("collider", action.Driver); break;
+                    case ComponentKind.MergeArmature:
+                        Selector("target", component.Target); Text("prefix", component.Prefix ?? ""); Text("suffix", component.Suffix ?? ""); Text("lockMode", Camel(component.LockMode)); Bool("mangleNames", component.MangleNames); break;
+                    case ComponentKind.BoneProxy:
+                        Selector("target", component.Target); Text("attachmentMode", Camel(component.AttachmentMode)); Bool("matchScale", component.MatchScale); break;
+                    case ComponentKind.MenuItem:
+                        Text("label", component.Label ?? component.Id); Text("controlType", Camel(component.ControlType));
+                        if (!string.IsNullOrEmpty(component.Parameter)) Text("parameter", component.Parameter);
+                        Float("value", component.Value); Float("defaultValue", component.DefaultValue); Bool("automatic", component.Automatic); break;
+                    default:
+                        f.Key(component.Kind == ComponentKind.ShapeChanger ? "shapes" : component.Kind == ComponentKind.BlendshapeSync ? "bindings" : "objects"); f.BeginList();
+                        foreach (var entry in component.Entries)
+                        {
+                            f.BeginMap(); Selector(component.Kind == ComponentKind.BlendshapeSync ? "driven" : "target", entry.Target);
+                            switch (component.Kind)
+                            {
+                                case ComponentKind.BlendshapeSync:
+                                    Selector("driver", entry.Driver);
+                                    var curve = entry.Curve ?? AnimationCurve.Linear(0, 0, 1, 1);
+                                    if (curve.length < 2) throw new InvalidOperationException("A sync curve requires two or more points.");
+                                    f.Key("curve"); f.BeginMap(); Text("interpolation", "linear");
+                                    f.Key("points"); f.BeginList(); foreach (var key in curve.keys) { f.BeginList(); f.Value(key.time); f.Value(key.value); f.EndList(); } f.EndList();
+                                    f.EndMap(); break;
+                                case ComponentKind.ShapeChanger: Text("changeType", Camel(entry.ChangeType)); Float("value", entry.Value); break;
+                                case ComponentKind.ObjectToggle: Bool("value", entry.Active); break;
+                                case ComponentKind.MaterialSetter:
+                                    var material = materials.IndexOf(entry.Material); if (material < 0) throw new InvalidOperationException("An alternate material was not registered with the exporter.");
+                                    Int("slot", entry.MaterialSlot); Int("material", material); break;
+                            }
+                            f.EndMap();
+                        }
+                        f.EndList(); break;
                 }
                 f.EndMap();
             }

@@ -1,18 +1,24 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UniVRM10;
 
 namespace Mochiya.AvatarComposition
 {
     public enum AssetKind { Avatar = 0, Attachment = 1 }
-    public enum ActionKind { MorphSync, MorphOverride, NodeActive, MaterialSwap, ColliderLink }
+    public enum ComponentKind { MergeArmature, BoneProxy, ShapeChanger, BlendshapeSync, ObjectToggle, MaterialSetter, MenuItem }
+    public enum ShapeChangeType { Set, Delete }
+    public enum PositionLockMode { Unidirectional, Bidirectional, NotLocked }
+    public enum ProxyAttachmentMode { KeepWorldPose, AtRoot, KeepPosition, KeepRotation }
+    public enum MenuControlType { Toggle, Button }
+    public enum ComponentOrigin { ModularAvatar, ReferenceRig, ColliderAnchor, Authored }
 
     [Serializable]
     public sealed class AssetSelector
     {
         public bool Base;
         public Transform Node;
+        public string[] Path;
+        public bool BaseRoot;
         public string[] BoneKeywords = Array.Empty<string>();
         public string[] MeshKeywords = Array.Empty<string>();
         public string[] NodeKeywords = Array.Empty<string>();
@@ -20,8 +26,8 @@ namespace Mochiya.AvatarComposition
         public string[] ParentKeywords = Array.Empty<string>();
         public int MorphIndex = -1;
         public string HumanBone;
+        public string[] HumanBonePath;
     }
-
     [Serializable]
     public sealed class AssetCondition
     {
@@ -30,43 +36,39 @@ namespace Mochiya.AvatarComposition
         public string Control;
         public float Value = 1;
     }
-
     [Serializable]
-    public sealed class AssetAction
+    public sealed class AssetEntry
     {
-        public string Id;
-        public ActionKind Kind;
-        public int SourceOrder;
-        public bool UseCondition;
-        public AssetCondition Condition;
         public AssetSelector Target = new AssetSelector();
         public AssetSelector Driver = new AssetSelector();
         public AnimationCurve Curve = AnimationCurve.Linear(0, 0, 1, 1);
+        public ShapeChangeType ChangeType;
         public float Value;
         public bool Active;
         public int MaterialSlot;
         public Material Material;
     }
-
     [Serializable]
-    public sealed class AssetJointMapping
-    {
-        public Transform Source;
-        public AssetSelector Target = new AssetSelector { Base = true };
-        public bool Attachment;
-        public bool Snap;
-    }
-
-    [Serializable]
-    public sealed class AssetControl
+    public sealed class AssetComponent
     {
         public string Id;
-        public string Label;
-        public float DefaultValue;
-        public float Min;
-        public float Max = 1;
+        public ComponentKind Kind;
+        public Transform Source;
+        public ComponentOrigin Origin = ComponentOrigin.Authored;
+        public bool UseCondition;
+        public AssetCondition Condition;
+        public List<AssetEntry> Entries = new List<AssetEntry>();
+        public AssetSelector Target = new AssetSelector { Base = true };
+        public string Prefix = "", Suffix = "";
+        public PositionLockMode LockMode = PositionLockMode.Unidirectional;
+        public bool MangleNames = true;
+        public ProxyAttachmentMode AttachmentMode;
+        public bool MatchScale;
+        public string Label, Parameter;
+        public MenuControlType ControlType;
+        public float Value = 1, DefaultValue;
+        public bool Automatic = true;
     }
-
     [Serializable]
     public sealed class AssetNodeState
     {
@@ -74,25 +76,14 @@ namespace Mochiya.AvatarComposition
         public bool Active = true;
         public string[] Aliases = Array.Empty<string>();
     }
-
-    /// <summary>Scene-owned authoring data. No VRChat, Modular Avatar or lilToon assembly is required.</summary>
+    /// <summary>Portable MA-style instructions. Resolved bone pairs belong to the consuming runtime.</summary>
     [DisallowMultipleComponent, AddComponentMenu("Mochiya/Avatar Composition")]
-    public sealed class MochiyaAvatarComposition : MonoBehaviour, ISerializationCallbackReceiver
+    public sealed class MochiyaAvatarComposition : MonoBehaviour
     {
         public AssetKind Kind;
         public string[] ArmatureKeywords = Array.Empty<string>();
-        public List<AssetJointMapping> Joints = new List<AssetJointMapping>();
-        public List<AssetAction> Actions = new List<AssetAction>();
-        public List<AssetControl> Controls = new List<AssetControl>();
+        public List<AssetComponent> Components = new List<AssetComponent>();
         public List<AssetNodeState> Nodes = new List<AssetNodeState>();
         [HideInInspector] public string ConversionReport;
-
-        public void OnBeforeSerialize() { }
-        public void OnAfterDeserialize()
-        {
-            // Existing scenes/prefabs stored Outfit as 1 and Accessory as 2.
-            // Both are now attachments; keep Avatar's serialized value unchanged.
-            if ((int)Kind == 2) Kind = AssetKind.Attachment;
-        }
     }
 }

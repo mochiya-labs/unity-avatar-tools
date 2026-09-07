@@ -95,11 +95,11 @@ Omit the profile argument or pass `null` for the bundled default. Reports contai
 | `three-liltoon` | Renders materials carrying `MOCHIYA_materials_liltoon`. |
 | `@mochiya/avatar-composition` | Reads `MOCHIYA_avatar_composition`, fits separate attachments by names, applies supported actions and restores the base on removal. |
 
-The host registers `VRMLoaderPlugin`, `GLTFLilToonExtension` and `MochiyaAvatarCompositionLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. Its `examples/viewer` demonstrates local-file loading, fitting, controls and removal.
+The host enables rendering with `enableLilToon(renderer)` and registers `enableLilToonVRM(new VRMLoaderPlugin(parser))` plus `MochiyaAvatarCompositionLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. Its `examples/viewer` demonstrates local-file loading, fitting, controls and removal.
 
 Both Mochiya extensions are optional additions to standard files. Ordinary viewers display standalone geometry and fallback materials without attachment actions. Matching uses bone, armature, mesh and blendshape names; missing names warn and skip only affected operations. It does not check base identity or reshape garments to fit different bodies.
 
-Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with `assetKind: "avatar"` or `"attachment"`. New attachment exports use `rig.role: "attachmentReference"`. Saved Unity Outfit/Accessory kinds migrate to Attachment; update script enum references to `AssetKind.Attachment`. `ConvertOutfitInScene` remains an obsolete alias of `ConvertAttachmentInScene` for existing scripts.
+Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with `assetKind: "avatar"` or `"attachment"`. New attachment exports use `rig.role: "attachmentReference"`. The current composition draft stores MA-style component instructions; re-convert older prepared objects and re-export older files to use it.
 
 ## Supported behavior and limits
 
@@ -112,15 +112,16 @@ Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with 
 | VRM first-person | Existing VRM settings or generated defaults | VRC-specific visibility is not translated. |
 | Spring bones and colliders (`VRMC_springBone`) | VRC PhysBones/colliders; existing VRM physics | Approximate active-preset simulation and sphere/capsule collisions; no VRC interactions or angle limits. |
 | Node constraints (`VRMC_node_constraint`) | Existing UniVRM constraints | No VRC constraint conversion. |
-| Mochiya `rig.bind` | MA Merge Armature and attachment skin bones | Best-effort bone matching; no Unity armature merge. |
-| Mochiya `rig.attach` | MA Bone Proxy; external base-collider anchors | External targets only; keep-world or snap, without partial-pose/scale matching. |
-| Mochiya `morph.sync` | MA Blendshape Sync | Linear remaps; no synchronization chains or cycles. |
-| Mochiya `morph.override` | MA Shape Changer | Set only; no geometry deletion. |
-| Mochiya `node.active` | MA Object Toggle and Menu Item activation | No cyclic visibility rules. |
-| Mochiya `material.swap` | MA Material Setter | Whole-material replacement only. |
-| Mochiya controls | MA automatic Toggle/Button menu items | Independent binary controls; no shared parameters or menu hierarchy. |
-| Mochiya `collider.link` | Explicit Mochiya data | No automatic VRC/MA adapter or global cross-asset collision. |
+| Mochiya `mergeArmature` | MA Merge Armature; generated reference rig | Roots/settings are retained; web matching is unidirectional. Other lock modes warn and fall back. No Unity merge. |
+| Mochiya `boneProxy` | MA Bone Proxy; external base-collider anchors | Keep World Pose or At Root in the web runtime; partial-pose/scale modes warn and keep world pose. |
+| Mochiya `blendshapeSync` | MA Blendshape Sync | Grouped bindings with MA linear remap points; no synchronization chains or cycles. |
+| Mochiya `shapeChanger` | MA Shape Changer | Grouped Set/Delete entries. Delete warns and uses blendshape weight 0 without cutting geometry. |
+| Mochiya `objectToggle` | MA Object Toggle | Grouped visibility entries; no cyclic visibility rules. |
+| Mochiya `materialSetter` | MA Material Setter | Grouped whole-material slot replacements. |
+| Mochiya `menuItem` | MA Toggle/Button menu items | Automatic object activation and local parameter metadata; buttons are momentary. No Animator execution/networking/menu hierarchy. |
 | lilToon materials (`MOCHIYA_materials_liltoon`) | Regular opaque/cutout/transparent lilToon, including outlines | No specialized variants; 2D textures/UV0 only. Browser appearance can differ. |
+
+Component records preserve source roots, settings, conditions and grouped entries; resolved bone pairs are computed by the web runtime. The `@mochiya/avatar-composition` specification defines the wire format and runtime rules. Each VRM retains its own spring/collider groups; cross-asset collider linking is outside this profile.
 
 Other VRC/MA behavior, including Animator programs, Contacts and mesh processing, is omitted. Ordinary GLB omits VRM behavior. Texture export requires graphics-enabled Unity.
 

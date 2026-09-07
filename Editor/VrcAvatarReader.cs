@@ -116,7 +116,7 @@ namespace Mochiya.AvatarTools.Editor
                 anchor.SetParent(c.Asset.transform, false);
                 anchor.position = root.position; anchor.rotation = root.rotation; anchor.localScale = Vector3.Scale(root.lossyScale, new Vector3(1 / c.Asset.transform.lossyScale.x, 1 / c.Asset.transform.lossyScale.y, 1 / c.Asset.transform.lossyScale.z));
                 localRoot = anchor;
-                if (c.Attachment) c.Asset.Joints.Add(new AssetJointMapping { Source = anchor, Target = c.Select(root, forceBase: true, bone: true), Attachment = true });
+                if (c.Attachment) c.Add(new AssetComponent { Kind = ComponentKind.BoneProxy, Source = anchor, Target = c.Select(root, forceBase: true, bone: true), Origin = ComponentOrigin.ColliderAnchor });
             }
             var shape = String(source, "shapeType");
             if (shape != "Sphere" && shape != "Capsule") { c.Report.Warnings.Add($"{source.name}: {shape} collider has no core VRM sphere/capsule representation and was omitted."); return null; }
