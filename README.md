@@ -11,7 +11,7 @@ Use **Unity 2022.3+** and **UniVRM/UniGLTF 0.131.2+**. Add these entries to the 
 ```json
 "com.vrmc.gltf": "https://github.com/vrm-c/UniVRM.git?path=/Packages/UniGLTF#v0.131.2",
 "com.vrmc.vrm": "https://github.com/vrm-c/UniVRM.git?path=/Packages/VRM10#v0.131.2",
-"org.mochiya.avatar-tools": "https://github.com/zekailin00/liltoon-unity-exporter.git"
+"org.mochiya.avatar-tools": "https://github.com/mochiya-labs/unity-avatar-tools.git"
 ```
 
 This example pins the verified UniVRM version. For a local copy, use **Window → Package Manager → Add package from disk** and select this package's `package.json`.
@@ -94,8 +94,8 @@ Omit the profile argument or pass `null` for the bundled default. Reports contai
 | Mochiya Avatar Tools | Converts the selected asset, records supported MA intent, and adds Mochiya extensions during export. |
 | UniVRM / UniGLTF | Provides standard VRM components, geometry/material conversion and VRM/GLB file writing. |
 | `@pixiv/three-vrm` | Loads and updates standard VRM humanoids, expressions and spring bones in the browser. |
-| `three-liltoon` | Renders materials carrying `MOCHIYA_materials_liltoon`. |
-| `@mochiya/avatar-composition` | Reads `MOCHIYA_avatar_composition`, fits separate attachments by names, applies supported actions and restores the base on removal. |
+| [`three-liltoon`](https://github.com/mochiya-labs/three-liltoon) | Renders materials carrying `MOCHIYA_materials_liltoon`. |
+| [`@mochiya/avatar-composition`](https://github.com/mochiya-labs/avatar-composition) | Reads `MOCHIYA_avatar_composition`, fits separate attachments by names, applies supported actions and restores the base on removal. |
 
 The host enables rendering with `enableLilToon(renderer)` and registers `enableLilToonVRM(new VRMLoaderPlugin(parser))` plus `MochiyaAvatarCompositionLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. Its `examples/viewer` demonstrates local-file loading, fitting, controls and removal.
 
