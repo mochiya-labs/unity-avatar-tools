@@ -136,8 +136,8 @@ namespace Mochiya.AvatarTools.Editor.Tests
             var extracted = MochiyaAvatarConverter.ConvertAttachmentInScene(source, attachment); Keep(extracted.Root);
             Assert.That(baseOnly.Root.GetComponentsInChildren<Renderer>(true).Select(r => r.name), Is.EqualTo(new[] { "Body" }));
             Assert.That(baseOnly.Root.GetComponent<Vrm10Instance>().Vrm.Expression.Happy.MorphTargetBindings.Single().RelativePath, Is.EqualTo("Body"));
-            Assert.That(extracted.Root.GetComponent<Vrm10Instance>().Vrm.Expression.Happy.MorphTargetBindings.Single().RelativePath, Is.EqualTo("Coat/Coat Mesh"));
-            Assert.That(extracted.Root.GetComponent<Vrm10Instance>().Vrm.FirstPerson.Renderers.Single().Renderer, Is.EqualTo("Coat/Coat Mesh"));
+            Assert.That(extracted.Root.GetComponent<Vrm10Instance>().Vrm.Expression.Happy.MorphTargetBindings.Single().RelativePath, Is.EqualTo("Coat Mesh"));
+            Assert.That(extracted.Root.GetComponent<Vrm10Instance>().Vrm.FirstPerson.Renderers.Single().Renderer, Is.EqualTo("Coat Mesh"));
             Assert.That(clip.MorphTargetBindings.Length, Is.EqualTo(2)); Assert.That(original.Vrm.FirstPerson.Renderers.Count, Is.EqualTo(2));
         }
         [Test] public void ExportsRealGlbAndVrmWithInactiveVariantsAlternateMaterialsAndFinalReferences()

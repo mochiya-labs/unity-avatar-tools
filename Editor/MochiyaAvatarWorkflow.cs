@@ -36,7 +36,7 @@ namespace Mochiya.AvatarTools.Editor
             var asset = root.GetComponent<MochiyaAvatarComposition>();
             if (asset != null && !HasAuthoringComponents(root))
             {
-                // Extracted attachments carry a full reference humanoid. Their explicit kind wins over that Animator.
+                // Completed attachments carry a humanoid. Their explicit kind wins over that Animator.
                 result.Kind = asset.Kind == AssetKind.Avatar ? MochiyaTargetKind.Avatar : MochiyaTargetKind.Attachment;
                 result.ReferenceAvatar = root;
                 result.IsPrepared = !HasAuthoringComponents(root);

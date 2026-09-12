@@ -4,6 +4,7 @@
   "references": [
     "Mochiya.AvatarComposition",
     "UniGLTF",
+    "UniGLTF.Utils",
     "UniGLTF.Editor",
     "VRM10",
     "VRM10.Editor",

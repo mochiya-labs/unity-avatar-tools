@@ -108,6 +108,11 @@ namespace Mochiya.AvatarTools.Editor
             if (cache.TryGetValue(source, out var existing)) return existing;
             var root = PhysBoneRoot(source);
             var localRoot = c.Local(root);
+            // Completing a humanoid can map a base bone to an authored garment bone with a
+            // different rest offset. Keep external body colliders at their original base pose.
+            if (c.Attachment && !root.IsChildOf(c.Scope.transform) && localRoot != null &&
+                Enumerable.Range(0, 4).Any(i => Vector4.Distance(root.localToWorldMatrix.GetColumn(i), localRoot.localToWorldMatrix.GetColumn(i)) > .00001f))
+                localRoot = null;
             if (localRoot == null)
             {
                 // Capture a referenced base collider on an attachment-owned anchor and bind that anchor by keywords at runtime.

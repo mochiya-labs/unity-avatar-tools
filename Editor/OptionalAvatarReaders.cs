@@ -35,7 +35,7 @@ namespace Mochiya.AvatarTools.Editor
                 NodeKeywords = !bone && shape == null ? new[] { target.name } : Array.Empty<string>(),
                 MeshKeywords = !bone ? new[] { target.name } : Array.Empty<string>(),
                 ParentKeywords = target.parent != null ? new[] { target.parent.name } : Array.Empty<string>() };
-            if (!external && !bone && target == RigRoot.transform && target.TryGetComponent<Renderer>(out var sourceRenderer) && Map.TryGetValue(sourceRenderer, out var copyRenderer))
+            if (!external && !bone && target.TryGetComponent<Renderer>(out var sourceRenderer) && Map.TryGetValue(sourceRenderer, out var copyRenderer))
                 result.Node = ((Renderer)copyRenderer).transform;
             if (shape != null)
             {

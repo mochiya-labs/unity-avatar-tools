@@ -299,7 +299,8 @@ namespace Mochiya.AvatarTools.Editor.Tests
             Assert.That(sourceHips.parent, Is.SameAs(clothing.transform.Find("Armature")));
             using (var attachment = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
             {
-                Assert.That(attachment.Root.transform.Find("Clothing/Armature/Hips"), Is.Not.Null);
+                Assert.That(attachment.Root.transform.Find("Clothing"), Is.Null);
+                Assert.That(attachment.Root.transform.Find("Armature/Hips"), Is.Not.Null);
                 Assert.That(attachment.Root.GetComponent<MochiyaAvatarComposition>().Components.Where(c => c.Kind == ComponentKind.MergeArmature).Count(), Is.GreaterThan(0));
             }
         }
@@ -314,6 +315,130 @@ namespace Mochiya.AvatarTools.Editor.Tests
             {
                 Assert.That(copy.Root.transform.Find("Prop"), Is.Not.Null);
                 Assert.That(copy.Root.transform.Find("Prop").localPosition, Is.EqualTo(before));
+            }
+        }
+
+        [TestCase(false, false)] [TestCase(true, false)] [TestCase(true, true)]
+        public void AttachmentCompletesOneAuthoredArmatureAndExports(bool prefixed, bool missingSpine)
+        {
+            var parent = Avatar("Parent"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
+            var animator = clothing.GetComponent<Animator>();
+            var hips = animator.GetBoneTransform(HumanBodyBones.Hips);
+            var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
+            var neck = animator.GetBoneTransform(HumanBodyBones.Neck);
+            Object.DestroyImmediate(animator);
+            // A partial outfit lacks the head/neck and may skip an intermediate torso bone.
+            Object.DestroyImmediate(neck.gameObject);
+            if (missingSpine)
+            {
+                foreach (var child in spine.Cast<Transform>().ToArray()) child.SetParent(spine.parent, true);
+                Object.DestroyImmediate(spine.gameObject);
+            }
+            var armature = clothing.transform.Find("Armature");
+            if (prefixed) foreach (var t in armature.GetComponentsInChildren<Transform>().Where(t => t != armature)) t.name = "Coat_" + t.name + "_end";
+            var ma = Merge(armature.gameObject, parent.transform.Find("Armature"));
+            Field(ma, "prefix", prefixed ? "Coat_" : ""); Field(ma, "suffix", prefixed ? "_end" : "");
+            var extra = new GameObject("SkirtPhysics").transform; extra.SetParent(hips, false); extra.localPosition = new Vector3(.05f, -.1f, .03f);
+            // Same-named collider objects outside the rig must not become humanoid bones.
+            var colliderContainer = new GameObject("Colliders").transform; colliderContainer.SetParent(clothing.transform, false);
+            var colliderHips = new GameObject(hips.name).transform; colliderHips.SetParent(colliderContainer, false);
+            clothing.transform.localPosition = new Vector3(.02f, .03f, .04f);
+            var renderer = clothing.GetComponentInChildren<SkinnedMeshRenderer>();
+            var before = clothing.GetComponentsInChildren<Transform>(true).ToDictionary(t => t, t => t.localToWorldMatrix);
+            var sourceBones = renderer.bones; var binds = renderer.sharedMesh.bindposes; var maJson = EditorJsonUtility.ToJson(ma);
+            var baked = new Mesh(); renderer.BakeMesh(baked);
+            var vertices = baked.vertices.Select(renderer.transform.TransformPoint).ToArray(); Object.DestroyImmediate(baked);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
+            {
+                Assert.That(copy.Root.transform.Find("Coat"), Is.Null);
+                Assert.That(copy.Root.GetComponentsInChildren<Transform>().Count(t => t.name == "Armature"), Is.EqualTo(1));
+                Assert.That(copy.Root.GetComponentsInChildren<Renderer>().Length, Is.EqualTo(1));
+                var rig = copy.Root.GetComponent<Animator>();
+                Assert.That(MochiyaAvatarConverter.HasValidHumanoid(copy.Root), Is.True);
+                var copyRenderer = copy.Root.GetComponentInChildren<SkinnedMeshRenderer>();
+                Assert.That(copyRenderer.bones[0], Is.SameAs(rig.GetBoneTransform(HumanBodyBones.Hips)));
+                Assert.That(rig.GetBoneTransform(HumanBodyBones.Hips).name, Is.EqualTo(hips.name));
+                Assert.That(rig.GetBoneTransform(HumanBodyBones.Head), Is.Not.Null);
+                Assert.That(copyRenderer.sharedMesh, Is.SameAs(renderer.sharedMesh));
+                Assert.That(copyRenderer.sharedMesh.bindposes, Is.EqualTo(binds));
+                Assert.That(copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Count(c => c.Kind == ComponentKind.MergeArmature), Is.EqualTo(1));
+                var copyExtra = copy.Root.GetComponentsInChildren<Transform>().Single(t => t.name == extra.name);
+                Assert.That(copyExtra.parent, Is.SameAs(rig.GetBoneTransform(HumanBodyBones.Hips)));
+                foreach (var original in armature.GetComponentsInChildren<Transform>(true))
+                {
+                    var path = UnityEditor.AnimationUtility.CalculateTransformPath(original, clothing.transform);
+                    var matched = copy.Root.GetComponent<MochiyaAvatarComposition>().Nodes.Single(n => n.Node.name == original.name && n.Node.IsChildOf(copy.Root.transform.Find("Armature"))).Node;
+                    for (var column = 0; column < 4; column++)
+                        Assert.That(Vector4.Distance(original.localToWorldMatrix.GetColumn(column), matched.localToWorldMatrix.GetColumn(column)), Is.LessThan(.00001f), path);
+                }
+                var afterBake = new Mesh(); copyRenderer.BakeMesh(afterBake);
+                var afterVertices = afterBake.vertices.Select(copyRenderer.transform.TransformPoint).ToArray(); Object.DestroyImmediate(afterBake);
+                for (var i = 0; i < vertices.Length; i++) Assert.That(Vector3.Distance(vertices[i], afterVertices[i]), Is.LessThan(.00001f));
+                Directory.CreateDirectory("MochiyaTests");
+                var settings = ScriptableObject.CreateInstance<VRM10ExportSettings>();
+                try
+                {
+                    foreach (var freeze in new[] { false, true })
+                    {
+                        settings.FreezeMesh = freeze;
+                        var path = Path.GetFullPath($"MochiyaTests/completed-{prefixed}-{missingSpine}-{freeze}.vrm");
+                        MochiyaLilToonExporter.ExportVrm(copy.Root, path, null, settings);
+                    }
+                    MochiyaLilToonExporter.ExportGlb(copy.Root, Path.GetFullPath($"MochiyaTests/completed-{prefixed}-{missingSpine}.glb"));
+                }
+                finally { Object.DestroyImmediate(settings); }
+                var resources = copy.Root.GetComponent<MochiyaSceneResources>();
+                rig.avatar = null; resources.RestoreIfNeeded();
+                Assert.That(MochiyaAvatarConverter.HasValidHumanoid(copy.Root), Is.True);
+                Assert.That(rig.GetBoneTransform(HumanBodyBones.Hips), Is.SameAs(copyRenderer.bones[0]));
+            }
+            Assert.That(renderer.bones, Is.EqualTo(sourceBones));
+            Assert.That(EditorJsonUtility.ToJson(ma), Is.EqualTo(maJson));
+            foreach (var p in before) Assert.That(p.Key.localToWorldMatrix, Is.EqualTo(p.Value));
+        }
+
+        [Test] public void UnnamedRigCompletionUsesOwnedSkinAndKeepsRootInstructions()
+        {
+            var parent = Avatar("Parent"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
+            Object.DestroyImmediate(clothing.GetComponent<Animator>());
+            clothing.transform.Find("Armature").name = "ClothingRig";
+            Shape(clothing, parent.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
+            {
+                Assert.That(copy.Root.transform.Find("Armature"), Is.Null);
+                Assert.That(copy.Root.transform.Find("ClothingRig/Hips"), Is.Not.Null);
+                Assert.That(copy.Root.transform.Find("Coat"), Is.Null);
+                var data = copy.Root.GetComponent<MochiyaAvatarComposition>();
+                var shape = data.Components.Single(c => c.Kind == ComponentKind.ShapeChanger);
+                Assert.That(shape.Source, Is.SameAs(copy.Root.transform));
+                Assert.That(shape.Condition.Node, Is.SameAs(copy.Root.transform));
+                Assert.That(data.Components.Single(c => c.Kind == ComponentKind.MergeArmature).Source, Is.SameAs(copy.Root.transform.Find("ClothingRig")));
+                Assert.That(copy.Root.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Hips), Is.SameAs(copy.Root.GetComponentInChildren<SkinnedMeshRenderer>().bones[0]));
+            }
+        }
+
+        [Test] public void CompletionPreservesExternalColliderPoseWhenClothingHasAnOffset()
+        {
+            Type Vrc(string name) => AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("VRC.SDK3.Dynamics.PhysBone.Components." + name)).FirstOrDefault(t => t != null);
+            if (Vrc("VRCPhysBone") == null) Assert.Ignore("Optional VRC SDK is not installed.");
+            var parent = Avatar("Parent"); var clothing = Avatar("Coat"); clothing.transform.SetParent(parent.transform, false);
+            var hips = clothing.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
+            Object.DestroyImmediate(clothing.GetComponent<Animator>());
+            clothing.transform.localPosition = new Vector3(.05f, 0, 0);
+            Merge(clothing.transform.Find("Armature").gameObject, parent.transform.Find("Armature"));
+            var baseHips = parent.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
+            var collider = baseHips.gameObject.AddComponent(Vrc("VRCPhysBoneCollider"));
+            Field(collider, "radius", .07f); Field(collider, "position", new Vector3(0, .03f, 0));
+            var root = new GameObject("Spring").transform; root.SetParent(hips, false);
+            var tip = new GameObject("Tip").transform; tip.SetParent(root, false); tip.localPosition = Vector3.down * .1f;
+            var physics = root.gameObject.AddComponent(Vrc("VRCPhysBone"));
+            ((IList)physics.GetType().GetField("colliders").GetValue(physics)).Add(collider);
+            using (var copy = MochiyaAvatarWorkflow.ConvertToVrmGameObject(clothing))
+            {
+                var converted = copy.Root.GetComponentsInChildren<VRM10SpringBoneCollider>().Single();
+                Assert.That(Vector3.Distance(converted.transform.TransformPoint(converted.Offset), baseHips.TransformPoint(new Vector3(0, .03f, 0))), Is.LessThan(.00001f));
+                var anchor = copy.Root.GetComponent<MochiyaAvatarComposition>().Components.Single(c => c.Origin == ComponentOrigin.ColliderAnchor);
+                Assert.That(anchor.Kind, Is.EqualTo(ComponentKind.BoneProxy)); Assert.That(anchor.Target.Base, Is.True);
             }
         }
 

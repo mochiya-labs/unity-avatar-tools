@@ -1,0 +1,2015 @@
+{
+  "limits": {
+    "version": 1,
+    "title": 80,
+    "tags": 12,
+    "tag": 40,
+    "gallery": 12,
+    "additionalFiles": 20,
+    "imageBytes": 10485760,
+    "fileBytes": 524288000,
+    "totalBytes": 2147483648,
+    "specifications": 5000,
+    "requirements": 4000,
+    "credits": 2000,
+    "licenseText": 3000,
+    "maxPriceCents": 90000000
+  },
+  "categories": [
+    "base_avatar",
+    "outfit",
+    "hair",
+    "accessory",
+    "other"
+  ],
+  "locales": [
+    {
+      "name": "en",
+      "labels": [
+        {
+          "name": "required",
+          "value": "Required"
+        },
+        {
+          "name": "pageTitle",
+          "value": "List an item"
+        },
+        {
+          "name": "pageDescription",
+          "value": "Share an avatar-ready 3D asset for viewing, or show shoppers where they can buy it."
+        },
+        {
+          "name": "editPageTitle",
+          "value": "Edit item"
+        },
+        {
+          "name": "editPageDescription",
+          "value": "Update the listing information and files shown to shoppers."
+        },
+        {
+          "name": "editNotFound",
+          "value": "Item not found"
+        },
+        {
+          "name": "editNotFoundDescription",
+          "value": "This listing is unavailable."
+        },
+        {
+          "name": "editForbidden",
+          "value": "You cannot edit this item"
+        },
+        {
+          "name": "editForbiddenDescription",
+          "value": "Only the creator who published this item can edit it."
+        },
+        {
+          "name": "backToMarketplace",
+          "value": "Back to marketplace"
+        },
+        {
+          "name": "backToProduct",
+          "value": "Back to item"
+        },
+        {
+          "name": "loginTitle",
+          "value": "Log in to list an item"
+        },
+        {
+          "name": "loginDescription",
+          "value": "Creator uploads are connected to your Mochiya profile."
+        },
+        {
+          "name": "listingBasics",
+          "value": "Listing basics"
+        },
+        {
+          "name": "listingBasicsDescription",
+          "value": "Set how the item appears in search and whether it can be purchased."
+        },
+        {
+          "name": "title",
+          "value": "Upload an item"
+        },
+        {
+          "name": "tags",
+          "value": "Tags"
+        },
+        {
+          "name": "tagsPlaceholder",
+          "value": "Enter one tag"
+        },
+        {
+          "name": "tagsHint",
+          "value": "Add tags one at a time. {count}/12"
+        },
+        {
+          "name": "addTag",
+          "value": "Add"
+        },
+        {
+          "name": "removeTag",
+          "value": "Remove {tag}"
+        },
+        {
+          "name": "category",
+          "value": "Category"
+        },
+        {
+          "name": "availability",
+          "value": "Item use"
+        },
+        {
+          "name": "availableForPurchase",
+          "value": "Available for purchase"
+        },
+        {
+          "name": "sellOnMochiya",
+          "value": "Sell on Mochiya"
+        },
+        {
+          "name": "price",
+          "value": "Item price (USD)"
+        },
+        {
+          "name": "purchaseOptionsHint",
+          "value": "Enter a price or an external purchase link. At least one is required."
+        },
+        {
+          "name": "mochiyaPriceHint",
+          "value": "Buyers pay this price. Selling fees are deducted from your earnings. Set $0 for a free item."
+        },
+        {
+          "name": "marketplacePreview",
+          "value": "Marketplace preview"
+        },
+        {
+          "name": "additionalItemDetails",
+          "value": "Additional item details"
+        },
+        {
+          "name": "additionalItemDetailsDescription",
+          "value": "Optional gallery, downloads, specifications, setup, credits, and license terms."
+        },
+        {
+          "name": "specifications",
+          "value": "Specifications"
+        },
+        {
+          "name": "specificationsPlaceholder",
+          "value": "Describe the item, variants, polygon count, materials, meshes, bones, blendshapes, and other useful details"
+        },
+        {
+          "name": "requirements",
+          "value": "Requirements & setup"
+        },
+        {
+          "name": "requirementsPlaceholder",
+          "value": "Required software, shaders, packages, tested versions, and installation or usage steps"
+        },
+        {
+          "name": "credits",
+          "value": "Credits"
+        },
+        {
+          "name": "creditsPlaceholder",
+          "value": "Contributors, tools, shaders, or referenced creators"
+        },
+        {
+          "name": "modelAndCover",
+          "value": "Model and cover"
+        },
+        {
+          "name": "modelAndCoverDescription",
+          "value": "Add the required cover image and the model Mochiya uses for 3D preview."
+        },
+        {
+          "name": "cover",
+          "value": "Cover image"
+        },
+        {
+          "name": "coverPreviewAlt",
+          "value": "Selected cover image"
+        },
+        {
+          "name": "coverHint",
+          "value": "JPG or PNG. Maximum 10 MB."
+        },
+        {
+          "name": "gallery",
+          "value": "Preview gallery"
+        },
+        {
+          "name": "galleryPreviewAlt",
+          "value": "Selected preview image {number}"
+        },
+        {
+          "name": "galleryHint",
+          "value": "Add up to 12 JPG or PNG images. Maximum 10 MB each."
+        },
+        {
+          "name": "clearImage",
+          "value": "Remove {name}"
+        },
+        {
+          "name": "clearFile",
+          "value": "Remove {name}"
+        },
+        {
+          "name": "modelAsset",
+          "value": "Model asset"
+        },
+        {
+          "name": "assetHint",
+          "value": "Upload one .glb or .vrm file for Mochiya's live preview and editor. Maximum 500 MB."
+        },
+        {
+          "name": "additionalFiles",
+          "value": "Additional downloadable files"
+        },
+        {
+          "name": "additionalFilesHint",
+          "value": "Optional. Add multiple source files, packages, textures, documents, or archives. Maximum 500 MB each."
+        },
+        {
+          "name": "licenseText",
+          "value": "License terms"
+        },
+        {
+          "name": "licenseDefault",
+          "value": "This item uses the VN3 License. See https://www.vn3.org/ for details."
+        },
+        {
+          "name": "previewTitle",
+          "value": "Your item title"
+        },
+        {
+          "name": "publishButton",
+          "value": "Publish listing"
+        },
+        {
+          "name": "saveChanges",
+          "value": "Save changes"
+        },
+        {
+          "name": "statusCover",
+          "value": "Uploading cover image…"
+        },
+        {
+          "name": "statusGallery",
+          "value": "Uploading preview images…"
+        },
+        {
+          "name": "statusAsset",
+          "value": "Uploading model asset…"
+        },
+        {
+          "name": "statusAdditionalFiles",
+          "value": "Uploading additional files…"
+        },
+        {
+          "name": "statusPublish",
+          "value": "Publishing listing…"
+        },
+        {
+          "name": "statusSave",
+          "value": "Saving changes…"
+        },
+        {
+          "name": "coverRequired",
+          "value": "Choose a cover image."
+        },
+        {
+          "name": "coverInvalid",
+          "value": "Use a JPG or PNG cover image under 10 MB."
+        },
+        {
+          "name": "galleryTooMany",
+          "value": "Add no more than 12 preview images."
+        },
+        {
+          "name": "galleryInvalid",
+          "value": "Every preview image must be a JPG or PNG under 10 MB."
+        },
+        {
+          "name": "assetRequired",
+          "value": "Choose a model asset."
+        },
+        {
+          "name": "assetFormat",
+          "value": "Use a .glb or .vrm model asset."
+        },
+        {
+          "name": "assetTooLarge",
+          "value": "The model asset must be 500 MB or smaller."
+        },
+        {
+          "name": "additionalFileTooLarge",
+          "value": "Each additional file must be 500 MB or smaller."
+        },
+        {
+          "name": "priceInvalid",
+          "value": "Enter $0 for a free item or at least $0.50 for a paid item."
+        },
+        {
+          "name": "purchaseOptionRequired",
+          "value": "Add a price or an external purchase link for an item that can be bought."
+        },
+        {
+          "name": "stripeVerificationRequired",
+          "value": "Complete seller verification in Profile before listing a paid Mochiya item."
+        },
+        {
+          "name": "stripeStatusUnavailable",
+          "value": "Seller verification could not be checked. Open Profile and try again."
+        },
+        {
+          "name": "description",
+          "value": "Keep an item for your own studio, or offer it on the marketplace."
+        },
+        {
+          "name": "privateItem",
+          "value": "Private studio item"
+        },
+        {
+          "name": "publish",
+          "value": "Upload item"
+        },
+        {
+          "name": "publishDescription",
+          "value": "Private items stay in your library. Sale items also appear in the marketplace."
+        },
+        {
+          "name": "processingDeduction",
+          "value": "Stripe processing ({rate} + {fixed})"
+        },
+        {
+          "name": "commissionDeduction",
+          "value": "Mochiya commission ({rate})"
+        },
+        {
+          "name": "earningsPerSale",
+          "value": "You receive per sale"
+        },
+        {
+          "name": "earningsHint",
+          "value": "Estimate based on the configured fees per item."
+        },
+        {
+          "name": "priceTooLowForFees",
+          "value": "Increase the price to cover the selling fees, or make this item free."
+        },
+        {
+          "name": "uploadFailed",
+          "value": "Upload failed. Check the fields and file limits, then try again. Completed files will not be uploaded again."
+        },
+        {
+          "name": "upload_rate_limited",
+          "value": "Too many uploads. Please try again in an hour."
+        },
+        {
+          "name": "item_changed",
+          "value": "This item changed elsewhere. Reopen it before saving."
+        },
+        {
+          "name": "fileLimits",
+          "value": "Up to 20 additional files, 500 MiB each; all files together up to 2 GiB."
+        },
+        {
+          "name": "additionalFilesTooMany",
+          "value": "Choose at most 20 additional files."
+        },
+        {
+          "name": "connect",
+          "value": "Connect"
+        },
+        {
+          "name": "disconnect",
+          "value": "Disconnect"
+        },
+        {
+          "name": "profile",
+          "value": "Open my profile"
+        },
+        {
+          "name": "source",
+          "value": "Avatar or attachment"
+        },
+        {
+          "name": "useSelection",
+          "value": "Use selection"
+        },
+        {
+          "name": "format",
+          "value": "Model format"
+        },
+        {
+          "name": "exportSettings",
+          "value": "Export settings (optional)"
+        },
+        {
+          "name": "details",
+          "value": "Additional item details"
+        },
+        {
+          "name": "prepare",
+          "value": "Preparing model…"
+        },
+        {
+          "name": "uploading",
+          "value": "Uploading…"
+        },
+        {
+          "name": "finalizing",
+          "value": "Finishing upload…"
+        },
+        {
+          "name": "retry",
+          "value": "Retry upload"
+        },
+        {
+          "name": "cancel",
+          "value": "Cancel"
+        },
+        {
+          "name": "view",
+          "value": "View item"
+        },
+        {
+          "name": "connected",
+          "value": "Connected as"
+        },
+        {
+          "name": "warnings",
+          "value": "Compatibility warnings"
+        },
+        {
+          "name": "choose",
+          "value": "Choose file…"
+        },
+        {
+          "name": "add",
+          "value": "Add file…"
+        },
+        {
+          "name": "remove",
+          "value": "Remove"
+        },
+        {
+          "name": "privateUpload",
+          "value": "Upload private item"
+        },
+        {
+          "name": "done",
+          "value": "Your item is ready."
+        },
+        {
+          "name": "failed",
+          "value": "Upload failed. Check the details below, then retry."
+        },
+        {
+          "name": "noSource",
+          "value": "Choose an avatar or attachment from the Hierarchy."
+        },
+        {
+          "name": "token",
+          "value": "Paste your Mochiya token"
+        },
+        {
+          "name": "language",
+          "value": "Language"
+        },
+        {
+          "name": "limits",
+          "value": "Images: 10 MiB each. Model and buyer files: 500 MiB each. Total: 2 GiB. Up to 12 gallery images and 20 additional files."
+        },
+        {
+          "name": "earnings",
+          "value": "Estimated earnings"
+        },
+        {
+          "name": "prepareAgain",
+          "value": "Prepare a new upload"
+        },
+        {
+          "name": "processingFee",
+          "value": "Processing fee"
+        },
+        {
+          "name": "commissionFee",
+          "value": "Mochiya fee"
+        },
+        {
+          "name": "base_avatar",
+          "value": "Avatar body"
+        },
+        {
+          "name": "outfit",
+          "value": "Outfit"
+        },
+        {
+          "name": "hair",
+          "value": "Hair"
+        },
+        {
+          "name": "accessory",
+          "value": "Accessory"
+        },
+        {
+          "name": "other",
+          "value": "Other"
+        }
+      ]
+    },
+    {
+      "name": "ja",
+      "labels": [
+        {
+          "name": "required",
+          "value": "必須"
+        },
+        {
+          "name": "pageTitle",
+          "value": "アイテムを出品"
+        },
+        {
+          "name": "pageDescription",
+          "value": "アバター向け3Dアセットを閲覧用に共有したり、購入先を案内したりできます。"
+        },
+        {
+          "name": "editPageTitle",
+          "value": "アイテムを編集"
+        },
+        {
+          "name": "editPageDescription",
+          "value": "購入者に表示される出品情報とファイルを更新します。"
+        },
+        {
+          "name": "editNotFound",
+          "value": "アイテムが見つかりません"
+        },
+        {
+          "name": "editNotFoundDescription",
+          "value": "この出品は利用できません。"
+        },
+        {
+          "name": "editForbidden",
+          "value": "このアイテムは編集できません"
+        },
+        {
+          "name": "editForbiddenDescription",
+          "value": "このアイテムを公開したクリエイターだけが編集できます。"
+        },
+        {
+          "name": "backToMarketplace",
+          "value": "マーケットプレイスに戻る"
+        },
+        {
+          "name": "backToProduct",
+          "value": "アイテムに戻る"
+        },
+        {
+          "name": "loginTitle",
+          "value": "ログインして出品"
+        },
+        {
+          "name": "loginDescription",
+          "value": "クリエイターのアップロードはMochiyaプロフィールに紐づきます。"
+        },
+        {
+          "name": "listingBasics",
+          "value": "掲載の基本情報"
+        },
+        {
+          "name": "listingBasicsDescription",
+          "value": "検索での表示内容と、購入できるアイテムかどうかを設定します。"
+        },
+        {
+          "name": "title",
+          "value": "アイテムをアップロード"
+        },
+        {
+          "name": "tags",
+          "value": "タグ"
+        },
+        {
+          "name": "tagsPlaceholder",
+          "value": "タグを1つ入力"
+        },
+        {
+          "name": "tagsHint",
+          "value": "タグを1つずつ追加します。{count}/12"
+        },
+        {
+          "name": "addTag",
+          "value": "追加"
+        },
+        {
+          "name": "removeTag",
+          "value": "{tag}を削除"
+        },
+        {
+          "name": "category",
+          "value": "カテゴリ"
+        },
+        {
+          "name": "availability",
+          "value": "アイテムの用途"
+        },
+        {
+          "name": "availableForPurchase",
+          "value": "購入可能"
+        },
+        {
+          "name": "sellOnMochiya",
+          "value": "Mochiya で販売"
+        },
+        {
+          "name": "price",
+          "value": "商品価格（USD）"
+        },
+        {
+          "name": "purchaseOptionsHint",
+          "value": "価格または外部購入リンクのいずれかを入力してください。"
+        },
+        {
+          "name": "mochiyaPriceHint",
+          "value": "購入者はこの価格を支払います。手数料は売上から差し引かれます。$0 で無料になります。"
+        },
+        {
+          "name": "marketplacePreview",
+          "value": "マーケットプレイスのプレビュー"
+        },
+        {
+          "name": "additionalItemDetails",
+          "value": "追加アイテム詳細"
+        },
+        {
+          "name": "additionalItemDetailsDescription",
+          "value": "ギャラリー、ダウンロード、仕様、導入方法、クレジット、ライセンスを任意で追加します。"
+        },
+        {
+          "name": "specifications",
+          "value": "仕様"
+        },
+        {
+          "name": "specificationsPlaceholder",
+          "value": "商品の説明、バリエーション、ポリゴン数、マテリアル、メッシュ、ボーン、ブレンドシェイプなど"
+        },
+        {
+          "name": "requirements",
+          "value": "必要環境・導入方法"
+        },
+        {
+          "name": "requirementsPlaceholder",
+          "value": "必要なソフトウェア、シェーダー、パッケージ、動作確認済みバージョン、導入・使用手順"
+        },
+        {
+          "name": "credits",
+          "value": "クレジット"
+        },
+        {
+          "name": "creditsPlaceholder",
+          "value": "共同制作者、ツール、シェーダー、参照したクリエイター"
+        },
+        {
+          "name": "modelAndCover",
+          "value": "モデルとカバー"
+        },
+        {
+          "name": "modelAndCoverDescription",
+          "value": "必須のカバー画像と、Mochiyaの3Dプレビューで使うモデルを追加します。"
+        },
+        {
+          "name": "cover",
+          "value": "カバー画像"
+        },
+        {
+          "name": "coverPreviewAlt",
+          "value": "選択したカバー画像"
+        },
+        {
+          "name": "coverHint",
+          "value": "JPGまたはPNG。最大10 MB。"
+        },
+        {
+          "name": "gallery",
+          "value": "プレビューギャラリー"
+        },
+        {
+          "name": "galleryPreviewAlt",
+          "value": "選択したプレビュー画像{number}"
+        },
+        {
+          "name": "galleryHint",
+          "value": "JPGまたはPNG画像を最大12枚追加できます。各10 MBまで。"
+        },
+        {
+          "name": "clearImage",
+          "value": "{name}を削除"
+        },
+        {
+          "name": "clearFile",
+          "value": "{name}を削除"
+        },
+        {
+          "name": "modelAsset",
+          "value": "モデルアセット"
+        },
+        {
+          "name": "assetHint",
+          "value": "Mochiyaのライブプレビューとエディターで使う.glbまたは.vrmファイルを1つアップロードします。最大500 MB。"
+        },
+        {
+          "name": "additionalFiles",
+          "value": "追加ダウンロードファイル"
+        },
+        {
+          "name": "additionalFilesHint",
+          "value": "任意。ソースファイル、パッケージ、テクスチャ、説明書、アーカイブなどを複数追加できます。各500 MBまで。"
+        },
+        {
+          "name": "licenseText",
+          "value": "ライセンス内容"
+        },
+        {
+          "name": "licenseDefault",
+          "value": "この商品にはVN3ライセンスを適用します。詳細は https://www.vn3.org/ をご確認ください。"
+        },
+        {
+          "name": "previewTitle",
+          "value": "アイテムのタイトル"
+        },
+        {
+          "name": "publishButton",
+          "value": "出品を公開"
+        },
+        {
+          "name": "saveChanges",
+          "value": "変更を保存"
+        },
+        {
+          "name": "statusCover",
+          "value": "カバー画像をアップロード中…"
+        },
+        {
+          "name": "statusGallery",
+          "value": "プレビュー画像をアップロード中…"
+        },
+        {
+          "name": "statusAsset",
+          "value": "モデルアセットをアップロード中…"
+        },
+        {
+          "name": "statusAdditionalFiles",
+          "value": "追加ファイルをアップロード中…"
+        },
+        {
+          "name": "statusPublish",
+          "value": "出品を公開中…"
+        },
+        {
+          "name": "statusSave",
+          "value": "変更を保存中…"
+        },
+        {
+          "name": "coverRequired",
+          "value": "カバー画像を選択してください。"
+        },
+        {
+          "name": "coverInvalid",
+          "value": "10 MB未満のJPGまたはPNG画像を使用してください。"
+        },
+        {
+          "name": "galleryTooMany",
+          "value": "プレビュー画像は12枚以内にしてください。"
+        },
+        {
+          "name": "galleryInvalid",
+          "value": "各プレビュー画像は10 MB未満のJPGまたはPNGにしてください。"
+        },
+        {
+          "name": "assetRequired",
+          "value": "モデルアセットを選択してください。"
+        },
+        {
+          "name": "assetFormat",
+          "value": ".glbまたは.vrmのモデルアセットを使用してください。"
+        },
+        {
+          "name": "assetTooLarge",
+          "value": "モデルアセットは500 MB以下にしてください。"
+        },
+        {
+          "name": "additionalFileTooLarge",
+          "value": "追加ファイルは1つ500 MB以下にしてください。"
+        },
+        {
+          "name": "priceInvalid",
+          "value": "無料の場合は $0、有料の場合は $0.50 以上を入力してください。"
+        },
+        {
+          "name": "purchaseOptionRequired",
+          "value": "購入可能なアイテムには価格または外部購入リンクを追加してください。"
+        },
+        {
+          "name": "stripeVerificationRequired",
+          "value": "Mochiya の有料商品を公開する前に、プロフィールで販売者確認を完了してください。"
+        },
+        {
+          "name": "stripeStatusUnavailable",
+          "value": "販売者確認を確認できませんでした。プロフィールを開いて再試行してください。"
+        },
+        {
+          "name": "description",
+          "value": "自分のスタジオで使うか、マーケットで販売。"
+        },
+        {
+          "name": "privateItem",
+          "value": "自分のスタジオ用"
+        },
+        {
+          "name": "publish",
+          "value": "アイテムを保存"
+        },
+        {
+          "name": "publishDescription",
+          "value": "非公開アイテムはライブラリのみ、販売アイテムはマーケットにも表示されます。"
+        },
+        {
+          "name": "processingDeduction",
+          "value": "Stripe 決済手数料（{rate} + {fixed}）"
+        },
+        {
+          "name": "commissionDeduction",
+          "value": "Mochiya 販売手数料（{rate}）"
+        },
+        {
+          "name": "earningsPerSale",
+          "value": "1件あたりの受取額"
+        },
+        {
+          "name": "earningsHint",
+          "value": "商品ごとの現在の手数料設定に基づく概算です。"
+        },
+        {
+          "name": "priceTooLowForFees",
+          "value": "手数料を賄える価格に上げるか、無料に設定してください。"
+        },
+        {
+          "name": "uploadFailed",
+          "value": "アップロードできませんでした。入力内容とファイルの上限を確認して再試行してください。完了したファイルは再送信されません。"
+        },
+        {
+          "name": "upload_rate_limited",
+          "value": "アップロード回数が多すぎます。1時間後に再試行してください。"
+        },
+        {
+          "name": "item_changed",
+          "value": "別の場所でアイテムが変更されました。開き直して保存してください。"
+        },
+        {
+          "name": "fileLimits",
+          "value": "追加ファイルは最大20個、各500 MiB、全ファイル合計2 GiBまでです。"
+        },
+        {
+          "name": "additionalFilesTooMany",
+          "value": "???????20??????????"
+        },
+        {
+          "name": "connect",
+          "value": "接続"
+        },
+        {
+          "name": "disconnect",
+          "value": "切断"
+        },
+        {
+          "name": "profile",
+          "value": "プロフィールを開く"
+        },
+        {
+          "name": "source",
+          "value": "アバターまたはアタッチメント"
+        },
+        {
+          "name": "useSelection",
+          "value": "選択中のオブジェクトを使用"
+        },
+        {
+          "name": "format",
+          "value": "モデル形式"
+        },
+        {
+          "name": "exportSettings",
+          "value": "エクスポート設定（任意）"
+        },
+        {
+          "name": "details",
+          "value": "追加のアイテム情報"
+        },
+        {
+          "name": "prepare",
+          "value": "モデルを準備中…"
+        },
+        {
+          "name": "uploading",
+          "value": "アップロード中…"
+        },
+        {
+          "name": "finalizing",
+          "value": "アップロードを完了中…"
+        },
+        {
+          "name": "retry",
+          "value": "再試行"
+        },
+        {
+          "name": "cancel",
+          "value": "キャンセル"
+        },
+        {
+          "name": "view",
+          "value": "アイテムを見る"
+        },
+        {
+          "name": "connected",
+          "value": "接続中のアカウント"
+        },
+        {
+          "name": "warnings",
+          "value": "互換性の警告"
+        },
+        {
+          "name": "choose",
+          "value": "ファイルを選択…"
+        },
+        {
+          "name": "add",
+          "value": "ファイルを追加…"
+        },
+        {
+          "name": "remove",
+          "value": "削除"
+        },
+        {
+          "name": "privateUpload",
+          "value": "非公開アイテムをアップロード"
+        },
+        {
+          "name": "done",
+          "value": "アイテムの準備ができました。"
+        },
+        {
+          "name": "failed",
+          "value": "アップロードできませんでした。詳細を確認し、再試行してください。"
+        },
+        {
+          "name": "noSource",
+          "value": "Hierarchy からアバターまたはアタッチメントを選択してください。"
+        },
+        {
+          "name": "token",
+          "value": "Mochiya のトークンを貼り付け"
+        },
+        {
+          "name": "language",
+          "value": "言語"
+        },
+        {
+          "name": "limits",
+          "value": "画像は各10 MiB、モデルと購入者向けファイルは各500 MiB、合計2 GiBまで。ギャラリー12枚、追加ファイル20個まで。"
+        },
+        {
+          "name": "earnings",
+          "value": "受取額の目安"
+        },
+        {
+          "name": "prepareAgain",
+          "value": "新しいアップロードを準備"
+        },
+        {
+          "name": "processingFee",
+          "value": "決済手数料"
+        },
+        {
+          "name": "commissionFee",
+          "value": "Mochiya 手数料"
+        },
+        {
+          "name": "base_avatar",
+          "value": "アバター本体"
+        },
+        {
+          "name": "outfit",
+          "value": "衣装"
+        },
+        {
+          "name": "hair",
+          "value": "髪型"
+        },
+        {
+          "name": "accessory",
+          "value": "アクセサリー"
+        },
+        {
+          "name": "other",
+          "value": "その他"
+        }
+      ]
+    },
+    {
+      "name": "zh-CN",
+      "labels": [
+        {
+          "name": "required",
+          "value": "必填"
+        },
+        {
+          "name": "pageTitle",
+          "value": "发布商品"
+        },
+        {
+          "name": "pageDescription",
+          "value": "分享可用于虚拟形象的 3D 素材供他人查看，或告诉买家在哪里购买。"
+        },
+        {
+          "name": "editPageTitle",
+          "value": "编辑商品"
+        },
+        {
+          "name": "editPageDescription",
+          "value": "更新向买家显示的商品信息和文件。"
+        },
+        {
+          "name": "editNotFound",
+          "value": "未找到商品"
+        },
+        {
+          "name": "editNotFoundDescription",
+          "value": "此商品目前不可用。"
+        },
+        {
+          "name": "editForbidden",
+          "value": "你无法编辑此商品"
+        },
+        {
+          "name": "editForbiddenDescription",
+          "value": "只有发布此商品的创作者才能编辑。"
+        },
+        {
+          "name": "backToMarketplace",
+          "value": "返回素材市场"
+        },
+        {
+          "name": "backToProduct",
+          "value": "返回商品"
+        },
+        {
+          "name": "loginTitle",
+          "value": "登录后发布商品"
+        },
+        {
+          "name": "loginDescription",
+          "value": "创作者上传内容会关联到你的 Mochiya 个人资料。"
+        },
+        {
+          "name": "listingBasics",
+          "value": "商品基本信息"
+        },
+        {
+          "name": "listingBasicsDescription",
+          "value": "设置商品在搜索中的展示方式，以及是否可供购买。"
+        },
+        {
+          "name": "title",
+          "value": "上传物品"
+        },
+        {
+          "name": "tags",
+          "value": "标签"
+        },
+        {
+          "name": "tagsPlaceholder",
+          "value": "输入一个标签"
+        },
+        {
+          "name": "tagsHint",
+          "value": "逐个添加标签。{count}/12"
+        },
+        {
+          "name": "addTag",
+          "value": "添加"
+        },
+        {
+          "name": "removeTag",
+          "value": "移除 {tag}"
+        },
+        {
+          "name": "category",
+          "value": "分类"
+        },
+        {
+          "name": "availability",
+          "value": "物品用途"
+        },
+        {
+          "name": "availableForPurchase",
+          "value": "可购买"
+        },
+        {
+          "name": "sellOnMochiya",
+          "value": "在 Mochiya 出售"
+        },
+        {
+          "name": "price",
+          "value": "商品价格（美元）"
+        },
+        {
+          "name": "purchaseOptionsHint",
+          "value": "请输入价格或站外购买链接，至少填写一项。"
+        },
+        {
+          "name": "mochiyaPriceHint",
+          "value": "买家支付此价格，销售费用从您的收益中扣除。设为 $0 即为免费商品。"
+        },
+        {
+          "name": "marketplacePreview",
+          "value": "市场预览"
+        },
+        {
+          "name": "additionalItemDetails",
+          "value": "其他商品详情"
+        },
+        {
+          "name": "additionalItemDetailsDescription",
+          "value": "可选填写图库、下载文件、规格、设置、制作人员和许可条款。"
+        },
+        {
+          "name": "specifications",
+          "value": "规格"
+        },
+        {
+          "name": "specificationsPlaceholder",
+          "value": "说明商品、版本、多边形数量、材质、网格、骨骼、变形目标及其他有用信息"
+        },
+        {
+          "name": "requirements",
+          "value": "使用要求与设置"
+        },
+        {
+          "name": "requirementsPlaceholder",
+          "value": "所需软件、着色器、软件包、已测试版本，以及安装或使用步骤"
+        },
+        {
+          "name": "credits",
+          "value": "制作人员"
+        },
+        {
+          "name": "creditsPlaceholder",
+          "value": "协作者、工具、着色器或引用的创作者"
+        },
+        {
+          "name": "modelAndCover",
+          "value": "模型与封面"
+        },
+        {
+          "name": "modelAndCoverDescription",
+          "value": "添加必填的封面图，以及 Mochiya 用于 3D 预览的模型。"
+        },
+        {
+          "name": "cover",
+          "value": "封面图"
+        },
+        {
+          "name": "coverPreviewAlt",
+          "value": "已选择的封面图"
+        },
+        {
+          "name": "coverHint",
+          "value": "JPG 或 PNG，最大 10 MB。"
+        },
+        {
+          "name": "gallery",
+          "value": "预览图库"
+        },
+        {
+          "name": "galleryPreviewAlt",
+          "value": "已选择的预览图 {number}"
+        },
+        {
+          "name": "galleryHint",
+          "value": "最多添加 12 张 JPG 或 PNG 图片，每张最大 10 MB。"
+        },
+        {
+          "name": "clearImage",
+          "value": "移除{name}"
+        },
+        {
+          "name": "clearFile",
+          "value": "移除{name}"
+        },
+        {
+          "name": "modelAsset",
+          "value": "模型资产"
+        },
+        {
+          "name": "assetHint",
+          "value": "上传一个用于 Mochiya 实时预览和编辑器的 .glb 或 .vrm 文件，最大 500 MB。"
+        },
+        {
+          "name": "additionalFiles",
+          "value": "其他可下载文件"
+        },
+        {
+          "name": "additionalFilesHint",
+          "value": "可选。可添加多个源文件、软件包、贴图、文档或压缩包，每个最大 500 MB。"
+        },
+        {
+          "name": "licenseText",
+          "value": "许可条款"
+        },
+        {
+          "name": "licenseDefault",
+          "value": "本商品使用 VN3 许可。详情请参阅 https://www.vn3.org/。"
+        },
+        {
+          "name": "previewTitle",
+          "value": "你的商品标题"
+        },
+        {
+          "name": "publishButton",
+          "value": "发布商品"
+        },
+        {
+          "name": "saveChanges",
+          "value": "保存更改"
+        },
+        {
+          "name": "statusCover",
+          "value": "正在上传封面图…"
+        },
+        {
+          "name": "statusGallery",
+          "value": "正在上传预览图…"
+        },
+        {
+          "name": "statusAsset",
+          "value": "正在上传模型资产…"
+        },
+        {
+          "name": "statusAdditionalFiles",
+          "value": "正在上传其他文件…"
+        },
+        {
+          "name": "statusPublish",
+          "value": "正在发布商品…"
+        },
+        {
+          "name": "statusSave",
+          "value": "正在保存更改…"
+        },
+        {
+          "name": "coverRequired",
+          "value": "请选择封面图。"
+        },
+        {
+          "name": "coverInvalid",
+          "value": "请使用小于 10 MB 的 JPG 或 PNG 封面图。"
+        },
+        {
+          "name": "galleryTooMany",
+          "value": "预览图不能超过 12 张。"
+        },
+        {
+          "name": "galleryInvalid",
+          "value": "每张预览图必须是小于 10 MB 的 JPG 或 PNG。"
+        },
+        {
+          "name": "assetRequired",
+          "value": "请选择模型资产。"
+        },
+        {
+          "name": "assetFormat",
+          "value": "请使用 .glb 或 .vrm 模型资产。"
+        },
+        {
+          "name": "assetTooLarge",
+          "value": "模型资产不能超过 500 MB。"
+        },
+        {
+          "name": "additionalFileTooLarge",
+          "value": "每个其他文件不能超过 500 MB。"
+        },
+        {
+          "name": "priceInvalid",
+          "value": "免费商品请输入 $0，付费商品请输入至少 $0.50。"
+        },
+        {
+          "name": "purchaseOptionRequired",
+          "value": "可购买商品必须填写价格或站外购买链接。"
+        },
+        {
+          "name": "stripeVerificationRequired",
+          "value": "请先在个人资料中完成卖家验证，再发布 Mochiya 付费商品。"
+        },
+        {
+          "name": "stripeStatusUnavailable",
+          "value": "无法检查卖家验证状态。请打开个人资料后重试。"
+        },
+        {
+          "name": "description",
+          "value": "供自己的工作室使用，或在市场上出售。"
+        },
+        {
+          "name": "privateItem",
+          "value": "私人物品"
+        },
+        {
+          "name": "publish",
+          "value": "上传物品"
+        },
+        {
+          "name": "publishDescription",
+          "value": "私人物品仅保留在你的物品库，出售的物品也会展示在市场中。"
+        },
+        {
+          "name": "processingDeduction",
+          "value": "Stripe 支付处理费（{rate} + {fixed}）"
+        },
+        {
+          "name": "commissionDeduction",
+          "value": "Mochiya 佣金（{rate}）"
+        },
+        {
+          "name": "earningsPerSale",
+          "value": "每次销售您可获得"
+        },
+        {
+          "name": "earningsHint",
+          "value": "根据每件商品的当前费率估算。"
+        },
+        {
+          "name": "priceTooLowForFees",
+          "value": "请提高价格以支付销售费用，或将商品设为免费。"
+        },
+        {
+          "name": "uploadFailed",
+          "value": "上传失败。请检查输入和文件限制后重试，已完成的文件不会重复上传。"
+        },
+        {
+          "name": "upload_rate_limited",
+          "value": "上传过于频繁，请一小时后重试。"
+        },
+        {
+          "name": "item_changed",
+          "value": "此物品已在其他位置修改，请重新打开后保存。"
+        },
+        {
+          "name": "fileLimits",
+          "value": "最多20个附加文件，每个不超过500 MiB；所有文件总计不超过2 GiB。"
+        },
+        {
+          "name": "additionalFilesTooMany",
+          "value": "????20??????"
+        },
+        {
+          "name": "connect",
+          "value": "连接"
+        },
+        {
+          "name": "disconnect",
+          "value": "断开连接"
+        },
+        {
+          "name": "profile",
+          "value": "打开个人资料"
+        },
+        {
+          "name": "source",
+          "value": "头像或附件"
+        },
+        {
+          "name": "useSelection",
+          "value": "使用当前选择"
+        },
+        {
+          "name": "format",
+          "value": "模型格式"
+        },
+        {
+          "name": "exportSettings",
+          "value": "导出设置（可选）"
+        },
+        {
+          "name": "details",
+          "value": "附加物品信息"
+        },
+        {
+          "name": "prepare",
+          "value": "正在准备模型…"
+        },
+        {
+          "name": "uploading",
+          "value": "正在上传…"
+        },
+        {
+          "name": "finalizing",
+          "value": "正在完成上传…"
+        },
+        {
+          "name": "retry",
+          "value": "重试上传"
+        },
+        {
+          "name": "cancel",
+          "value": "取消"
+        },
+        {
+          "name": "view",
+          "value": "查看物品"
+        },
+        {
+          "name": "connected",
+          "value": "已连接账号"
+        },
+        {
+          "name": "warnings",
+          "value": "兼容性警告"
+        },
+        {
+          "name": "choose",
+          "value": "选择文件…"
+        },
+        {
+          "name": "add",
+          "value": "添加文件…"
+        },
+        {
+          "name": "remove",
+          "value": "移除"
+        },
+        {
+          "name": "privateUpload",
+          "value": "上传私人物品"
+        },
+        {
+          "name": "done",
+          "value": "物品已准备就绪。"
+        },
+        {
+          "name": "failed",
+          "value": "上传失败。请检查以下详情后重试。"
+        },
+        {
+          "name": "noSource",
+          "value": "请从层级面板选择头像或附件。"
+        },
+        {
+          "name": "token",
+          "value": "粘贴 Mochiya 令牌"
+        },
+        {
+          "name": "language",
+          "value": "语言"
+        },
+        {
+          "name": "limits",
+          "value": "图片每个10 MiB，模型和买家文件每个500 MiB，总计2 GiB。最多12张展示图片和20个附加文件。"
+        },
+        {
+          "name": "earnings",
+          "value": "预计收入"
+        },
+        {
+          "name": "prepareAgain",
+          "value": "准备新的上传"
+        },
+        {
+          "name": "processingFee",
+          "value": "支付手续费"
+        },
+        {
+          "name": "commissionFee",
+          "value": "Mochiya 费用"
+        },
+        {
+          "name": "base_avatar",
+          "value": "虚拟形象身体"
+        },
+        {
+          "name": "outfit",
+          "value": "服装"
+        },
+        {
+          "name": "hair",
+          "value": "发型"
+        },
+        {
+          "name": "accessory",
+          "value": "配饰"
+        },
+        {
+          "name": "other",
+          "value": "其他"
+        }
+      ]
+    },
+    {
+      "name": "ko",
+      "labels": [
+        {
+          "name": "required",
+          "value": "필수"
+        },
+        {
+          "name": "pageTitle",
+          "value": "아이템 등록"
+        },
+        {
+          "name": "pageDescription",
+          "value": "아바타용 3D 에셋을 감상용으로 공유하거나 구매할 수 있는 곳을 안내하세요."
+        },
+        {
+          "name": "editPageTitle",
+          "value": "아이템 편집"
+        },
+        {
+          "name": "editPageDescription",
+          "value": "구매자에게 표시되는 상품 정보와 파일을 수정하세요."
+        },
+        {
+          "name": "editNotFound",
+          "value": "아이템을 찾을 수 없습니다"
+        },
+        {
+          "name": "editNotFoundDescription",
+          "value": "이 상품은 이용할 수 없습니다."
+        },
+        {
+          "name": "editForbidden",
+          "value": "이 아이템을 편집할 수 없습니다"
+        },
+        {
+          "name": "editForbiddenDescription",
+          "value": "이 아이템을 게시한 크리에이터만 편집할 수 있습니다."
+        },
+        {
+          "name": "backToMarketplace",
+          "value": "마켓플레이스로 돌아가기"
+        },
+        {
+          "name": "backToProduct",
+          "value": "아이템으로 돌아가기"
+        },
+        {
+          "name": "loginTitle",
+          "value": "로그인하고 아이템 등록"
+        },
+        {
+          "name": "loginDescription",
+          "value": "크리에이터 업로드는 Mochiya 프로필에 연결됩니다."
+        },
+        {
+          "name": "listingBasics",
+          "value": "등록 기본 정보"
+        },
+        {
+          "name": "listingBasicsDescription",
+          "value": "검색에 표시될 내용과 아이템의 구매 가능 여부를 설정하세요."
+        },
+        {
+          "name": "title",
+          "value": "아이템 업로드"
+        },
+        {
+          "name": "tags",
+          "value": "태그"
+        },
+        {
+          "name": "tagsPlaceholder",
+          "value": "태그 하나 입력"
+        },
+        {
+          "name": "tagsHint",
+          "value": "태그를 하나씩 추가하세요. {count}/12"
+        },
+        {
+          "name": "addTag",
+          "value": "추가"
+        },
+        {
+          "name": "removeTag",
+          "value": "{tag} 삭제"
+        },
+        {
+          "name": "category",
+          "value": "카테고리"
+        },
+        {
+          "name": "availability",
+          "value": "아이템 용도"
+        },
+        {
+          "name": "availableForPurchase",
+          "value": "구매 가능"
+        },
+        {
+          "name": "sellOnMochiya",
+          "value": "Mochiya에서 판매"
+        },
+        {
+          "name": "price",
+          "value": "상품 가격(USD)"
+        },
+        {
+          "name": "purchaseOptionsHint",
+          "value": "가격 또는 외부 구매 링크 중 하나 이상을 입력하세요."
+        },
+        {
+          "name": "mochiyaPriceHint",
+          "value": "구매자는 이 가격을 지불합니다. 판매 수수료는 수익에서 차감됩니다. 무료 상품은 $0로 설정하세요."
+        },
+        {
+          "name": "marketplacePreview",
+          "value": "마켓플레이스 미리보기"
+        },
+        {
+          "name": "additionalItemDetails",
+          "value": "추가 아이템 정보"
+        },
+        {
+          "name": "additionalItemDetailsDescription",
+          "value": "갤러리, 다운로드, 사양, 설치, 크레딧 및 라이선스를 선택적으로 추가하세요."
+        },
+        {
+          "name": "specifications",
+          "value": "사양"
+        },
+        {
+          "name": "specificationsPlaceholder",
+          "value": "상품 설명, 변형, 폴리곤 수, 머티리얼, 메시, 본, 블렌드셰이프 및 기타 유용한 정보"
+        },
+        {
+          "name": "requirements",
+          "value": "요구 사항 및 설치"
+        },
+        {
+          "name": "requirementsPlaceholder",
+          "value": "필수 소프트웨어, 셰이더, 패키지, 테스트 버전과 설치 또는 사용 단계"
+        },
+        {
+          "name": "credits",
+          "value": "크레딧"
+        },
+        {
+          "name": "creditsPlaceholder",
+          "value": "기여자, 도구, 셰이더 또는 참조한 크리에이터"
+        },
+        {
+          "name": "modelAndCover",
+          "value": "모델 및 커버"
+        },
+        {
+          "name": "modelAndCoverDescription",
+          "value": "필수 커버 이미지와 Mochiya의 3D 미리보기에 사용할 모델을 추가하세요."
+        },
+        {
+          "name": "cover",
+          "value": "커버 이미지"
+        },
+        {
+          "name": "coverPreviewAlt",
+          "value": "선택한 커버 이미지"
+        },
+        {
+          "name": "coverHint",
+          "value": "JPG 또는 PNG. 최대 10 MB."
+        },
+        {
+          "name": "gallery",
+          "value": "미리보기 갤러리"
+        },
+        {
+          "name": "galleryPreviewAlt",
+          "value": "선택한 미리보기 이미지 {number}"
+        },
+        {
+          "name": "galleryHint",
+          "value": "JPG 또는 PNG 이미지를 최대 12장 추가하세요. 각 10 MB 이하."
+        },
+        {
+          "name": "clearImage",
+          "value": "{name} 삭제"
+        },
+        {
+          "name": "clearFile",
+          "value": "{name} 삭제"
+        },
+        {
+          "name": "modelAsset",
+          "value": "모델 에셋"
+        },
+        {
+          "name": "assetHint",
+          "value": "Mochiya의 라이브 미리보기와 에디터에 사용할 .glb 또는 .vrm 파일 1개를 업로드하세요. 최대 500 MB."
+        },
+        {
+          "name": "additionalFiles",
+          "value": "추가 다운로드 파일"
+        },
+        {
+          "name": "additionalFilesHint",
+          "value": "선택 사항. 소스 파일, 패키지, 텍스처, 문서 또는 압축 파일을 여러 개 추가할 수 있습니다. 각 500 MB 이하."
+        },
+        {
+          "name": "licenseText",
+          "value": "라이선스 내용"
+        },
+        {
+          "name": "licenseDefault",
+          "value": "이 상품에는 VN3 라이선스가 적용됩니다. 자세한 내용은 https://www.vn3.org/ 를 확인하세요."
+        },
+        {
+          "name": "previewTitle",
+          "value": "아이템 제목"
+        },
+        {
+          "name": "publishButton",
+          "value": "상품 게시"
+        },
+        {
+          "name": "saveChanges",
+          "value": "변경 사항 저장"
+        },
+        {
+          "name": "statusCover",
+          "value": "커버 이미지 업로드 중…"
+        },
+        {
+          "name": "statusGallery",
+          "value": "미리보기 이미지 업로드 중…"
+        },
+        {
+          "name": "statusAsset",
+          "value": "모델 에셋 업로드 중…"
+        },
+        {
+          "name": "statusAdditionalFiles",
+          "value": "추가 파일 업로드 중…"
+        },
+        {
+          "name": "statusPublish",
+          "value": "상품 게시 중…"
+        },
+        {
+          "name": "statusSave",
+          "value": "변경 사항 저장 중…"
+        },
+        {
+          "name": "coverRequired",
+          "value": "커버 이미지를 선택하세요."
+        },
+        {
+          "name": "coverInvalid",
+          "value": "10 MB 미만의 JPG 또는 PNG 커버 이미지를 사용하세요."
+        },
+        {
+          "name": "galleryTooMany",
+          "value": "미리보기 이미지는 12장 이하로 추가하세요."
+        },
+        {
+          "name": "galleryInvalid",
+          "value": "각 미리보기 이미지는 10 MB 미만의 JPG 또는 PNG여야 합니다."
+        },
+        {
+          "name": "assetRequired",
+          "value": "모델 에셋을 선택하세요."
+        },
+        {
+          "name": "assetFormat",
+          "value": ".glb 또는 .vrm 모델 에셋을 사용하세요."
+        },
+        {
+          "name": "assetTooLarge",
+          "value": "모델 에셋은 500 MB 이하여야 합니다."
+        },
+        {
+          "name": "additionalFileTooLarge",
+          "value": "추가 파일은 각각 500 MB 이하여야 합니다."
+        },
+        {
+          "name": "priceInvalid",
+          "value": "무료 상품은 $0, 유료 상품은 $0.50 이상을 입력하세요."
+        },
+        {
+          "name": "purchaseOptionRequired",
+          "value": "구매 가능한 아이템에는 가격 또는 외부 구매 링크를 추가하세요."
+        },
+        {
+          "name": "stripeVerificationRequired",
+          "value": "Mochiya 유료 상품을 등록하기 전에 프로필에서 판매자 인증을 완료하세요."
+        },
+        {
+          "name": "stripeStatusUnavailable",
+          "value": "판매자 인증 상태를 확인할 수 없습니다. 프로필을 열고 다시 시도하세요."
+        },
+        {
+          "name": "description",
+          "value": "개인 스튜디오에서 사용하거나 마켓에서 판매하세요."
+        },
+        {
+          "name": "privateItem",
+          "value": "개인 스튜디오용"
+        },
+        {
+          "name": "publish",
+          "value": "아이템 업로드"
+        },
+        {
+          "name": "publishDescription",
+          "value": "개인 아이템은 라이브러리에만, 판매 아이템은 마켓에도 표시됩니다."
+        },
+        {
+          "name": "processingDeduction",
+          "value": "Stripe 결제 수수료({rate} + {fixed})"
+        },
+        {
+          "name": "commissionDeduction",
+          "value": "Mochiya 판매 수수료({rate})"
+        },
+        {
+          "name": "earningsPerSale",
+          "value": "판매당 수령액"
+        },
+        {
+          "name": "earningsHint",
+          "value": "상품당 현재 수수료 설정에 따른 예상 금액입니다."
+        },
+        {
+          "name": "priceTooLowForFees",
+          "value": "판매 수수료를 충당할 수 있도록 가격을 높이거나 무료로 설정하세요."
+        },
+        {
+          "name": "uploadFailed",
+          "value": "업로드하지 못했어요. 입력 내용과 파일 제한을 확인하고 다시 시도하세요. 완료된 파일은 다시 업로드하지 않아요."
+        },
+        {
+          "name": "upload_rate_limited",
+          "value": "업로드 횟수가 너무 많아요. 한 시간 후 다시 시도하세요."
+        },
+        {
+          "name": "item_changed",
+          "value": "다른 곳에서 수정된 아이템이에요. 다시 열어 저장하세요."
+        },
+        {
+          "name": "fileLimits",
+          "value": "추가 파일은 최대 20개, 파일당 500 MiB, 전체 파일 합계 2 GiB까지 가능해요."
+        },
+        {
+          "name": "additionalFilesTooMany",
+          "value": "?? ??? ?? 20??? ??? ? ????."
+        },
+        {
+          "name": "connect",
+          "value": "연결"
+        },
+        {
+          "name": "disconnect",
+          "value": "연결 해제"
+        },
+        {
+          "name": "profile",
+          "value": "내 프로필 열기"
+        },
+        {
+          "name": "source",
+          "value": "아바타 또는 부착물"
+        },
+        {
+          "name": "useSelection",
+          "value": "현재 선택 사용"
+        },
+        {
+          "name": "format",
+          "value": "모델 형식"
+        },
+        {
+          "name": "exportSettings",
+          "value": "내보내기 설정 (선택)"
+        },
+        {
+          "name": "details",
+          "value": "추가 아이템 정보"
+        },
+        {
+          "name": "prepare",
+          "value": "모델 준비 중…"
+        },
+        {
+          "name": "uploading",
+          "value": "업로드 중…"
+        },
+        {
+          "name": "finalizing",
+          "value": "업로드 완료 중…"
+        },
+        {
+          "name": "retry",
+          "value": "다시 업로드"
+        },
+        {
+          "name": "cancel",
+          "value": "취소"
+        },
+        {
+          "name": "view",
+          "value": "아이템 보기"
+        },
+        {
+          "name": "connected",
+          "value": "연결된 계정"
+        },
+        {
+          "name": "warnings",
+          "value": "호환성 경고"
+        },
+        {
+          "name": "choose",
+          "value": "파일 선택…"
+        },
+        {
+          "name": "add",
+          "value": "파일 추가…"
+        },
+        {
+          "name": "remove",
+          "value": "제거"
+        },
+        {
+          "name": "privateUpload",
+          "value": "비공개 아이템 업로드"
+        },
+        {
+          "name": "done",
+          "value": "아이템이 준비되었어요."
+        },
+        {
+          "name": "failed",
+          "value": "업로드하지 못했어요. 아래 내용을 확인한 후 다시 시도하세요."
+        },
+        {
+          "name": "noSource",
+          "value": "Hierarchy에서 아바타 또는 부착물을 선택하세요."
+        },
+        {
+          "name": "token",
+          "value": "Mochiya 토큰 붙여넣기"
+        },
+        {
+          "name": "language",
+          "value": "언어"
+        },
+        {
+          "name": "limits",
+          "value": "이미지당 10 MiB, 모델 및 구매자 파일당 500 MiB, 전체 2 GiB. 갤러리 12개, 추가 파일 20개까지."
+        },
+        {
+          "name": "earnings",
+          "value": "예상 수익"
+        },
+        {
+          "name": "prepareAgain",
+          "value": "새 업로드 준비"
+        },
+        {
+          "name": "processingFee",
+          "value": "결제 수수료"
+        },
+        {
+          "name": "commissionFee",
+          "value": "Mochiya 수수료"
+        },
+        {
+          "name": "base_avatar",
+          "value": "아바타 바디"
+        },
+        {
+          "name": "outfit",
+          "value": "의상"
+        },
+        {
+          "name": "hair",
+          "value": "헤어"
+        },
+        {
+          "name": "accessory",
+          "value": "액세서리"
+        },
+        {
+          "name": "other",
+          "value": "기타"
+        }
+      ]
+    }
+  ]
+}

@@ -161,6 +161,9 @@ namespace Mochiya.AvatarTools.Editor
                     go.SetActive(t.gameObject.activeSelf);
                     map[t] = go.transform; map[t.gameObject] = go;
                 }
+                var completedAttachment = attachment != null && rigRoot != attachment;
+                if (completedAttachment)
+                    AttachmentHumanoid.Complete(source, attachment, duplicate, included, map, report);
                 var copied = new List<Component>();
                 GameObject rootGeometry = null;
                 foreach (var component in scope.GetComponentsInChildren<Component>(true))
@@ -172,9 +175,15 @@ namespace Mochiya.AvatarTools.Editor
                           type.Namespace == "UniVRM10" && type.Name.EndsWith("Constraint", StringComparison.Ordinal))) continue;
                     if (component is Renderer && !(component is MeshRenderer || component is SkinnedMeshRenderer)) continue;
                     var destination = (GameObject)mapped;
-                    if (component.gameObject == rigRoot && (component is Renderer || component is MeshFilter))
+                    if (destination == duplicate && (component is Renderer || component is MeshFilter))
                     {
-                        if (rootGeometry == null) { rootGeometry = new GameObject(source.name + " Geometry"); rootGeometry.transform.SetParent(duplicate.transform, false); }
+                        if (rootGeometry == null)
+                        {
+                            rootGeometry = new GameObject(scope.name + " Geometry");
+                            rootGeometry.transform.SetPositionAndRotation(scope.transform.position, scope.transform.rotation);
+                            rootGeometry.transform.localScale = scope.transform.lossyScale;
+                            rootGeometry.transform.SetParent(duplicate.transform, true);
+                        }
                         destination = rootGeometry;
                     }
                     var copy = destination.AddComponent(type);
@@ -186,17 +195,21 @@ namespace Mochiya.AvatarTools.Editor
                 if (sourceAnimator != null)
                 {
                     var animator = duplicate.AddComponent<Animator>();
-                    animator.avatar = sourceAnimator.avatar;
+                    animator.avatar = completedAttachment
+                        ? AttachmentHumanoid.BuildAvatar(sourceAnimator, duplicate, map, allocated)
+                        : sourceAnimator.avatar;
                     animator.applyRootMotion = false;
+                    if (completedAttachment) AttachmentHumanoid.ValidateMapping(sourceAnimator, animator, map);
                 }
                 var asset = duplicate.AddComponent<MochiyaAvatarComposition>();
                 asset.Kind = attachment != null ? AssetKind.Attachment : AssetKind.Avatar;
                 asset.ArmatureKeywords = report.CanExportVrm ? new[] { sourceAnimator.GetBoneTransform(HumanBodyBones.Hips)?.parent?.name ?? "Armature" } : Array.Empty<string>();
-                foreach (var pair in map.Where(x => x.Key is Transform && x.Key != rigRoot.transform))
+                foreach (var group in map.Where(x => x.Key is Transform && x.Key != rigRoot.transform).GroupBy(x => x.Value))
                 {
+                    var pair = group.OrderByDescending(x => ((Transform)x.Key).IsChildOf(scope.transform)).First();
                     var original = (Transform)pair.Key; var node = (Transform)pair.Value;
                     var renderer = original.GetComponent<Renderer>();
-                    asset.Nodes.Add(new AssetNodeState { Node = node, Active = original.gameObject.activeSelf && (renderer == null || renderer.enabled), Aliases = new[] { original.name } });
+                    asset.Nodes.Add(new AssetNodeState { Node = node, Active = original.gameObject.activeSelf && (renderer == null || renderer.enabled), Aliases = group.Select(x => ((Transform)x.Key).name).Distinct().ToArray() });
                 }
                 Vrm10Instance instance = null;
                 Action finalizeVrmPaths = null;
@@ -231,10 +244,11 @@ namespace Mochiya.AvatarTools.Editor
                 finalizeVrmPaths?.Invoke();
                 if (attachment != null)
                 {
-                    // Only generated parent reference roots need implicit following. Authored MA roots remain instructions.
+                    // Completed reference roots need following only when an authored rig instruction does not cover them.
                     var external = new HashSet<Transform>(included.Where(t => t != source.transform && !t.IsChildOf(scope.transform)));
                     foreach (var original in external.Where(t => !external.Contains(t.parent)))
-                        if (map.TryGetValue(original, out var reference))
+                        if (map.TryGetValue(original, out var reference) && !asset.Components.Any(c =>
+                            c.Source == (Transform)reference && (c.Kind == ComponentKind.MergeArmature || c.Kind == ComponentKind.BoneProxy)))
                             context.Add(new AssetComponent { Kind = ComponentKind.MergeArmature, Source = (Transform)reference, Target = context.Select(original, forceBase: true, bone: true), Origin = ComponentOrigin.ReferenceRig });
 
                 }
@@ -279,7 +293,7 @@ namespace Mochiya.AvatarTools.Editor
                 var clip = Object.Instantiate(entry.Clip); allocated.Add(clip);
                 clip.MaterialColorBindings = colors; clip.MaterialUVBindings = uvs;
                 copy.Expression.AddClip(entry.Preset, clip);
-                // MA can reparent renderers. Resolve paths only after hierarchy conversion finishes.
+                // Resolve paths against the final completed attachment hierarchy.
                 finalize.Add(() => clip.MorphTargetBindings = bindings.Select(x => new MorphTargetBinding(
                     AnimationUtility.CalculateTransformPath(x.renderer.transform, destination), x.binding.Index, x.binding.Weight)).ToArray());
             }
