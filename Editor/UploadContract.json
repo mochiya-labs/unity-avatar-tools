@@ -1,6 +1,6 @@
 {
   "limits": {
-    "version": 1,
+    "version": 2,
     "title": 80,
     "tags": 12,
     "tag": 40,
@@ -116,7 +116,7 @@
         },
         {
           "name": "availability",
-          "value": "Item use"
+          "value": "Visibility"
         },
         {
           "name": "availableForPurchase",
@@ -124,7 +124,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "Sell on Mochiya"
+          "value": "Public"
         },
         {
           "name": "price",
@@ -328,7 +328,7 @@
         },
         {
           "name": "privateItem",
-          "value": "Private studio item"
+          "value": "Private"
         },
         {
           "name": "publish",
@@ -472,7 +472,7 @@
         },
         {
           "name": "token",
-          "value": "Paste your Mochiya token"
+          "value": "API key"
         },
         {
           "name": "language",
@@ -613,7 +613,7 @@
         },
         {
           "name": "availability",
-          "value": "アイテムの用途"
+          "value": "公開設定"
         },
         {
           "name": "availableForPurchase",
@@ -621,7 +621,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "Mochiya で販売"
+          "value": "公開"
         },
         {
           "name": "price",
@@ -825,7 +825,7 @@
         },
         {
           "name": "privateItem",
-          "value": "自分のスタジオ用"
+          "value": "非公開"
         },
         {
           "name": "publish",
@@ -969,7 +969,7 @@
         },
         {
           "name": "token",
-          "value": "Mochiya のトークンを貼り付け"
+          "value": "APIキー"
         },
         {
           "name": "language",
@@ -1110,7 +1110,7 @@
         },
         {
           "name": "availability",
-          "value": "物品用途"
+          "value": "可见性"
         },
         {
           "name": "availableForPurchase",
@@ -1118,7 +1118,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "在 Mochiya 出售"
+          "value": "公开"
         },
         {
           "name": "price",
@@ -1322,7 +1322,7 @@
         },
         {
           "name": "privateItem",
-          "value": "私人物品"
+          "value": "私密"
         },
         {
           "name": "publish",
@@ -1466,7 +1466,7 @@
         },
         {
           "name": "token",
-          "value": "粘贴 Mochiya 令牌"
+          "value": "API 密钥"
         },
         {
           "name": "language",
@@ -1607,7 +1607,7 @@
         },
         {
           "name": "availability",
-          "value": "아이템 용도"
+          "value": "공개 설정"
         },
         {
           "name": "availableForPurchase",
@@ -1615,7 +1615,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "Mochiya에서 판매"
+          "value": "공개"
         },
         {
           "name": "price",
@@ -1819,7 +1819,7 @@
         },
         {
           "name": "privateItem",
-          "value": "개인 스튜디오용"
+          "value": "비공개"
         },
         {
           "name": "publish",
@@ -1963,7 +1963,7 @@
         },
         {
           "name": "token",
-          "value": "Mochiya 토큰 붙여넣기"
+          "value": "API 키"
         },
         {
           "name": "language",

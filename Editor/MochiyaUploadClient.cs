@@ -24,7 +24,7 @@ namespace Mochiya.AvatarTools.Editor
     [Serializable] public sealed class MochiyaUploadContract { public MochiyaUploadLimits limits; public string[] categories; public MochiyaUploadLocale[] locales; }
     [Serializable] public sealed class MochiyaItemInput
     {
-        public string title = "", category = "base_avatar", purchaseMode = "private";
+        public string title = "", category = "base_avatar", status = "private";
         public string[] tags = Array.Empty<string>(); public int priceCents;
         public string specifications = "", requirements = "", credits = "", licenseText = "";
     }
@@ -34,11 +34,11 @@ namespace Mochiya.AvatarTools.Editor
     }
     [Serializable] public sealed class MochiyaUploadRequest
     {
-        public int version = 1; public string idempotencyKey; public MochiyaItemInput item; public MochiyaUploadFile[] files;
+        public int version = 2; public string idempotencyKey; public MochiyaItemInput item; public MochiyaUploadFile[] files;
         public string ToJson()
         {
             var json = JsonUtility.ToJson(this);
-            return item.purchaseMode == "private" ? json.Replace("\"priceCents\":" + item.priceCents, "\"priceCents\":null") : json;
+            return item.status == "private" ? json.Replace("\"priceCents\":" + item.priceCents, "\"priceCents\":null") : json;
         }
     }
     [Serializable] public sealed class MochiyaUploadTarget { public string id, url; public MochiyaUploadPair[] headers; }

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Mochiya.AvatarTools.Editor
 {
-    /// <summary>Item fields must match mochiya-site. Read AGENTS.md and Documentation~/ITEM_UPLOAD.md before editing.</summary>
+    /// <summary>Uploads use the shared Mochiya item contract.</summary>
     public sealed class MochiyaUploadWindow : EditorWindow
     {
         [SerializeField] private GameObject target;
@@ -103,8 +103,8 @@ namespace Mochiya.AvatarTools.Editor
                 }
                 for (int i = 0; i < item.tags.Length; i++) using (new EditorGUILayout.HorizontalScope())
                 { EditorGUILayout.LabelField(item.tags[i]); if (GUILayout.Button("×", GUILayout.Width(28))) { item.tags = item.tags.Where((_, n) => n != i).ToArray(); GUI.changed = true; break; } }
-                item.purchaseMode = EditorGUILayout.Popup(L("availability"), item.purchaseMode == "private" ? 0 : 1, new[] { L("privateItem"), L("sellOnMochiya") }) == 0 ? "private" : "mochiya";
-                if (item.purchaseMode == "mochiya")
+                item.status = EditorGUILayout.Popup(L("availability"), item.status == "private" ? 0 : 1, new[] { L("privateItem"), L("sellOnMochiya") }) == 0 ? "private" : "public";
+                if (item.status == "public")
                 {
                     price = EditorGUILayout.DoubleField(L("price") + " (USD)", price);
                     if (capabilities?.pricing != null && price >= 0 && price <= 900000)
@@ -153,7 +153,7 @@ namespace Mochiya.AvatarTools.Editor
             if (busy) { var rect = EditorGUILayout.GetControlRect(false, 20); EditorGUI.ProgressBar(rect, progress, message); if (GUILayout.Button(L("cancel"))) cancellation?.Cancel(); }
             else using (new EditorGUI.DisabledScope(!connected))
             {
-                if (GUILayout.Button(L(requestJson != null || !string.IsNullOrEmpty(recoveryId) ? "retry" : item.purchaseMode == "private" ? "privateUpload" : "publishButton"), GUILayout.Height(36))) _ = Upload();
+                if (GUILayout.Button(L(requestJson != null || !string.IsNullOrEmpty(recoveryId) ? "retry" : item.status == "private" ? "privateUpload" : "publishButton"), GUILayout.Height(36))) _ = Upload();
                 if ((requestJson != null || !string.IsNullOrEmpty(recoveryId)) && GUILayout.Button(L("prepareAgain")))
                 { CleanupLocal(); requestJson = null; requestData = null; recoveryId = ""; message = ""; }
             }
@@ -216,8 +216,8 @@ namespace Mochiya.AvatarTools.Editor
             if (target == null) throw new InvalidOperationException(L("noSource"));
             if (string.IsNullOrWhiteSpace(item.title) || item.title.Length > contract.limits.title) throw new InvalidOperationException(L("title") + ": 1–" + contract.limits.title);
             if (item.specifications.Length > contract.limits.specifications || item.requirements.Length > contract.limits.requirements || item.credits.Length > contract.limits.credits || item.licenseText.Length > contract.limits.licenseText) throw new InvalidOperationException("An item detail exceeds the form's text limit.");
-            if (double.IsNaN(price) || double.IsInfinity(price) || price < 0 || price > 900000 || (item.purchaseMode == "mochiya" && price > 0 && price < .5)) throw new InvalidOperationException(L("priceInvalid"));
-            item.priceCents = item.purchaseMode == "private" ? 0 : (int)Math.Floor(price * 100 + .5);
+            if (double.IsNaN(price) || double.IsInfinity(price) || price < 0 || price > 900000 || (item.status == "public" && price > 0 && price < .5)) throw new InvalidOperationException(L("priceInvalid"));
+            item.priceCents = item.status == "private" ? 0 : (int)Math.Floor(price * 100 + .5);
             message = L("prepare"); Repaint();
             temporaryDirectory = Path.Combine(Path.GetTempPath(), "MochiyaUpload-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(temporaryDirectory);
             var modelPath = Path.Combine(temporaryDirectory, "model" + (outputFormat == 0 ? ".vrm" : ".glb"));
