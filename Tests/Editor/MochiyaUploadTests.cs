@@ -7,6 +7,48 @@ namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class MochiyaUploadTests
     {
+        [TestCase("https://preview.vercel.app", "https://preview.vercel.app", true)]
+        [TestCase(null, "https://preview.vercel.app", false)]
+        [TestCase("https://preview.vercel.app", "https://other.vercel.app", false)]
+        [TestCase("https://mochiya.org", "https://mochiya.org", false)]
+        [TestCase("https://www.mochiya.org", "https://www.mochiya.org", false)]
+        [TestCase("http://localhost:3000", "http://localhost:3000", false)]
+        [TestCase("https://preview.vercel.app.evil.example", "https://preview.vercel.app.evil.example", false)]
+        [TestCase("https://preview.vercel.app?secret=wrong", "https://preview.vercel.app", false)]
+        [TestCase("https://preview.vercel.app:444", "https://preview.vercel.app:444", false)]
+        public void BypassIsDevelopmentOnlyAndBoundToExplicitPreview(string configuredOrigin, string origin, bool expected)
+        {
+            var previousOrigin = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL");
+            var previousSecret = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_VERCEL_BYPASS_TOKEN");
+            try
+            {
+                Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL", configuredOrigin);
+                Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_VERCEL_BYPASS_TOKEN", "test-bypass");
+                using (var client = new MochiyaUploadClient("test-api-key", origin))
+                using (var request = client.CreateApiRequest("/api/v1/creator/uploads", "GET", null))
+                {
+#if !MOCHIYA_UPLOAD_DEVELOPMENT
+                    expected = false;
+#endif
+                    Assert.AreEqual(expected ? "test-bypass" : null, request.GetRequestHeader("x-vercel-protection-bypass"));
+                    Assert.AreEqual("Bearer test-api-key", request.GetRequestHeader("Authorization"));
+                    Assert.AreEqual(0, request.redirectLimit);
+                    StringAssert.DoesNotContain("test-bypass", request.url);
+                }
+                using (var production = new MochiyaUploadClient("test-api-key"))
+                using (var request = production.CreateApiRequest("/api/v1/creator/uploads", "GET", null))
+                {
+                    Assert.AreEqual("https://mochiya.org/api/v1/creator/uploads", request.url);
+                    Assert.IsNull(request.GetRequestHeader("x-vercel-protection-bypass"));
+                }
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL", previousOrigin);
+                Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_VERCEL_BYPASS_TOKEN", previousSecret);
+            }
+        }
+
         [Test]
         public void PrivateRequestUsesJsonNullPriceAndHasNoCredentials()
         {

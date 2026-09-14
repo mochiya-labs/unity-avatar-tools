@@ -48,23 +48,55 @@ namespace Mochiya.AvatarTools.Editor
 
     internal sealed class MochiyaUploadClient : IDisposable
     {
-        internal const string ProductionOrigin = "http://localhost:3000";
+        internal const string ProductionOrigin = "https://mochiya.org";
         private readonly string origin, token;
+#if MOCHIYA_UPLOAD_DEVELOPMENT
+        private readonly string protectionBypass;
+#endif
         private UnityWebRequest active;
         public MochiyaUploadClient(string token, string origin = ProductionOrigin)
         {
             var uri = new Uri(origin);
             if (uri.Scheme != "https" && !(uri.IsLoopback && uri.Scheme == "http")) throw new ArgumentException("Use HTTPS for Mochiya.");
             this.origin = uri.GetLeftPart(UriPartial.Authority); this.token = token;
+#if MOCHIYA_UPLOAD_DEVELOPMENT
+            // Bind the secret to the explicitly selected development origin, never production or Storage.
+            var development = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL");
+            if (Uri.TryCreate(development, UriKind.Absolute, out var preview)
+                && preview.Scheme == "https" && preview.IsDefaultPort
+                && preview.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase)
+                && string.IsNullOrEmpty(preview.UserInfo) && preview.AbsolutePath == "/"
+                && string.IsNullOrEmpty(preview.Query) && string.IsNullOrEmpty(preview.Fragment)
+                && string.Equals(this.origin, preview.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
+            {
+                var secret = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_VERCEL_BYPASS_TOKEN");
+                if (!string.IsNullOrWhiteSpace(secret))
+                {
+                    foreach (var character in secret)
+                        if (character < 33 || character > 126) throw new ArgumentException("Invalid Vercel bypass token format.");
+                    protectionBypass = secret;
+                }
+            }
+#endif
+        }
+        internal UnityWebRequest CreateApiRequest(string path, string method, string json)
+        {
+            if (string.IsNullOrEmpty(path) || !path.StartsWith("/api/", StringComparison.Ordinal)
+                || path.Contains("\\") || path.Contains("#")) throw new ArgumentException("Use a Mochiya API path.");
+            var request = new UnityWebRequest(origin + path, method);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.redirectLimit = 0; request.timeout = 120;
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+#if MOCHIYA_UPLOAD_DEVELOPMENT
+            if (protectionBypass != null) request.SetRequestHeader("x-vercel-protection-bypass", protectionBypass);
+#endif
+            if (json != null) { request.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(json)); request.SetRequestHeader("Content-Type", "application/json"); }
+            return request;
         }
         public async Task<T> Api<T>(string path, string method, string json, CancellationToken cancel)
         {
-            using (var request = new UnityWebRequest(origin + path, method))
+            using (var request = CreateApiRequest(path, method, json))
             {
-                request.downloadHandler = new DownloadHandlerBuffer();
-                request.redirectLimit = 0; request.timeout = 120;
-                request.SetRequestHeader("Authorization", "Bearer " + token);
-                if (json != null) { request.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(json)); request.SetRequestHeader("Content-Type", "application/json"); }
                 await Send(request, cancel);
                 if (request.result != UnityWebRequest.Result.Success)
                 {
