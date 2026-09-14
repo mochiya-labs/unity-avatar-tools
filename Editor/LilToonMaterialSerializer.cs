@@ -12,7 +12,7 @@ namespace Mochiya.AvatarTools.Editor
     internal static class LilToonMaterialSerializer
     {
         public const string ExtensionName = "MOCHIYA_materials_liltoon";
-        public const string SpecVersion = "1.0";
+        public const string SpecVersion = "1.2";
 
         private static readonly Regex DataTextureName = new Regex(
             "(_Mask|Mask$|Normal|Bump|Dither|Parallax|Noise|UDIM|AudioLink|Metallic|Smoothness)",
@@ -35,6 +35,11 @@ namespace Mochiya.AvatarTools.Editor
             formatter.Value(source.shader.name);
             formatter.Key("renderMode");
             formatter.Value(LilToonMaterialSupport.GetRenderMode(source));
+            if (LilToonMaterialSupport.GetRenderMode(source) == "transparent")
+            {
+                formatter.Key("transparencyMode");
+                formatter.Value(LilToonMaterialSupport.GetTransparencyMode(source));
+            }
 
             formatter.Key("properties");
             WriteProperties(formatter, source);

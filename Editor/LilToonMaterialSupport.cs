@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Mochiya.AvatarTools.Editor
 {
     /// <summary>
-    /// The deliberately small lilToon surface that the current Three.js port can render faithfully.
+    /// Shader families accepted by the current Three.js runtime. Appearance has renderer-specific limits.
     /// </summary>
     public static class LilToonMaterialSupport
     {
@@ -17,6 +17,16 @@ namespace Mochiya.AvatarTools.Editor
             "Hidden/lilToonCutoutOutline",
             "Hidden/lilToonTransparent",
             "Hidden/lilToonTransparentOutline",
+            "Hidden/lilToonRefraction",
+            "Hidden/lilToonFur",
+            "Hidden/lilToonGem",
+            "Hidden/lilToonRefractionBlur",
+            "Hidden/lilToonFurCutout",
+            "Hidden/lilToonFurTwoPass",
+            "Hidden/lilToonOnePassTransparent",
+            "Hidden/lilToonOnePassTransparentOutline",
+            "Hidden/lilToonTwoPassTransparent",
+            "Hidden/lilToonTwoPassTransparentOutline",
         };
 
         public static bool IsLilToonShaderName(string shaderName)
@@ -64,6 +74,12 @@ namespace Mochiya.AvatarTools.Editor
         {
             if (material == null) throw new ArgumentNullException(nameof(material));
             var shaderName = material.shader != null ? material.shader.name : string.Empty;
+            if (shaderName == "Hidden/lilToonRefractionBlur") return "refraction-blur";
+            if (shaderName == "Hidden/lilToonFurCutout") return "fur-cutout";
+            if (shaderName == "Hidden/lilToonFurTwoPass") return "fur-two-pass";
+            if (shaderName == "Hidden/lilToonRefraction") return "refraction";
+            if (shaderName == "Hidden/lilToonFur") return "fur";
+            if (shaderName == "Hidden/lilToonGem") return "gem";
             if (shaderName.IndexOf("Cutout", StringComparison.OrdinalIgnoreCase) >= 0) return "cutout";
             if (shaderName.IndexOf("Transparent", StringComparison.OrdinalIgnoreCase) >= 0) return "transparent";
 
@@ -77,6 +93,15 @@ namespace Mochiya.AvatarTools.Editor
             }
 
             return "opaque";
+        }
+
+        public static string GetTransparencyMode(Material material)
+        {
+            if (material == null) throw new ArgumentNullException(nameof(material));
+            var name = material.shader != null ? material.shader.name : string.Empty;
+            if (name.IndexOf("TwoPassTransparent", StringComparison.Ordinal) >= 0) return "two-pass";
+            if (name.IndexOf("OnePassTransparent", StringComparison.Ordinal) >= 0) return "one-pass";
+            return "normal";
         }
     }
 }

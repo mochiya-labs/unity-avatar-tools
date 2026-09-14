@@ -39,8 +39,8 @@ namespace Mochiya.AvatarTools.Editor
             ITextureExporter textureExporter)
         {
             var renderMode = LilToonMaterialSupport.GetRenderMode(material);
-            destination.alphaMode = renderMode == "cutout" ? "MASK" : renderMode == "transparent" ? "BLEND" : "OPAQUE";
-            if (renderMode == "cutout" && material.HasProperty("_Cutoff"))
+            destination.alphaMode = renderMode == "cutout" || renderMode == "fur-cutout" ? "MASK" : renderMode == "opaque" ? "OPAQUE" : "BLEND";
+            if ((renderMode == "cutout" || renderMode == "fur-cutout") && material.HasProperty("_Cutoff"))
             {
                 destination.alphaCutoff = material.GetFloat("_Cutoff");
             }
