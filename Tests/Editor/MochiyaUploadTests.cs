@@ -27,8 +27,9 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 using (var client = new MochiyaUploadClient("test-api-key", origin))
                 using (var request = client.CreateApiRequest("/api/v1/creator/uploads", "GET", null))
                 {
-#if !MOCHIYA_UPLOAD_DEVELOPMENT
+#if !MOCHIYA_DEVELOPMENT
                     expected = false;
+                    Assert.AreEqual("https://www.mochiya.org/api/v1/creator/uploads", request.url);
 #endif
                     Assert.AreEqual(expected ? "test-bypass" : null, request.GetRequestHeader("x-vercel-protection-bypass"));
                     Assert.AreEqual("Bearer test-api-key", request.GetRequestHeader("Authorization"));
@@ -38,7 +39,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 using (var production = new MochiyaUploadClient("test-api-key"))
                 using (var request = production.CreateApiRequest("/api/v1/creator/uploads", "GET", null))
                 {
-                    Assert.AreEqual("https://mochiya.org/api/v1/creator/uploads", request.url);
+                    Assert.AreEqual("https://www.mochiya.org/api/v1/creator/uploads", request.url);
                     Assert.IsNull(request.GetRequestHeader("x-vercel-protection-bypass"));
                 }
             }
@@ -47,6 +48,31 @@ namespace Mochiya.AvatarTools.Editor.Tests
                 Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL", previousOrigin);
                 Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_VERCEL_BYPASS_TOKEN", previousSecret);
             }
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("   ")]
+        [TestCase("http://localhost:3000/")]
+        [TestCase("https://preview.vercel.app")]
+        public void EnvironmentOriginRequiresDevelopmentAndResetsWhenRemoved(string configuredOrigin)
+        {
+            var previous = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL");
+            try
+            {
+                Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL", configuredOrigin);
+                var expected = MochiyaUploadClient.ProductionOrigin;
+#if MOCHIYA_DEVELOPMENT
+                if (!string.IsNullOrWhiteSpace(configuredOrigin)) expected = configuredOrigin.Trim().TrimEnd('/');
+#endif
+                Assert.AreEqual(expected, MochiyaUploadClient.ConfiguredOrigin);
+                using (var client = new MochiyaUploadClient("test-api-key", MochiyaUploadClient.ConfiguredOrigin))
+                using (var request = client.CreateApiRequest("/api/v1/creator/upload-capabilities", "GET", null))
+                    Assert.AreEqual(expected + "/api/v1/creator/upload-capabilities", request.url);
+                Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL", null);
+                Assert.AreEqual(MochiyaUploadClient.ProductionOrigin, MochiyaUploadClient.ConfiguredOrigin);
+            }
+            finally { Environment.SetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL", previous); }
         }
 
         [Test]

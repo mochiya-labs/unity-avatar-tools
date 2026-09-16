@@ -22,12 +22,15 @@ namespace Mochiya.AvatarTools.Editor
         [SerializeField] private double price;
         [SerializeField] private bool details, exportSettings, warnings;
         [SerializeField] private string recoveryId = "", productId = "";
-        private string token = "", message = "", temporaryDirectory, requestJson;
-        private string origin = MochiyaUploadClient.ProductionOrigin;
+        [NonSerialized] private string token = "", message = "", temporaryDirectory, requestJson;
+        private string origin => MochiyaUploadClient.ConfiguredOrigin;
         private bool busy, connected, failed, closing;
         private float progress;
         private Vector2 scroll;
         private MochiyaUploadClient client;
+        private MochiyaUploadConnection connection;
+        private string activeOrigin;
+        private bool cleanupAfterOperation;
         private CancellationTokenSource cancellation;
         private MochiyaUploadContract contract;
         private MochiyaUploadCapabilities capabilities;
@@ -49,9 +52,32 @@ namespace Mochiya.AvatarTools.Editor
         private void OnEnable()
         {
             closing = false;
+            connected = false; busy = false; activeOrigin = null;
+            connection = new MochiyaUploadConnection(new MochiyaCredentialStore(Path.GetDirectoryName(Application.dataPath)));
             if (profile == null) profile = MochiyaExportProfile.Default;
             var asset = AssetDatabase.LoadAssetAtPath<TextAsset>("Packages/org.mochiya.avatar-tools/Editor/UploadContract.json");
             if (asset != null) { contract = JsonUtility.FromJson<MochiyaUploadContract>(asset.text); SetLocale(); }
+            EditorApplication.delayCall += RestoreConnection;
+        }
+        private void RestoreConnection()
+        {
+            if (closing || this == null || contract == null || busy) return;
+            try
+            {
+                if (connection.Restore(origin)) { token = connection.Token; _ = Connect(); }
+                else { recoveryId = ""; productId = ""; }
+            }
+            catch (Exception error) { failed = true; message = error.Message; }
+        }
+        private bool SignOut()
+        {
+            cancellation?.Cancel(); client?.Dispose(); client = null;
+            connected = false; token = ""; capabilities = null; activeOrigin = null;
+            recoveryId = ""; productId = ""; requestJson = null; requestData = null;
+            cleanupAfterOperation = busy;
+            if (!busy) CleanupLocal();
+            try { connection?.SignOut(); return true; }
+            catch (Exception error) { failed = true; message = error.Message; return false; }
         }
         private void SetLocale()
         {
@@ -63,6 +89,7 @@ namespace Mochiya.AvatarTools.Editor
         private void OnDisable()
         {
             closing = true;
+            EditorApplication.delayCall -= RestoreConnection;
             cancellation?.Cancel(); client?.Dispose(); connected = false; token = "";
             if (coverPreview != null) DestroyImmediate(coverPreview);
             // Keep the non-secret recovery ID through assembly reload, but never serialize credentials.
@@ -71,19 +98,18 @@ namespace Mochiya.AvatarTools.Editor
         private void OnGUI()
         {
             if (contract == null) { EditorGUILayout.HelpBox("Upload contract is missing. Reinstall Mochiya Avatar Tools.", MessageType.Error); return; }
+            if (activeOrigin != null && activeOrigin != origin) SignOut();
             scroll = EditorGUILayout.BeginScrollView(scroll);
             using (new EditorGUI.DisabledScope(busy))
             {
                 int language = EditorGUILayout.Popup(L("language"), Math.Max(0, Array.IndexOf(Locales, locale)), LocaleNames);
-                if (Locales[language] != locale) { locale = Locales[language]; SetLocale(); connected = false; }
-                // Development origin is opt-in, never received from remote content or persisted with a token.
-                var development = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL");
-                if (!string.IsNullOrEmpty(development)) { origin = development.TrimEnd('/'); EditorGUILayout.HelpBox(origin, MessageType.Info); }
-                token = EditorGUILayout.PasswordField(L("token"), token);
+                if (Locales[language] != locale) { locale = Locales[language]; SetLocale(); if (connected) _ = Connect(); }
+                if (origin != MochiyaUploadClient.ProductionOrigin) EditorGUILayout.HelpBox(origin, MessageType.Info);
+                if (!connected) token = EditorGUILayout.PasswordField(L("token"), token);
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button(L(connected ? "disconnect" : "connect")))
-                    { if (connected) { client?.Dispose(); client = null; connected = false; token = ""; } else _ = Connect(); }
+                    { if (connected) { if (SignOut()) message = ""; } else _ = Connect(); }
                     if (GUILayout.Button(L("profile"))) Application.OpenURL(origin + "/profile");
                 }
                 if (connected) EditorGUILayout.LabelField(L("connected"), capabilities.displayName);
@@ -104,6 +130,7 @@ namespace Mochiya.AvatarTools.Editor
                 for (int i = 0; i < item.tags.Length; i++) using (new EditorGUILayout.HorizontalScope())
                 { EditorGUILayout.LabelField(item.tags[i]); if (GUILayout.Button("×", GUILayout.Width(28))) { item.tags = item.tags.Where((_, n) => n != i).ToArray(); GUI.changed = true; break; } }
                 item.status = EditorGUILayout.Popup(L("availability"), item.status == "private" ? 0 : 1, new[] { L("privateItem"), L("sellOnMochiya") }) == 0 ? "private" : "public";
+                EditorGUILayout.HelpBox(L(item.status == "private" ? "personalUseHint" : "marketplaceListingHint") + " " + L("availabilityHint"), MessageType.None);
                 if (item.status == "public")
                 {
                     price = EditorGUILayout.DoubleField(L("price") + " (USD)", price);
@@ -118,9 +145,10 @@ namespace Mochiya.AvatarTools.Editor
                 cover = FileField(L("cover") + " *", cover, "png,jpg,jpeg");
                 DrawCover();
                 EditorGUILayout.Space(8);
+                EditorGUI.BeginChangeCheck();
                 target = (GameObject)EditorGUILayout.ObjectField(L("source") + " *", target, typeof(GameObject), true);
                 if (GUILayout.Button(L("useSelection"))) { target = Selection.activeGameObject; GUI.changed = true; }
-                if (string.IsNullOrEmpty(item.title) && target != null) item.title = target.name.Substring(0, Math.Min(target.name.Length, contract.limits.title));
+                if (EditorGUI.EndChangeCheck() && target != null) item.title = target.name.Substring(0, Math.Min(target.name.Length, contract.limits.title));
                 outputFormat = EditorGUILayout.Popup(L("format"), outputFormat, new[] { "VRM", "GLB" });
                 if (target != null)
                 {
@@ -198,18 +226,33 @@ namespace Mochiya.AvatarTools.Editor
         }
         private async Task Connect()
         {
-            busy = true; failed = false; cancellation = new CancellationTokenSource();
+            if (busy) return;
+            busy = true; connected = false; failed = false; cancellation = new CancellationTokenSource();
+            var cancel = cancellation.Token;
             try
             {
-                client?.Dispose(); client = new MochiyaUploadClient(token.Trim(), origin);
-                capabilities = await client.Api<MochiyaUploadCapabilities>("/api/v1/creator/upload-capabilities?locale=" + locale, "GET", null, cancellation.Token);
-                if (capabilities.limits.version != contract.limits.version) throw new InvalidOperationException("Update Mochiya Avatar Tools to use the current upload form.");
+                activeOrigin = origin;
+                token = token.Trim();
+                if (connection.Token != null && connection.Token != token)
+                {
+                    recoveryId = ""; productId = ""; requestJson = null; requestData = null; CleanupLocal();
+                }
+                client?.Dispose(); client = new MochiyaUploadClient(token, activeOrigin);
+                capabilities = await connection.Authenticate(token, activeOrigin, async () =>
+                {
+                    var result = await client.Api<MochiyaUploadCapabilities>("/api/v1/creator/upload-capabilities?locale=" + locale, "GET", null, cancel);
+                    if (activeOrigin != origin) throw new InvalidOperationException("The Mochiya server changed. Connect again.");
+                    if (result?.limits == null || result.labels == null || result.limits.version != contract.limits.version)
+                        throw new InvalidOperationException("Update Mochiya Avatar Tools to use the current upload form.");
+                    return result;
+                }, cancel);
                 contract.limits = capabilities.limits;
                 foreach (var pair in capabilities.labels) labels[pair.name] = pair.value;
                 connected = true; message = L("connected") + " " + capabilities.displayName;
             }
-            catch (Exception error) { failed = true; connected = false; message = error.Message; }
-            finally { busy = false; if (closing) CleanupLocal(); if (this != null) Repaint(); }
+            catch (OperationCanceledException) { connected = false; client?.Dispose(); }
+            catch (Exception error) { SignOut(); failed = true; message = error.Message; }
+            finally { busy = false; if (closing || cleanupAfterOperation) CleanupLocal(); cleanupAfterOperation = false; if (this != null) Repaint(); }
         }
         private void Prepare()
         {
@@ -241,6 +284,7 @@ namespace Mochiya.AvatarTools.Editor
         }
         private async Task Upload()
         {
+            if (busy || !connected) return;
             busy = true; failed = false; progress = 0; cancellation = new CancellationTokenSource();
             try
             {
@@ -268,8 +312,12 @@ namespace Mochiya.AvatarTools.Editor
                 message = L("done"); progress = 1; requestJson = null; requestData = null; recoveryId = ""; CleanupLocal();
             }
             catch (OperationCanceledException) { message = L("retry"); }
-            catch (Exception error) { failed = true; message = L("failed") + "\n" + error.Message; }
-            finally { busy = false; if (closing) CleanupLocal(); if (this != null) Repaint(); }
+            catch (Exception error)
+            {
+                if (error is MochiyaUploadApiException apiError && apiError.InvalidatesConnection) SignOut();
+                failed = true; message = L("failed") + "\n" + error.Message;
+            }
+            finally { busy = false; if (closing || cleanupAfterOperation) CleanupLocal(); cleanupAfterOperation = false; if (this != null) Repaint(); }
         }
         private void CleanupLocal()
         {
