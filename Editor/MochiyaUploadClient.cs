@@ -46,20 +46,41 @@ namespace Mochiya.AvatarTools.Editor
     [Serializable] internal sealed class MochiyaUploadError { public string code, message; }
     [Serializable] internal sealed class MochiyaUploadErrorResponse { public MochiyaUploadError error; }
 
+    internal sealed class MochiyaUploadApiException : InvalidOperationException
+    {
+        internal bool InvalidatesConnection { get; }
+        internal MochiyaUploadApiException(long status, string message) : base(message)
+        { InvalidatesConnection = status == 0 || status == 401 || status == 403 || status >= 500; }
+    }
+
     internal sealed class MochiyaUploadClient : IDisposable
     {
-        internal const string ProductionOrigin = "https://mochiya.org";
+        internal const string ProductionOrigin = "https://www.mochiya.org";
         private readonly string origin, token;
-#if MOCHIYA_UPLOAD_DEVELOPMENT
+#if MOCHIYA_DEVELOPMENT
         private readonly string protectionBypass;
 #endif
         private UnityWebRequest active;
+        internal static string ConfiguredOrigin
+        {
+            get
+            {
+#if MOCHIYA_DEVELOPMENT
+                var development = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL");
+                if (!string.IsNullOrWhiteSpace(development)) return development.Trim().TrimEnd('/');
+#endif
+                return ProductionOrigin;
+            }
+        }
         public MochiyaUploadClient(string token, string origin = ProductionOrigin)
         {
+#if !MOCHIYA_DEVELOPMENT
+            origin = ProductionOrigin;
+#endif
             var uri = new Uri(origin);
             if (uri.Scheme != "https" && !(uri.IsLoopback && uri.Scheme == "http")) throw new ArgumentException("Use HTTPS for Mochiya.");
             this.origin = uri.GetLeftPart(UriPartial.Authority); this.token = token;
-#if MOCHIYA_UPLOAD_DEVELOPMENT
+#if MOCHIYA_DEVELOPMENT
             // Bind the secret to the explicitly selected development origin, never production or Storage.
             var development = Environment.GetEnvironmentVariable("MOCHIYA_UPLOAD_API_URL");
             if (Uri.TryCreate(development, UriKind.Absolute, out var preview)
@@ -87,7 +108,7 @@ namespace Mochiya.AvatarTools.Editor
             request.downloadHandler = new DownloadHandlerBuffer();
             request.redirectLimit = 0; request.timeout = 120;
             request.SetRequestHeader("Authorization", "Bearer " + token);
-#if MOCHIYA_UPLOAD_DEVELOPMENT
+#if MOCHIYA_DEVELOPMENT
             if (protectionBypass != null) request.SetRequestHeader("x-vercel-protection-bypass", protectionBypass);
 #endif
             if (json != null) { request.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(json)); request.SetRequestHeader("Content-Type", "application/json"); }
@@ -102,7 +123,7 @@ namespace Mochiya.AvatarTools.Editor
                 {
                     MochiyaUploadErrorResponse error = null;
                     try { error = JsonUtility.FromJson<MochiyaUploadErrorResponse>(request.downloadHandler.text); } catch { }
-                    throw new InvalidOperationException(error?.error?.message ?? ("Mochiya request failed (" + request.responseCode + ")."));
+                    throw new MochiyaUploadApiException(request.responseCode, error?.error?.message ?? ("Mochiya request failed (" + request.responseCode + ")."));
                 }
                 return JsonUtility.FromJson<T>(request.downloadHandler.text);
             }

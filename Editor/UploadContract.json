@@ -116,7 +116,7 @@
         },
         {
           "name": "availability",
-          "value": "Visibility"
+          "value": "Availability"
         },
         {
           "name": "availableForPurchase",
@@ -124,7 +124,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "Public"
+          "value": "Listed on marketplace"
         },
         {
           "name": "price",
@@ -328,7 +328,7 @@
         },
         {
           "name": "privateItem",
-          "value": "Private"
+          "value": "Personal use"
         },
         {
           "name": "publish",
@@ -336,7 +336,7 @@
         },
         {
           "name": "publishDescription",
-          "value": "Private items stay in your library. Sale items also appear in the marketplace."
+          "value": "Items for personal use stay in your library. Listed items also appear in the marketplace."
         },
         {
           "name": "processingDeduction",
@@ -377,6 +377,18 @@
         {
           "name": "additionalFilesTooMany",
           "value": "Choose at most 20 additional files."
+        },
+        {
+          "name": "personalUseHint",
+          "value": "Use this item in Avatar Studio without listing it on the marketplace."
+        },
+        {
+          "name": "marketplaceListingHint",
+          "value": "Let others get this item for free or purchase it at your set price."
+        },
+        {
+          "name": "availabilityHint",
+          "value": "You can change this anytime."
         },
         {
           "name": "connect",
@@ -456,7 +468,7 @@
         },
         {
           "name": "privateUpload",
-          "value": "Upload private item"
+          "value": "Upload for personal use"
         },
         {
           "name": "done",
@@ -613,7 +625,7 @@
         },
         {
           "name": "availability",
-          "value": "公開設定"
+          "value": "利用方法"
         },
         {
           "name": "availableForPurchase",
@@ -621,7 +633,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "公開"
+          "value": "マーケットプレイスに掲載"
         },
         {
           "name": "price",
@@ -825,7 +837,7 @@
         },
         {
           "name": "privateItem",
-          "value": "非公開"
+          "value": "個人利用"
         },
         {
           "name": "publish",
@@ -833,7 +845,7 @@
         },
         {
           "name": "publishDescription",
-          "value": "非公開アイテムはライブラリのみ、販売アイテムはマーケットにも表示されます。"
+          "value": "個人利用のアイテムはライブラリに保存されます。掲載したアイテムはマーケットプレイスにも表示されます。"
         },
         {
           "name": "processingDeduction",
@@ -874,6 +886,18 @@
         {
           "name": "additionalFilesTooMany",
           "value": "???????20??????????"
+        },
+        {
+          "name": "personalUseHint",
+          "value": "マーケットプレイスに掲載せず、Avatar Studioでこのアイテムを使用します。"
+        },
+        {
+          "name": "marketplaceListingHint",
+          "value": "他のユーザーが無料で入手するか、設定した価格で購入できるようにします。"
+        },
+        {
+          "name": "availabilityHint",
+          "value": "この設定はいつでも変更できます。"
         },
         {
           "name": "connect",
@@ -953,7 +977,7 @@
         },
         {
           "name": "privateUpload",
-          "value": "非公開アイテムをアップロード"
+          "value": "個人利用としてアップロード"
         },
         {
           "name": "done",
@@ -1110,7 +1134,7 @@
         },
         {
           "name": "availability",
-          "value": "可见性"
+          "value": "提供方式"
         },
         {
           "name": "availableForPurchase",
@@ -1118,7 +1142,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "公开"
+          "value": "在市场上架"
         },
         {
           "name": "price",
@@ -1322,7 +1346,7 @@
         },
         {
           "name": "privateItem",
-          "value": "私密"
+          "value": "个人使用"
         },
         {
           "name": "publish",
@@ -1330,7 +1354,7 @@
         },
         {
           "name": "publishDescription",
-          "value": "私人物品仅保留在你的物品库，出售的物品也会展示在市场中。"
+          "value": "个人使用的物品保存在你的物品库中。上架的物品也会显示在市场中。"
         },
         {
           "name": "processingDeduction",
@@ -1371,6 +1395,18 @@
         {
           "name": "additionalFilesTooMany",
           "value": "????20??????"
+        },
+        {
+          "name": "personalUseHint",
+          "value": "在 Avatar Studio 中使用此物品，不在市场上架。"
+        },
+        {
+          "name": "marketplaceListingHint",
+          "value": "让其他用户免费获取此物品，或按你设定的价格购买。"
+        },
+        {
+          "name": "availabilityHint",
+          "value": "你可以随时更改此设置。"
         },
         {
           "name": "connect",
@@ -1450,7 +1486,7 @@
         },
         {
           "name": "privateUpload",
-          "value": "上传私人物品"
+          "value": "上传供个人使用"
         },
         {
           "name": "done",
@@ -1607,7 +1643,7 @@
         },
         {
           "name": "availability",
-          "value": "공개 설정"
+          "value": "이용 방식"
         },
         {
           "name": "availableForPurchase",
@@ -1615,7 +1651,7 @@
         },
         {
           "name": "sellOnMochiya",
-          "value": "공개"
+          "value": "마켓플레이스에 등록"
         },
         {
           "name": "price",
@@ -1819,7 +1855,7 @@
         },
         {
           "name": "privateItem",
-          "value": "비공개"
+          "value": "개인 사용"
         },
         {
           "name": "publish",
@@ -1827,7 +1863,7 @@
         },
         {
           "name": "publishDescription",
-          "value": "개인 아이템은 라이브러리에만, 판매 아이템은 마켓에도 표시됩니다."
+          "value": "개인 사용 아이템은 내 라이브러리에 보관됩니다. 등록한 아이템은 마켓플레이스에도 표시됩니다."
         },
         {
           "name": "processingDeduction",
@@ -1868,6 +1904,18 @@
         {
           "name": "additionalFilesTooMany",
           "value": "?? ??? ?? 20??? ??? ? ????."
+        },
+        {
+          "name": "personalUseHint",
+          "value": "마켓플레이스에 등록하지 않고 Avatar Studio에서 이 아이템을 사용합니다."
+        },
+        {
+          "name": "marketplaceListingHint",
+          "value": "다른 사용자가 무료로 받거나 설정한 가격으로 구매할 수 있습니다."
+        },
+        {
+          "name": "availabilityHint",
+          "value": "이 설정은 언제든지 변경할 수 있습니다."
         },
         {
           "name": "connect",
@@ -1947,7 +1995,7 @@
         },
         {
           "name": "privateUpload",
-          "value": "비공개 아이템 업로드"
+          "value": "개인 사용으로 업로드"
         },
         {
           "name": "done",
