@@ -151,11 +151,13 @@ Omit the profile argument or pass `null` for the bundled default. Reports contai
 | [`three-liltoon`](https://github.com/mochiya-labs/three-liltoon) | Renders materials carrying `MOCHIYA_materials_liltoon`. |
 | [`@mochiya/avatar-composition`](https://github.com/mochiya-labs/avatar-composition) | Reads `MOCHIYA_avatar_composition`, fits separate attachments by names, applies supported actions and restores the base on removal. |
 
-The host enables rendering with `enableLilToon(renderer)` and registers `enableLilToonVRM(new VRMLoaderPlugin(parser))` plus `MochiyaAvatarCompositionLoaderPlugin` on one Three.js `GLTFLoader`. After loading, it prepares assets and attaches attachments through `AvatarCompositionSession`. Each frame: call `beforeVrmUpdate()`, update the base animation/VRM once, then call `afterVrmUpdate(delta)`. The [Avatar Composition example viewer](https://github.com/mochiya-labs/avatar-composition/tree/main/examples/viewer) demonstrates local-file loading, fitting, controls and removal.
+The host enables rendering with `enableLilToon(renderer)` and registers `enableLilToonVRM(new VRMLoaderPlugin(parser))` on `AvatarLoader` from `@mochiya/avatar-composition`. A completed load contains `gltf.userData.avatar`. Create `new AvatarComposition(base)` and call `composition.add(attachment)`; identities are generated automatically. Call `composition.update(delta)` once per frame. The [Avatar Composition example viewer](https://github.com/mochiya-labs/avatar-composition/tree/main/examples/viewer) demonstrates loading, authored-object controls and removal.
+
+The composition extension uses component-based format. The selected export root starts active regardless of its Unity activation; child objects preserve their combined GameObject/renderer activation. The runtime treats a multi-material Unity object as one editable item. See the [Avatar Composition reference](https://github.com/mochiya-labs/avatar-composition/blob/main/specification/README.md) for activation and component behavior.
 
 Both Mochiya extensions are optional additions to standard files. Ordinary viewers display standalone geometry and fallback materials without attachment actions. Matching uses bone, armature, mesh and blendshape names; missing names warn and skip only affected operations. It does not check base identity or reshape garments to fit different bodies.
 
-Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with `assetKind: "avatar"` or `"attachment"`. New attachment exports use `rig.role: "attachmentReference"`. The composition extension stores MA-style component instructions.
+Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with `assetKind: "avatar"` or `"attachment"`. Attachment exports use `rig.role: "attachmentReference"`. The composition extension stores MA-style component instructions.
 
 ## License
 

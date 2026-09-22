@@ -23,11 +23,11 @@ namespace Mochiya.AvatarTools.Editor
             if (asset == null) return;
             foreach (var node in root.GetComponentsInChildren<Transform>(true))
             {
-                if (node == root.transform) continue;
                 var state = asset.Nodes.FirstOrDefault(x => x.Node == node);
                 if (state == null) { state = new AssetNodeState { Node = node, Aliases = new[] { node.name } }; asset.Nodes.Add(state); }
                 var renderer = node.GetComponent<Renderer>();
-                state.Active = node.gameObject.activeSelf && (renderer == null || renderer.enabled);
+                // The selected export root is a container, always active regardless of its Unity state.
+                state.Active = node == root.transform || (node.gameObject.activeSelf && (renderer == null || renderer.enabled));
                 node.gameObject.SetActive(true);
                 if (renderer != null) renderer.enabled = true;
             }
@@ -40,7 +40,7 @@ namespace Mochiya.AvatarTools.Editor
             int Node(Transform node)
             {
                 // UniGLTF omits the scene container. Materialize an identity node only
-                // when a component actually addresses it; existing indices stay stable.
+                // when a component addresses it; the export root always starts active. Existing indices stay stable.
                 if (node == asset.transform && (!nodes.TryGetValue(node, out var root) || root < 0))
                 {
                     if (rootIndex < 0)
@@ -95,13 +95,13 @@ namespace Mochiya.AvatarTools.Editor
                 f.EndMap();
             }
             string Camel(object value) { var text = value.ToString(); return char.ToLowerInvariant(text[0]) + text.Substring(1); }
-            f.BeginMap(); Text("specVersion", "0.1"); Text("assetKind", Camel(asset.Kind));
+            f.BeginMap(); Text("specVersion", "0.2"); Text("assetKind", Camel(asset.Kind));
             Words("requiredCapabilities", asset.Components.Select(x => Camel(x.Kind)));
             f.Key("matching"); f.BeginMap(); Text("mode", "keywordBestEffort"); Text("onUnresolved", "warnAndContinue"); Words("armatureKeywords", asset.ArmatureKeywords); f.EndMap();
             f.Key("rig"); f.BeginMap(); Text("role", asset.Kind == AssetKind.Avatar ? "avatar" : "attachmentReference"); f.EndMap();
             f.Key("nodes"); f.BeginList();
-            foreach (var node in asset.Nodes.Where(x => x.Node != null && nodes.ContainsKey(x.Node) && nodes[x.Node] >= 0))
-            { f.BeginMap(); Int("node", Node(node.Node)); Words("aliases", node.Aliases); Bool("active", node.Active); f.EndMap(); }
+            foreach (var node in asset.Nodes.Where(x => x.Node != null && ((nodes.ContainsKey(x.Node) && nodes[x.Node] >= 0) || (x.Node == asset.transform && asset.Components.Any(c => c.Source == asset.transform)))))
+            { f.BeginMap(); Int("node", Node(node.Node)); Words("aliases", node.Aliases); Bool("active", node.Node == asset.transform || node.Active); f.EndMap(); }
             f.EndList();
             f.Key("components"); f.BeginList();
             foreach (var component in asset.Components)

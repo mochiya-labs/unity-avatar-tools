@@ -22,6 +22,31 @@ namespace Mochiya.AvatarTools.Editor.Tests
         private GameObject Keep(GameObject go) { objects.Add(go); return go; }
 
         private sealed class PathReference { public GameObject targetObject; public string referencePath; }
+        [TestCase(true, true, true)]
+        [TestCase(true, false, false)]
+        [TestCase(false, true, false)]
+        public void ExportCopyIgnoresRootStateAndPreservesCombinedChildActivation(bool objectActive, bool rendererEnabled, bool expected)
+        {
+            var root = new GameObject("Activation root");
+            try
+            {
+                var asset = root.AddComponent<MochiyaAvatarComposition>();
+                asset.Nodes.Add(new AssetNodeState { Node = root.transform, Active = false });
+                var rootRenderer = root.AddComponent<MeshRenderer>(); rootRenderer.enabled = false;
+                var child = new GameObject("Two material coat");
+                child.transform.SetParent(root.transform, false);
+                var renderer = child.AddComponent<MeshRenderer>();
+                renderer.enabled = rendererEnabled;
+                child.SetActive(objectActive);
+                root.SetActive(objectActive);
+                MochiyaAvatarCompositionSerializer.PrepareCopy(root);
+                Assert.That(asset.Nodes.Single(x => x.Node == child.transform).Active, Is.EqualTo(expected));
+                Assert.That(asset.Nodes.Single(x => x.Node == root.transform).Active, Is.True);
+                Assert.That(root.activeSelf && rootRenderer.enabled && child.activeSelf && renderer.enabled, Is.True);
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
+
         [Test] public void MaReferenceFallsBackToPathWhenDirectObjectIsUnityNull()
         {
             var source = Keep(CreateAvatar());
@@ -80,6 +105,30 @@ namespace Mochiya.AvatarTools.Editor.Tests
             renderer.sharedMaterial = new Material(Shader.Find("Standard")) { name = name + " Material", color = color };
             return renderer;
         }
+        [Test] public void ExportsLogicalTwoMaterialItemWithOwnedShapeAndSync()
+        {
+            var source = Keep(CreateAvatar());
+            var converted = MochiyaAvatarConverter.ConvertAvatarInScene(source); Keep(converted.Root);
+            MochiyaLilToonExporter.ExportGlb(converted.Root, Path.Combine(output, "logical-items-base.glb"));
+            var asset = converted.Root.GetComponent<MochiyaAvatarComposition>(); asset.Kind = AssetKind.Attachment;
+            var renderer = converted.Root.GetComponentInChildren<SkinnedMeshRenderer>();
+            var mesh = Object.Instantiate(renderer.sharedMesh); objects.Add(mesh); renderer.sharedMesh = mesh;
+            var triangles = mesh.triangles; var split = (triangles.Length / 6) * 3;
+            mesh.subMeshCount = 2; mesh.SetTriangles(triangles.Take(split).ToArray(), 0); mesh.SetTriangles(triangles.Skip(split).ToArray(), 1);
+            var trim = new Material(renderer.sharedMaterial) { name = "Trim" }; objects.Add(trim);
+            renderer.sharedMaterials = new[] { renderer.sharedMaterial, trim };
+            var target = new AssetSelector { Base = true, MeshKeywords = new[] { "Body" }, BlendshapeKeywords = new[] { "Body_Slim" } };
+            asset.Components.Clear();
+            asset.Components.Add(new AssetComponent { Id = "fit", Kind = ComponentKind.ShapeChanger, Source = renderer.transform, Entries = new List<AssetEntry> { new AssetEntry { Target = target, Value = .7f } } });
+            asset.Components.Add(new AssetComponent { Id = "sync", Kind = ComponentKind.BlendshapeSync, Source = renderer.transform, Entries = new List<AssetEntry> { new AssetEntry { Driver = target, Target = new AssetSelector { Node = renderer.transform, MorphIndex = 0, BlendshapeKeywords = new[] { "Body_Slim" } } } } });
+            MochiyaLilToonExporter.ExportGlb(converted.Root, Path.Combine(output, "logical-items-coat.glb"));
+            converted.Root.SetActive(false);
+            MochiyaLilToonExporter.ExportGlb(converted.Root, Path.Combine(output, "logical-items-inactive-root.glb"));
+            Assert.That(converted.Root.activeSelf, Is.False);
+            Assert.That(renderer.sharedMaterials.Length, Is.EqualTo(2));
+            Assert.That(source.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.subMeshCount, Is.EqualTo(1));
+        }
+
         [Test] public void AvatarConversionPreservesSourceAndCreatesVrmComponentsWithoutWritingAssets()
         {
             var source = Keep(CreateAvatar()); var before = EditorJsonUtility.ToJson(source.GetComponent<Animator>());
