@@ -139,7 +139,7 @@ namespace Mochiya.AvatarTools.Editor
                         var cents = Math.Floor(price * 100 + .5); var fees = capabilities.pricing;
                         var processing = cents == 0 ? 0 : Math.Floor(cents * fees.processingBasisPoints / 10000 + .5) + fees.processingFixedCents;
                         var commission = Math.Floor(cents * fees.commissionBasisPoints / 10000);
-                        EditorGUILayout.HelpBox(L("processingFee") + ": " + Money(processing) + "\n" + L("commissionFee") + ": " + Money(commission) + "\n" + L("earnings") + ": " + Money(cents - processing - commission), MessageType.Info);
+                        EditorGUILayout.HelpBox(L("processingFee") + " (" + (fees.processingBasisPoints / 100.0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "% + " + Money(fees.processingFixedCents) + "): " + Money(processing) + "\n" + L("commissionFee") + " (" + (fees.commissionBasisPoints / 100.0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "%): " + Money(commission) + "\n" + L("earnings") + ": " + Money(cents - processing - commission), MessageType.Info);
                     }
                 }
                 cover = FileField(L("cover") + " *", cover, "png,jpg,jpeg");

@@ -315,11 +315,11 @@
           "value": "Add a price or an external purchase link for an item that can be bought."
         },
         {
-          "name": "stripeVerificationRequired",
+          "name": "seller_not_ready",
           "value": "Complete seller verification in Profile before listing a paid Mochiya item."
         },
         {
-          "name": "stripeStatusUnavailable",
+          "name": "sellerStatusUnavailable",
           "value": "Seller verification could not be checked. Open Profile and try again."
         },
         {
@@ -340,7 +340,7 @@
         },
         {
           "name": "processingDeduction",
-          "value": "Stripe processing ({rate} + {fixed})"
+          "value": "Payment processing fee ({rate} + {fixed})"
         },
         {
           "name": "commissionDeduction",
@@ -504,7 +504,7 @@
         },
         {
           "name": "processingFee",
-          "value": "Processing fee"
+          "value": "Payment processing fee"
         },
         {
           "name": "commissionFee",
@@ -824,11 +824,11 @@
           "value": "購入可能なアイテムには価格または外部購入リンクを追加してください。"
         },
         {
-          "name": "stripeVerificationRequired",
+          "name": "seller_not_ready",
           "value": "Mochiya の有料商品を公開する前に、プロフィールで販売者確認を完了してください。"
         },
         {
-          "name": "stripeStatusUnavailable",
+          "name": "sellerStatusUnavailable",
           "value": "販売者確認を確認できませんでした。プロフィールを開いて再試行してください。"
         },
         {
@@ -849,7 +849,7 @@
         },
         {
           "name": "processingDeduction",
-          "value": "Stripe 決済手数料（{rate} + {fixed}）"
+          "value": "決済処理手数料（{rate} + {fixed}）"
         },
         {
           "name": "commissionDeduction",
@@ -1013,7 +1013,7 @@
         },
         {
           "name": "processingFee",
-          "value": "決済手数料"
+          "value": "決済処理手数料"
         },
         {
           "name": "commissionFee",
@@ -1333,11 +1333,11 @@
           "value": "可购买商品必须填写价格或站外购买链接。"
         },
         {
-          "name": "stripeVerificationRequired",
+          "name": "seller_not_ready",
           "value": "请先在个人资料中完成卖家验证，再发布 Mochiya 付费商品。"
         },
         {
-          "name": "stripeStatusUnavailable",
+          "name": "sellerStatusUnavailable",
           "value": "无法检查卖家验证状态。请打开个人资料后重试。"
         },
         {
@@ -1358,7 +1358,7 @@
         },
         {
           "name": "processingDeduction",
-          "value": "Stripe 支付处理费（{rate} + {fixed}）"
+          "value": "支付处理费（{rate} + {fixed}）"
         },
         {
           "name": "commissionDeduction",
@@ -1522,7 +1522,7 @@
         },
         {
           "name": "processingFee",
-          "value": "支付手续费"
+          "value": "支付处理费"
         },
         {
           "name": "commissionFee",
@@ -1842,11 +1842,11 @@
           "value": "구매 가능한 아이템에는 가격 또는 외부 구매 링크를 추가하세요."
         },
         {
-          "name": "stripeVerificationRequired",
+          "name": "seller_not_ready",
           "value": "Mochiya 유료 상품을 등록하기 전에 프로필에서 판매자 인증을 완료하세요."
         },
         {
-          "name": "stripeStatusUnavailable",
+          "name": "sellerStatusUnavailable",
           "value": "판매자 인증 상태를 확인할 수 없습니다. 프로필을 열고 다시 시도하세요."
         },
         {
@@ -1867,7 +1867,7 @@
         },
         {
           "name": "processingDeduction",
-          "value": "Stripe 결제 수수료({rate} + {fixed})"
+          "value": "결제 처리 수수료 ({rate} + {fixed})"
         },
         {
           "name": "commissionDeduction",
@@ -2031,7 +2031,7 @@
         },
         {
           "name": "processingFee",
-          "value": "결제 수수료"
+          "value": "결제 처리 수수료"
         },
         {
           "name": "commissionFee",
