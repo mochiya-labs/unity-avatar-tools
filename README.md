@@ -1,6 +1,6 @@
 # Mochiya Avatar Tools
 
-Prepare Unity avatars, outfits and accessories for [Mochiya](https://mochiya.org) and compatible web viewers. Mochiya Avatar Tools converts supported VRChat and Modular Avatar setups into **VRM 1.0 or GLB**, preserves supported lilToon materials, and can upload items directly from the Unity Editor.
+Prepare Unity avatars, outfits and accessories for [Mochiya](https://www.mochiya.org) and compatible web viewers. Mochiya Avatar Tools converts supported VRChat and Modular Avatar setups into **VRM 1.0 or GLB**, preserves supported lilToon materials, and can upload items directly from the Unity Editor.
 
 Conversion works on a duplicate and leaves your original setup unchanged. Offline conversion and export do not require a Mochiya account.
 
@@ -12,9 +12,39 @@ Conversion works on a duplicate and leaves your original setup unchanged. Offlin
 - Upload a model, cover, gallery and additional buyer files directly to Mochiya.
 - Reuse export profiles for metadata and native UniVRM/UniGLTF settings.
 
+## Start here
+
+[Install the package](#installation) → [Prepare your asset](#prepare-your-asset) → [Upload to Mochiya](#upload-directly-to-mochiya) → [Check the result](#check-and-manage-your-item).
+
+For local files only, see [conversion and export](#your-first-conversion-or-export). If something goes wrong, see [troubleshooting](#troubleshooting). The later sections cover detailed compatibility and optional scripting; you do not need to read code to upload an item.
+
 ## Installation
 
-Requires **Unity 2022.3 or newer** and **UniVRM/UniGLTF 0.131.2 or newer**. Add these entries to the existing `dependencies` object in your project's `Packages/manifest.json`:
+Use **Unity 2022.3 or newer**, with **UniVRM/UniGLTF 0.131.2 or newer**. For an existing avatar project, keep the Unity version supported by that asset and its other packages. Save your scene and back up the project before installing or updating packages.
+
+### Install through Unity's Package Manager
+
+1. Open the Unity project containing your asset.
+2. Install [Git](https://git-scm.com/downloads) if it is not already available, then restart Unity and Unity Hub. Unity uses Git to download these packages; you do not need to run Git commands.
+3. Open **Window → Package Manager** (in Unity 6, **Window → Package Management → Package Manager**).
+4. Click **+**, then **Add package from git URL…** (called **Install package from git URL…** in newer Editors). Paste the first URL below and click **Add/Install**. Wait for installation to finish, then repeat for the next URL, in order.
+
+| Order | Package | URL to paste |
+| --- | --- | --- |
+| 1 | UniGLTF | `https://github.com/vrm-c/UniVRM.git?path=/Packages/UniGLTF#v0.131.2` |
+| 2 | UniVRM 1.0 | `https://github.com/vrm-c/UniVRM.git?path=/Packages/VRM10#v0.131.2` |
+| 3 | Mochiya Avatar Tools | `https://github.com/mochiya-labs/unity-avatar-tools.git` |
+
+These URLs select a specific supported UniVRM version. If compatible UniGLTF and UniVRM 1.0 packages are already installed, keep them and skip their installation steps. Avoid mixing an older copy imported into `Assets` with another copy installed through Package Manager; follow [UniVRM's installation guidance](https://vrm.dev/en/univrm/install/univrm_install/) when replacing an existing installation.
+
+Wait for Unity to finish importing and compiling. Installation is ready when **Mochiya → Upload to Mochiya** and **Mochiya → Avatar Tools** appear in the top menu and the Console has no red compilation errors. See [Unity's Git installation instructions](https://docs.unity3d.com/2022.3/Documentation/Manual/upm-ui-giturl.html) if Package Manager cannot download a package.
+
+Install **VRChat SDK Avatars**, **Modular Avatar (MA)** and **lilToon 2.3.4 or newer** when your source asset uses them, following the asset creator's setup instructions. They are optional integrations for Mochiya, but missing scripts or shaders on your asset must be repaired before conversion.
+
+<details>
+<summary>Alternative installation: manifest or downloaded package</summary>
+
+Add these entries to the existing `dependencies` object in `Packages/manifest.json`. Preserve its other entries and valid JSON commas; do not replace the whole file.
 
 ```json
 "com.vrmc.gltf": "https://github.com/vrm-c/UniVRM.git?path=/Packages/UniGLTF#v0.131.2",
@@ -22,9 +52,117 @@ Requires **Unity 2022.3 or newer** and **UniVRM/UniGLTF 0.131.2 or newer**. Add 
 "org.mochiya.avatar-tools": "https://github.com/mochiya-labs/unity-avatar-tools.git"
 ```
 
-The example pins a verified UniVRM version. For a downloaded checkout, use **Window → Package Manager → Add package from disk** and select its `package.json`.
+For a downloaded Mochiya repository ZIP, extract it to a permanent folder outside your project's `Assets` folder. In Package Manager, choose **Add/Install package from disk…** and select its `package.json`. Install the UniVRM dependencies above as well. Keep the extracted folder in place while the project uses it.
 
-Install **VRChat SDK Avatars**, **Modular Avatar** and **lilToon 2.3.4 or newer** when your source asset uses them. These integrations are optional, but missing scripts or shaders on your asset need to be repaired before conversion.
+</details>
+
+## Prepare your asset
+
+Work in **Edit Mode**: Unity's Play button should be off. Drag the asset's prefab from the **Project** panel into the scene's **Hierarchy** panel, then select its top-level object in the Hierarchy.
+
+- **Whole avatar:** select the avatar root. Clothing and accessories already inside that root are included in the uploaded model.
+- **Separate outfit, hair or accessory:** configure it on its intended base avatar using the asset creator's instructions. Keep the attachment directly beneath the avatar root, with its original MA components intact. Select only the attachment root for upload. Do not run MA Manual Bake before this workflow.
+
+For example, this outfit is a direct child of its base avatar:
+
+```text
+Hierarchy
+└── My avatar
+    ├── Body
+    ├── Armature
+    └── My outfit  ← select this to upload only the outfit
+```
+
+The base avatar supplies the attachment's reference rig; its body and sibling meshes are excluded from a separate attachment export. You do not need to upload the base first. Tell users which base avatar and version the attachment was made for: Mochiya does not automatically reshape clothing to fit every body.
+
+Have a PNG or JPEG cover image ready. If you want buyers to receive a Unity package, source files or instructions, prepare those files separately—the upload does not automatically package your Unity project. Include only content you have permission to upload or distribute.
+
+## Upload directly to Mochiya
+
+You can upload straight from the original scene object; a separate conversion or manual model export is unnecessary. The upload panel supports English, Japanese, Simplified Chinese and Korean through **Language**. The labels below use English.
+
+### Connect your account
+
+1. Sign in to [Mochiya](https://www.mochiya.org), then open your [profile](https://www.mochiya.org/profile).
+2. Expand **API key** below the profile tabs and copy the key.
+3. In Unity, open **Mochiya → Upload to Mochiya**, paste it into **API key**, and click **Connect**.
+4. Check **Connected as** to confirm the correct account.
+
+### Complete the item and upload
+
+1. Drag the prepared scene object from the Hierarchy into **Avatar or attachment**, or select it in the Hierarchy and click **Use selection**. Selecting a source fills the title with its object name; edit the title afterward.
+2. Review the detection message and expand **Compatibility warnings**. Resolve errors before uploading. Warnings describe behavior that may be approximated or omitted.
+3. Keep **Model format: VRM** for supported avatar expressions and spring physics. Choose **GLB** when you need general glTF geometry; ordinary GLB does not carry VRM behavior. The tool generates this model file for you.
+4. Complete the fields below. For a first check, keep **Availability: Personal use**.
+5. Click **Upload for personal use**, or **Publish listing** for a marketplace item. Keep Unity open while it prepares the model, uploads files and finishes the upload.
+6. Wait for **Your item is ready.**, then click **View item**. Reaching the file-transfer stage alone does not mean the item has finished publishing.
+
+| Field | What to enter |
+| --- | --- |
+| Title (required) | A clear item name, up to 80 characters. Selecting another source replaces it. |
+| Category (required) | Avatar body, Outfit, Hair, Accessory or Other. This is the marketplace category, separate from automatic avatar/attachment detection. |
+| Tags (optional) | Add one tag at a time with **Add**; up to 12 distinct tags, 40 characters each. |
+| Availability | **Personal use** keeps it in your library for Avatar Studio. **Listed on marketplace** lets others acquire it for free or buy it. You can change this later on the website. |
+| Item price (marketplace only) | USD `0` for free, or $0.50–$900,000 for paid items. Paid prices must cover the displayed fees. |
+| Cover image (required) | Choose one PNG/JPEG showing the item. It is not captured automatically from Unity. |
+| Export settings (optional) | Select a reusable export profile to customize model metadata and export options. See [export settings](#export-settings). |
+| Additional item details (optional) | Expand this section for gallery images, additional downloadable files, specifications, requirements, credits and license terms. |
+
+**Paid listings:** open your profile's **Seller information**, submit the seller application and bank destination, and wait for Mochiya approval before listing a paid item. Review the panel's **Payment processing fee**, **Mochiya fee** and **Estimated earnings** for the current deductions.
+
+In **Additional item details**, describe supported avatars/versions and setup steps under **Requirements & setup**, and state what is included under **Specifications**. Add appropriate credits and license terms. These listing terms are separate from the metadata embedded in the VRM file; review both before distribution.
+
+| File or text | Limit |
+| --- | --- |
+| Required cover and optional gallery | PNG/JPEG, 10 MiB per image; up to 12 gallery images |
+| Generated model | One VRM/GLB, 500 MiB maximum |
+| Additional downloadable files | Up to 20 files, 500 MiB each |
+| All uploaded files combined | 2 GiB maximum, including images and the generated model |
+| Specifications / Requirements & setup | 5,000 / 4,000 characters |
+| Credits / License terms | 2,000 / 3,000 characters |
+
+Additional downloadable files are only the files you explicitly select. The generated model is used for Mochiya's 3D preview and editor; it does not replace an installable Unity source package for buyers.
+
+### Check and manage your item
+
+Open **View item** and check the cover, details and 3D preview. Then open [Avatar Studio](https://www.mochiya.org/studio) with your uploaded item. For an attachment, test it with its intended base avatar. Check appearance, fit, available controls and motion: a successful upload and a Unity preview do not guarantee identical browser rendering.
+
+Find your uploads in your profile's **Uploaded items** tab. Edit an existing item's details, files, price or availability on the website. The Unity panel creates new items; uploading again after a successful upload creates a separate item. To list an item you tested for personal use, edit that existing item on the website.
+
+### Retry or cancel an upload
+
+**Retry upload** keeps the current upload and skips files already received; an interrupted file starts again from the beginning. **Cancel** stops the current transfer without signing out. **Prepare a new upload**, or changing the form, starts fresh preparation. Unfinished sessions expire after 24 hours and are cleaned up by the service.
+
+After an Editor reload and automatic connection check, retry to recover a completed upload or finalize files that already arrived. If some files are missing and local preparation state was lost, the panel asks you to prepare a new upload. If the final result is uncertain, check **Uploaded items** before starting another upload. Signing out clears local recovery information. Temporary exports are removed after completion or cleanup; source objects remain unchanged.
+
+### Remembered sign-in
+
+After a successful connection, your sign-in is remembered for this Unity project on this computer using your OS credential store. Reopening the panel, reloading scripts or restarting Unity checks the saved key before enabling uploads. **Disconnect** signs out and removes it. Failed connection checks (including a server outage) and API authentication/server/network failures clear the saved sign-in; ordinary item-validation or file-transfer errors keep it.
+
+The key is not stored in project files or shared when you copy the project. Moving the project to another path requires connecting again. Windows uses Credential Manager; macOS uses Keychain; Linux requires `secret-tool` and an available Secret Service keyring. If access is denied, unlock your credential store and reconnect.
+
+Keep the key private. If it is exposed, use **Regenerate** in your Mochiya profile, then connect again with the new key in each Unity project that uses it.
+
+## Troubleshooting
+
+| Problem | What to do |
+| --- | --- |
+| Package Manager cannot find Git | Install Git, restart Unity and Unity Hub, and retry. On Windows, Git must be available on PATH; see the linked Unity installation guide. |
+| No Mochiya menu, or red compilation errors | Wait for compilation, then open **Window → General → Console**. Resolve the first red error. Check that both required UniVRM packages are installed and that older duplicate copies are not present. |
+| Missing scripts or pink materials | Restore the asset's required SDK, MA or shader packages using its creator's instructions before exporting. |
+| “Place the prefab in a scene” or no meshes detected | Drag the prefab into the Hierarchy and select its model root, rather than the Project-panel prefab or an empty container. |
+| Invalid humanoid or parent dependency | For an attachment, use its intended valid base avatar as the direct parent and retain the original MA setup. For a whole avatar, check its Humanoid rig and source setup. Conversion cannot repair an arbitrary broken rig. |
+| Upload button is disabled | Connect and wait for **Connected as**. Confirm the account, network connection and access to your OS credential store. |
+| Asked to update Avatar Tools | Update the package, allow Unity to compile, and reconnect. The installed upload form must be compatible with Mochiya's current service. |
+| Paid listing rejected | Check seller approval in your profile and ensure the price covers the displayed fees. Use $0 only if you intend a free listing. |
+| File or text limit error | Check the table above, including the generated model and total size. Remove unneeded files or reduce image/model size in your source workflow, then prepare again. |
+| Network error or interrupted upload | Restore the connection, reconnect if signed out, and use **Retry upload** when available. Check your profile before starting a new upload if completion was uncertain. |
+| Too many uploads | Wait an hour before creating another upload. Use an existing retry when available. |
+| Clothing, materials or physics look different in Mochiya | Test the intended base, review compatibility warnings and the limits below. Arbitrary VRChat animation logic and exact Unity shader/physics parity are not supported. |
+
+For Git installations, select **Mochiya Avatar Tools** in Package Manager and click **Update**. See [Unity's package update instructions](https://docs.unity3d.com/2022.3/Documentation/Manual/upm-ui-update.html) for revision-specific installation alternatives. Back up first and test the updated project before replacing a working setup. For disk installations, replace the extracted package with the updated download while preserving its location, then let Unity reimport it.
+
+If you still need help, [open an issue](https://github.com/mochiya-labs/unity-avatar-tools/issues) with your Unity/package versions, operating system, exact error text and steps to reproduce it. Remove API keys, personal details and private asset files from screenshots or logs; share a minimal reproduction only when you can redistribute it.
 
 ## Your first conversion or export
 
@@ -45,10 +183,9 @@ Under **Export settings (optional)**, select a profile or choose **Create editab
 
 ## Working with attachments
 
-
 A parent alone does not make a target an attachment. The deciding factor is **dependency**:
 
-Attachments include clothing, accessories, hair and other assets that depend on a base avatar. There is no separate Accessory category.
+Attachments include clothing, accessories, hair and other assets that depend on a base avatar. Conversion has two kinds: Avatar and Attachment. The upload form separately offers an Accessory marketplace category.
 
 - **Avatar:** its own humanoid can be exported as VRM, and its MA setup has no dependency outside the selected subtree.
 - **Attachment:** it needs its direct parent's humanoid, or MA components inside it reference/change the parent, its other descendants, or avatar settings. The direct parent must be a valid independent avatar.
@@ -76,25 +213,6 @@ flowchart TD
 The humanoid check uses the root Animator's valid Humanoid Avatar, required unique bone mappings and contained skin bones. An incomplete rig or a VRM/VRC component alone does not qualify. Broken MA references produce an error before classification. Prepared assets still undergo export validation.
 
 Mochiya records supported MA instructions for web composition; it does not run MA baking. Selecting a whole avatar retains its included attachment rigs separately. Use Modular Avatar first when you need a Unity-side merge, or export the base and attachments separately for web composition.
-
-## Upload directly to Mochiya
-
-1. Open your [Mochiya profile](https://www.mochiya.org/profile), expand **API key** at the bottom, and copy your key.
-2. Open **Mochiya → Upload to Mochiya**, paste the key and connect.
-3. Select a scene avatar or attachment, complete the item details, and add a cover, optional gallery and additional buyer files.
-4. Upload. The tool prepares and exports the model internally, then transfers the files.
-
-After a successful connection, your sign-in is remembered for this Unity project on this computer using your OS credential store. Reopening the panel, reloading scripts or restarting Unity automatically checks the saved key before enabling uploads. **Disconnect** signs out and removes it. A failed connection check (including a server outage), an authentication/server/network failure from the Mochiya API, or a change of server clears the saved sign-in. Ordinary item-validation or file-transfer errors keep it. Regenerating your key on the website requires connecting again with the new key.
-
-The key is not stored in your project files or shared when you copy the project. Moving the project to another path requires signing in again. Windows uses Credential Manager; macOS uses Keychain; Linux requires `secret-tool` and an available Secret Service keyring. If access is denied, unlock your credential store and reconnect. Keep your API key private.
-
-Raw MA/VRC setups are converted through the existing export workflow; prepared VRM GameObjects can be exported directly. Choose VRM or GLB and optionally select the shared export profile. VRM preserves supported VRM behavior; ordinary GLB does not carry the VRM spring runtime. See [supported behavior and limits](#supported-behavior-and-limits). Prefab assets must first be placed in the Hierarchy.
-
-Enter the same item details as the website: title, category, tags, Availability (Personal use or Listed on marketplace) and USD price, cover image, optional gallery, additional buyer files, specifications, requirements, credits and license text. Selecting an avatar or attachment fills the item title with its GameObject name (up to 80 characters), replacing the previous title. You can edit the title afterward. The required model file is produced internally. Source objects remain unchanged. A temporary export is kept for retries and removed afterward.
-
-Images must be PNG/JPEG up to 10 MiB each. Models and additional files are each at most 500 MiB, with a total of 2 GiB. Up to 12 gallery images and 20 additional files are supported. Personal use is the default and keeps the item in your library for Avatar Studio. Listed on marketplace makes the item available for free acquisition or sale. You can change this anytime. Paid sales need the website's seller setup. Additional files are explicitly selected; the tool does not package your project or dependencies automatically.
-
-Uploads show preparation, file transfer and finalization. Retry skips completed files and restarts an interrupted file. Cancel stops the current transfer without signing out; the server expires and cleans unfinished uploads. After an editor reload and automatic connection check, retry to recover a completed upload or finalize files that already arrived; if local preparation state was lost before all files arrived, start a fresh upload. Signing out clears local upload recovery. Existing item edits are available through the website. A Unity preview is not a guarantee of identical browser rendering.
 
 ## Supported behavior and limits
 
