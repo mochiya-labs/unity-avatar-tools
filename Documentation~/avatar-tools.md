@@ -4,6 +4,8 @@
 
 ## Your first conversion or export
 
+See [asset preparation](upload.md#prepare-your-asset) for scene setup and selecting a whole avatar or a separate attachment.
+
 1. Place your avatar or attachment prefab in a scene. If an attachment depends on a base avatar, keep it directly under that avatar with its original MA setup intact.
 2. Open **Mochiya → Avatar Tools** and assign **Avatar or attachment**.
 3. Check **Detected asset** and its explanation. Resolve any errors; expand **Compatibility warnings (optional)** to review unsupported behavior.
@@ -24,7 +26,7 @@ Under **Export settings (optional)**, select a profile or choose **Create editab
 
 A parent alone does not make a target an attachment. The deciding factor is **dependency**:
 
-Attachments include clothing, accessories, hair and other assets that depend on a base avatar. There is no separate Accessory category.
+Attachments include clothing, accessories, hair and other assets that depend on a base avatar. Conversion has two kinds: Avatar and Attachment. The upload form separately offers an Accessory marketplace category.
 
 - **Avatar:** its own humanoid can be exported as VRM, and its MA setup has no dependency outside the selected subtree.
 - **Attachment:** it needs its direct parent's humanoid, or MA components inside it reference/change the parent, its other descendants, or avatar settings. The direct parent must be a valid independent avatar.

@@ -2,7 +2,7 @@
 
 # Mochiya Avatar Tools documentation
 
-Prepare Unity avatars, outfits and accessories for [Mochiya](https://mochiya.org) and compatible web viewers. Mochiya Avatar Tools converts supported VRChat and Modular Avatar setups into **VRM 1.0 or GLB**, preserves supported lilToon materials, and can upload items directly from the Unity Editor.
+Prepare Unity avatars, outfits and accessories for [Mochiya](https://www.mochiya.org) and compatible web viewers. Mochiya Avatar Tools converts supported VRChat and Modular Avatar setups into **VRM 1.0 or GLB**, preserves supported lilToon materials, and can upload items directly from the Unity Editor.
 
 Conversion works on a duplicate and leaves your original setup unchanged. Offline conversion and export do not require a Mochiya account.
 
@@ -11,7 +11,8 @@ The **Avatar Tools** and **Upload to Mochiya** panels each offer a **Language** 
 ## Guides
 
 - [Installation options and dependencies](installation.md)
-- [Upload, file limits, sign-in and recovery](upload.md)
+- [Asset preparation, upload, file limits, sign-in and recovery](upload.md)
+- [Troubleshooting and package updates](troubleshooting.md)
 - [Model conversion, attachments and animation export](avatar-tools.md)
 - [Compatibility, scripting, web playback and licensing](reference.md)
 
