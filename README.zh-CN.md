@@ -59,6 +59,8 @@ Hierarchy
 1. 在 **Upload to Mochiya** 中，从 **Hierarchy** 将模型拖入**人物模型或附属物**字段。检查标题，选择分类和封面图，再选择**个人使用**或**在市场上架**。如有需要，可在**附加物品信息**中添加展示图片或买家下载文件。付费销售需要先在网站完成卖家设置。
 2. 解决提示的错误后，点击**上传供个人使用**或**发布商品**。工具会自动导出模型。完成后点击**查看物品**进行确认；已有物品请在网站上编辑。
 
+![使用 Upload to Mochiya 单独上传服装，不包含基础人物模型。](Documentation~/images/upload-outfit.webp)
+
 [文件限制、连接与上传恢复（英文）](Documentation~/upload.md) · [兼容性与限制（英文）](Documentation~/reference.md#supported-behavior-and-limits)
 
 <a id="local-avatar-tools"></a>

@@ -59,6 +59,8 @@ Hierarchy
 1. **Upload to Mochiya**에서 **Hierarchy**의 모델을 **아바타 또는 부착물** 필드로 드래그합니다. 제목을 확인하고 카테고리와 커버 이미지를 선택한 뒤, **개인 사용** 또는 **마켓플레이스에 등록**을 선택합니다. 필요하면 **추가 아이템 정보**에서 갤러리 이미지나 구매자용 파일을 추가하세요. 유료 판매는 웹사이트에서 판매자 설정을 먼저 완료해야 합니다.
 2. 표시된 오류를 해결한 뒤 **개인 사용으로 업로드** 또는 **상품 게시**를 누릅니다. 모델은 자동으로 내보내집니다. 완료 후 **아이템 보기**로 확인하세요. 기존 아이템은 웹사이트에서 편집합니다.
 
+![Upload to Mochiya로 베이스 아바타를 제외하고 의상만 업로드하는 과정.](Documentation~/images/upload-outfit.webp)
+
 [파일 제한, 연결 및 업로드 복구(영어)](Documentation~/upload.md) · [호환성 및 제한 사항(영어)](Documentation~/reference.md#supported-behavior-and-limits)
 
 <a id="local-avatar-tools"></a>

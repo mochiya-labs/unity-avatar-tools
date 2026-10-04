@@ -59,6 +59,8 @@ For a separate attachment, the base avatar supplies the reference skeleton, but 
 1. In **Upload to Mochiya**, drag the model from the **Hierarchy** into **Avatar or attachment**. Check the title, select a category and cover image, and choose **Personal use** or **Listed on marketplace**. Add gallery images or buyer files under **Additional item details** if needed. Paid listings require seller setup on the website.
 2. Resolve any errors, then click **Upload for personal use** or **Publish listing**. The model is exported automatically. When finished, click **View item**; existing items are edited on the website.
 
+![Uploading an outfit separately from its base avatar with Upload to Mochiya.](Documentation~/images/upload-outfit.webp)
+
 [File limits, sign-in and upload recovery](Documentation~/upload.md) · [Compatibility and limitations](Documentation~/reference.md#supported-behavior-and-limits)
 
 <a id="local-avatar-tools"></a>

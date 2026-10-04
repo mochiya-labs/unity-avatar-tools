@@ -59,6 +59,8 @@ Hierarchy
 1. **Upload to Mochiya**で、**Hierarchy**からモデルを**アバターまたはアタッチメント**欄へドラッグします。タイトルを確認し、カテゴリとカバー画像を選び、**個人利用**または**マーケットプレイスに掲載**を選択します。必要に応じて**追加のアイテム情報**からギャラリー画像や購入者向けファイルを追加します。有料販売にはWebサイトでの販売者設定が必要です。
 2. エラーを解消し、**個人利用としてアップロード**または**出品を公開**を押します。モデルは自動でエクスポートされます。完了後は**アイテムを見る**で確認できます。既存アイテムの編集はWebサイトで行います。
 
+![Upload to Mochiyaでベースアバターを含めず衣装だけをアップロードする手順。](Documentation~/images/upload-outfit.webp)
+
 [ファイル制限・接続・アップロードの再開（英語）](Documentation~/upload.md) · [互換性と制限（英語）](Documentation~/reference.md#supported-behavior-and-limits)
 
 <a id="local-avatar-tools"></a>
