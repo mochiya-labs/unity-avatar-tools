@@ -29,7 +29,7 @@ If UniVRM/UniGLTF 0.131.2 or newer is already installed, keep the compatible ins
 
 ## Connect to upload to Mochiya
 
-An **API key is required only for Upload to Mochiya**. To convert or export files on your computer, skip to [Mochiya Avatar Tools](#mochiya-avatar-tools); you do not need an account or API key.
+An **API key is required only for Upload to Mochiya**. To convert or export files on your computer, skip to [Mochiya Avatar Tools](#local-avatar-tools); you do not need an account or API key.
 
 1. Sign in to [Mochiya](https://www.mochiya.org/profile), or create an account if needed, and open your profile.
 2. Expand **API key** near the bottom of the profile and copy your key. This key lets the Unity tool upload to your Mochiya account.
@@ -41,11 +41,27 @@ An **API key is required only for Upload to Mochiya**. To convert or export file
 
 ## Upload directly to Mochiya
 
-1. In **Edit Mode**, place your model prefab in the scene. Keep an outfit or accessory that depends on an avatar directly under that avatar in the Hierarchy.
-2. In **Upload to Mochiya**, drag the model from the **Hierarchy** into **Avatar or attachment**. Check the title, select a category and cover image, and choose **Personal use** or **Listed on marketplace**. Add gallery images or buyer files under **Additional item details** if needed. Paid listings require seller setup on the website.
-3. Resolve any errors, then click **Upload for personal use** or **Publish listing**. The model is exported automatically. When finished, click **View item**; existing items are edited on the website.
+In **Edit Mode**, drag your model prefab from the **Project** panel into the scene's **Hierarchy**. Choose what you want to upload:
+
+- **Whole avatar:** drag the avatar's root object. The upload includes the clothing and accessories inside it.
+- **Attachment only (outfit, hair or accessory):** set it up on its intended avatar, following its creator's instructions. Keep it directly under the avatar root with its original Modular Avatar components intact, then drag only the attachment's root. Do not run MA Manual Bake first.
+
+```text
+Hierarchy
+└── My avatar      ← drag this to upload the whole avatar
+    ├── Body
+    ├── Armature
+    └── My outfit  ← drag this to upload only the outfit
+```
+
+For a separate attachment, the base avatar supplies the reference skeleton, but its body and other attachments are not included. You do not need to upload the base avatar first. Specify the intended avatar and version in your item's requirements; clothing is not automatically reshaped to fit other bodies.
+
+1. In **Upload to Mochiya**, drag the model from the **Hierarchy** into **Avatar or attachment**. Check the title, select a category and cover image, and choose **Personal use** or **Listed on marketplace**. Add gallery images or buyer files under **Additional item details** if needed. Paid listings require seller setup on the website.
+2. Resolve any errors, then click **Upload for personal use** or **Publish listing**. The model is exported automatically. When finished, click **View item**; existing items are edited on the website.
 
 [File limits, sign-in and upload recovery](Documentation~/upload.md) · [Compatibility and limitations](Documentation~/reference.md#supported-behavior-and-limits)
+
+<a id="local-avatar-tools"></a>
 
 ## Mochiya Avatar Tools
 
