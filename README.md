@@ -4,10 +4,13 @@ Prepare Unity avatars, outfits and accessories for [Mochiya](https://mochiya.org
 
 Conversion works on a duplicate and leaves your original setup unchanged. Offline conversion and export do not require a Mochiya account.
 
+The **Avatar Tools** and **Upload to Mochiya** panels each offer a **Language** selector for English, Japanese, Simplified Chinese and Korean. Each panel explains its purpose below the selector. Detailed diagnostics from Unity and other packages may appear in their original language.
+
 ## What you can do
 
 - Convert an avatar or attachment into an editable VRM GameObject.
 - Export a VRM or GLB without creating a permanent scene duplicate.
+- Export a Humanoid AnimationClip or single-frame pose as VRM Animation (`.vrma`), without selecting an avatar.
 - Preserve supported expressions, physics and attachment instructions for web playback.
 - Upload a model, cover, gallery and additional buyer files directly to Mochiya.
 - Reuse export profiles for metadata and native UniVRM/UniGLTF settings.
@@ -31,7 +34,7 @@ Install **VRChat SDK Avatars**, **Modular Avatar** and **lilToon 2.3.4 or newer*
 1. Place your avatar or attachment prefab in a scene. If an attachment depends on a base avatar, keep it directly under that avatar with its original MA setup intact.
 2. Open **Mochiya → Avatar Tools** and assign **Avatar or attachment**.
 3. Check **Detected asset** and its explanation. Resolve any errors; expand **Compatibility warnings (optional)** to review unsupported behavior.
-4. Choose **Convert to VRM GameObject** to keep an editable scene duplicate, or **Export VRM / GLB…** to save a model file.
+4. Review **Export settings (optional)** above the action buttons, then choose **Convert to VRM GameObject** to keep an editable scene duplicate, or **Export VRM / GLB…** to save a model file.
 
 Choose **VRM** for supported humanoid, expression and spring-bone behavior. Choose **GLB** for general glTF use; ordinary GLB does not carry the VRM runtime behavior. The separate **Mochiya → Export GLB or VRM with lilToon…** window also supports ordinary props as GLB.
 
@@ -96,6 +99,18 @@ Images must be PNG/JPEG up to 10 MiB each. Models and additional files are each 
 
 Uploads show preparation, file transfer and finalization. Retry skips completed files and restarts an interrupted file. Cancel stops the current transfer without signing out; the server expires and cleans unfinished uploads. After an editor reload and automatic connection check, retry to recover a completed upload or finalize files that already arrived; if local preparation state was lost before all files arrived, start a fresh upload. Signing out clears local upload recovery. Existing item edits are available through the website. A Unity preview is not a guarantee of identical browser rendering.
 
+## Export a Unity animation as VRMA
+
+**VRMA** is the file extension for **VRM Animation**, a format for playing humanoid motion on compatible avatars in Mochiya Avatar Studio and other supporting apps. A single-frame AnimationClip stores a pose; a multi-frame clip can store motion.
+
+1. Open **Mochiya → Avatar Tools** and find **Export animation**.
+2. Assign a **Humanoid AnimationClip** to **Animation Clip**.
+3. Choose **Export VRM Animation (.vrma)…** and save the `.vrma` file.
+
+The exporter uses a built-in, upright humanoid reference skeleton. It samples the clip at 30 Hz including its endpoint, or writes one sample for a static pose. Evaluated hips position and rotation are preserved; no scene avatar is modified. You can cancel sampling before the file is written. In Mochiya Avatar Studio, add the exported file through the animation controls and select it for playback.
+
+This exports humanoid bone motion, including fingers, for compatible VRMA players. Generic/Legacy clips, object or blendshape curves, facial expressions, Animator controllers, constraints, events and runtime IK are not exported. Use a standalone Humanoid-only clip. Different avatar proportions can change foot contact and hand placement; VRMA retargeting does not guarantee an identical pose on every avatar. Export profiles for VRM/GLB models do not affect animation export.
+
 ## Supported behavior and limits
 
 **VRM** means `VRMC_vrm` unless another extension is named; **Mochiya** means `MOCHIYA_avatar_composition`.
@@ -142,6 +157,8 @@ MochiyaLilToonExporter.ExportWithProfile(converted.Root, path, profile);
 
 Omit the profile argument or pass `null` for the bundled default. Reports contain errors, warnings and unsupported features. The explicit `ConvertAvatarInScene` and `ConvertAttachmentInScene` APIs enforce the same classification rules. Dispose a conversion result only to remove its duplicate. Use `MochiyaLilToonExporter.ExportGlb(prop, path)` for a general model without a humanoid.
 
+For a Humanoid `AnimationClip`, use `MochiyaAnimationExporter.Export(clip, "motion.vrma")`. `MochiyaAnimationExporter.Create(clip)` returns the VRMA bytes without writing a file. Both accept an optional `Action<float>` progress callback; throwing `OperationCanceledException` from it cancels sampling and releases temporary resources. These APIs require Edit Mode and no reference avatar.
+
 ## Architecture and web playback
 
 | Package | Responsibility |
@@ -164,3 +181,5 @@ Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with 
 ## License
 
 Mochiya Avatar Tools is [MIT-licensed](LICENSE). UniVRM/UniGLTF (VRM Consortium) and lilToon (lilxyzw) are separate MIT-licensed projects whose source is not redistributed here. Models and textures retain their own licenses.
+
+The animation exporter adapts [AnimationClipToVrmaSample](https://github.com/malaybaku/AnimationClipToVrmaSample), Copyright (c) 2023 Baku Dreameater, under the MIT License. Its copyright and complete license notice are retained in `Editor/MochiyaAnimationExporter.cs`. The reference skeleton is procedural; no source model or model-derived reference-pose asset is included.

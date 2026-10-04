@@ -33,25 +33,25 @@ namespace Mochiya.AvatarTools.Editor
 
     internal static class MochiyaExportProfileGUI
     {
-        internal static void Draw(ref MochiyaExportProfile profile)
+        internal static void Draw(ref MochiyaExportProfile profile, string locale = "en")
         {
             if (profile == null) profile = MochiyaExportProfile.Default;
-            profile = (MochiyaExportProfile)EditorGUILayout.ObjectField("Export profile", profile, typeof(MochiyaExportProfile), false);
+            profile = (MochiyaExportProfile)EditorGUILayout.ObjectField(MochiyaPanelText.Get(locale, "Export profile"), profile, typeof(MochiyaExportProfile), false);
             if (profile == null) profile = MochiyaExportProfile.Default;
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Inspect profile")) Selection.activeObject = profile;
-                if (GUILayout.Button("New profile…"))
+                if (GUILayout.Button(MochiyaPanelText.Get(locale, "Inspect profile"))) Selection.activeObject = profile;
+                if (GUILayout.Button(MochiyaPanelText.Get(locale, "New profile…")))
                 {
-                    var created = CreateCopy(profile);
+                    var created = CreateCopy(profile, locale);
                     if (created != null) profile = created;
                 }
             }
         }
 
-        internal static MochiyaExportProfile CreateCopy(MochiyaExportProfile source)
+        internal static MochiyaExportProfile CreateCopy(MochiyaExportProfile source, string locale = "en")
         {
-            var path = EditorUtility.SaveFilePanelInProject("Create export profile", "Mochiya Export Profile", "asset", "Save reusable export settings.");
+            var path = EditorUtility.SaveFilePanelInProject(MochiyaPanelText.Get(locale, "Create export profile"), "Mochiya Export Profile", "asset", MochiyaPanelText.Get(locale, "Save reusable export settings."));
             if (string.IsNullOrEmpty(path)) return null;
             var copy = Object.Instantiate(source);
             copy.hideFlags = HideFlags.None;

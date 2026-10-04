@@ -39,8 +39,7 @@ namespace Mochiya.AvatarTools.Editor
         private MochiyaUploadRequest requestData;
         private Texture2D coverPreview;
         private string previewPath;
-        private static readonly string[] Locales = { "en", "ja", "zh-CN", "ko" };
-        private static readonly string[] LocaleNames = { "English", "日本語", "简体中文", "한국어" };
+        private MochiyaUploadAnalysis analysis;
 
         [MenuItem("Mochiya/Upload to Mochiya")]
         public static void Open()
@@ -51,6 +50,10 @@ namespace Mochiya.AvatarTools.Editor
         }
         private void OnEnable()
         {
+            analysis?.Dispose();
+            analysis = new MochiyaUploadAnalysis();
+            EditorApplication.update -= UpdateAnalysis;
+            EditorApplication.update += UpdateAnalysis;
             closing = false;
             connected = false; busy = false; activeOrigin = null;
             connection = new MochiyaUploadConnection(new MochiyaCredentialStore(Path.GetDirectoryName(Application.dataPath)));
@@ -58,6 +61,11 @@ namespace Mochiya.AvatarTools.Editor
             var asset = AssetDatabase.LoadAssetAtPath<TextAsset>("Packages/org.mochiya.avatar-tools/Editor/UploadContract.json");
             if (asset != null) { contract = JsonUtility.FromJson<MochiyaUploadContract>(asset.text); SetLocale(); }
             EditorApplication.delayCall += RestoreConnection;
+        }
+        private void UpdateAnalysis()
+        {
+            if (!closing && !busy && analysis != null &&
+                analysis.Refresh(target, profile, outputFormat == 0, warnings, EditorApplication.timeSinceStartup)) Repaint();
         }
         private void RestoreConnection()
         {
@@ -89,6 +97,8 @@ namespace Mochiya.AvatarTools.Editor
         private void OnDisable()
         {
             closing = true;
+            EditorApplication.update -= UpdateAnalysis;
+            analysis?.Dispose(); analysis = null;
             EditorApplication.delayCall -= RestoreConnection;
             cancellation?.Cancel(); client?.Dispose(); connected = false; token = "";
             if (coverPreview != null) DestroyImmediate(coverPreview);
@@ -102,8 +112,10 @@ namespace Mochiya.AvatarTools.Editor
             scroll = EditorGUILayout.BeginScrollView(scroll);
             using (new EditorGUI.DisabledScope(busy))
             {
-                int language = EditorGUILayout.Popup(L("language"), Math.Max(0, Array.IndexOf(Locales, locale)), LocaleNames);
-                if (Locales[language] != locale) { locale = Locales[language]; SetLocale(); if (connected) _ = Connect(); }
+                var selectedLocale = MochiyaPanelText.LanguageField(locale);
+                if (selectedLocale != locale) { locale = selectedLocale; SetLocale(); if (connected) _ = Connect(); }
+                EditorGUILayout.LabelField(MochiyaPanelText.Get(locale, MochiyaPanelText.UploadIntro), EditorStyles.wordWrappedLabel);
+                EditorGUILayout.Space(10);
                 if (origin != MochiyaUploadClient.ProductionOrigin) EditorGUILayout.HelpBox(origin, MessageType.Info);
                 if (!connected) token = EditorGUILayout.PasswordField(L("token"), token);
                 using (new EditorGUILayout.HorizontalScope())
@@ -150,17 +162,17 @@ namespace Mochiya.AvatarTools.Editor
                 if (GUILayout.Button(L("useSelection"))) { target = Selection.activeGameObject; GUI.changed = true; }
                 if (EditorGUI.EndChangeCheck() && target != null) item.title = target.name.Substring(0, Math.Min(target.name.Length, contract.limits.title));
                 outputFormat = EditorGUILayout.Popup(L("format"), outputFormat, new[] { "VRM", "GLB" });
-                if (target != null)
+                if (target != null && analysis?.Target != null && analysis.Target.Root == target)
                 {
-                    var detected = MochiyaAvatarWorkflow.Detect(target);
+                    var detected = analysis.Target;
                     EditorGUILayout.HelpBox(detected.Error ?? detected.Reason, detected.Kind == MochiyaTargetKind.Invalid ? MessageType.Error : MessageType.Info);
                 }
                 exportSettings = FormFoldout(exportSettings, L("exportSettings"));
-                if (exportSettings) MochiyaExportProfileGUI.Draw(ref profile);
+                if (exportSettings) MochiyaExportProfileGUI.Draw(ref profile, locale);
                 warnings = FormFoldout(warnings, L("warnings"));
-                if (warnings && target != null)
+                if (warnings && target != null && analysis?.Report != null && analysis.Target?.Root == target)
                 {
-                    var report = MochiyaAvatarWorkflow.Validate(target, outputFormat == 0, profile);
+                    var report = analysis.Report;
                     foreach (var error in report.Errors) EditorGUILayout.HelpBox(error, MessageType.Error);
                     foreach (var warning in report.Warnings) EditorGUILayout.HelpBox(warning, MessageType.Warning);
                 }

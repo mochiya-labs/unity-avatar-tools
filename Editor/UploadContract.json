@@ -1422,7 +1422,7 @@
         },
         {
           "name": "source",
-          "value": "头像或附件"
+          "value": "人物模型或附属物"
         },
         {
           "name": "useSelection",
@@ -1498,7 +1498,7 @@
         },
         {
           "name": "noSource",
-          "value": "请从层级面板选择头像或附件。"
+          "value": "请从层级面板选择人物模型或附属物。"
         },
         {
           "name": "token",
