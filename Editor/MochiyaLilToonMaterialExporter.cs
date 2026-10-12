@@ -7,6 +7,7 @@ namespace Mochiya.AvatarTools.Editor
     internal sealed class MochiyaLilToonMaterialExporter : IMaterialExporter
     {
         private readonly IMaterialExporter _fallback;
+        public LilToonCubemapExporter Cubemaps { private get; set; }
 
         public bool HasExportedLilToonMaterial { get; private set; }
 
@@ -28,7 +29,7 @@ namespace Mochiya.AvatarTools.Editor
             }
 
             ApplyCoreFallback(destination, material, textureExporter);
-            LilToonMaterialSerializer.Attach(destination, material, textureExporter);
+            LilToonMaterialSerializer.Attach(destination, material, textureExporter, Cubemaps);
             HasExportedLilToonMaterial = true;
             return destination;
         }

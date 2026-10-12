@@ -123,10 +123,11 @@ namespace Mochiya.AvatarTools.Editor
                 var propertyName = shader.GetPropertyName(index);
                 var texture = material.GetTexture(propertyName);
                 if (texture == null || texture.dimension == TextureDimension.Tex2D) continue;
+                if (LilToonCubemapExporter.IsSupported(propertyName, texture)) continue;
 
                 issues.Add(new MochiyaExportIssue(
                     MochiyaExportIssueSeverity.Error,
-                    $"Material '{material.name}' texture '{propertyName}' is {texture.dimension}; glTF can embed only 2D material textures."));
+                    $"Material '{material.name}' texture '{propertyName}' is {texture.dimension}; supported inputs are 2D textures and a power-of-two Cubemap asset in _ReflectionCubeTex (one level or a complete mip chain). Cube RenderTextures, arrays and 3D textures cannot be exported."));
             }
         }
     }

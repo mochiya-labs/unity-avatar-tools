@@ -12,13 +12,13 @@ namespace Mochiya.AvatarTools.Editor
     internal static class LilToonMaterialSerializer
     {
         public const string ExtensionName = "MOCHIYA_materials_liltoon";
-        public const string SpecVersion = "1.2";
+        public const string SpecVersion = "1.3";
 
         private static readonly Regex DataTextureName = new Regex(
             "(_Mask|Mask$|Normal|Bump|Dither|Parallax|Noise|UDIM|AudioLink|Metallic|Smoothness)",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-        public static void Attach(glTFMaterial destination, Material source, ITextureExporter textureExporter)
+        public static void Attach(glTFMaterial destination, Material source, ITextureExporter textureExporter, LilToonCubemapExporter cubemaps)
         {
             if (destination == null) throw new ArgumentNullException(nameof(destination));
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -45,6 +45,11 @@ namespace Mochiya.AvatarTools.Editor
             WriteProperties(formatter, source);
             formatter.Key("textures");
             WriteTextures(formatter, source, textureExporter);
+            if (source.HasProperty(LilToonCubemapExporter.Property) && source.GetTexture(LilToonCubemapExporter.Property) != null)
+            {
+                formatter.Key("cubeTextures");
+                cubemaps.Write(formatter, source);
+            }
 
             formatter.EndMap();
             glTFExtensionExport.GetOrCreate(ref destination.extensions)
@@ -114,7 +119,7 @@ namespace Mochiya.AvatarTools.Editor
                 if (shader.GetPropertyType(index) != ShaderPropertyType.Texture) continue;
                 var textureName = shader.GetPropertyName(index);
                 var transformName = textureName + "_ST";
-                if (serializedNames.Contains(transformName) || material.GetTexture(textureName) == null) continue;
+                if (serializedNames.Contains(transformName) || material.GetTexture(textureName) == null || shader.GetPropertyTextureDimension(index) != TextureDimension.Tex2D) continue;
 
                 var scale = material.GetTextureScale(textureName);
                 var offset = material.GetTextureOffset(textureName);
@@ -137,6 +142,9 @@ namespace Mochiya.AvatarTools.Editor
                 var name = shader.GetPropertyName(index);
                 var texture = material.GetTexture(name);
                 if (texture == null) continue;
+                if (LilToonCubemapExporter.IsSupported(name, texture)) continue;
+                if (texture.dimension != TextureDimension.Tex2D)
+                    throw new NotSupportedException($"Material '{material.name}' texture '{name}' has unsupported dimension {texture.dimension}.");
 
                 var attributes = shader.GetPropertyAttributes(index);
                 var isNormal = HasNormalAttribute(attributes);

@@ -35,7 +35,8 @@ namespace Mochiya.AvatarTools.Editor
 
             var data = new ExportingGltfData();
             var materialExporter = new MochiyaLilToonMaterialExporter(
-                MaterialExporterUtility.GetValidGltfMaterialExporter());
+                MaterialExporterUtility.GetValidGltfMaterialExporter())
+            { Cubemaps = new LilToonCubemapExporter(data, settings.InverseAxis) };
             using (var exporter = new MochiyaGltfExporter(data, settings, materialExporter))
             {
                 exporter.Prepare(root);
@@ -104,6 +105,7 @@ namespace Mochiya.AvatarTools.Editor
                         materialExporter: materialExporter,
                         textureSerializer: new EditorTextureSerializer()))
                     {
+                        materialExporter.Cubemaps = new LilToonCubemapExporter(exporter.Storage, Axes.X);
                         exporter.Export(
                             exportRoot,
                             model,

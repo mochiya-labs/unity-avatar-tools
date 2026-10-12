@@ -20,7 +20,7 @@
 | Mochiya `objectToggle` | MA Object Toggle | Grouped visibility entries; no cyclic visibility rules. |
 | Mochiya `materialSetter` | MA Material Setter | Grouped whole-material slot replacements. |
 | Mochiya `menuItem` | MA Toggle/Button menu items | Automatic object activation and local parameter metadata; buttons are momentary. No Animator execution/networking/menu hierarchy. |
-| lilToon materials (`MOCHIYA_materials_liltoon`) | All nine regular rendering modes; Normal/OnePass/TwoPass transparency and outlines | Extension 1.2 requires an updated runtime. Additional-light passes and Unity shadow parity remain deferred. 2D textures/UV0 only; dense animated fur has CPU cost in WebGL2. Lite, Multi, FurOnly and tessellation remain unsupported. |
+| lilToon materials (`MOCHIYA_materials_liltoon`) | All nine regular rendering modes; Normal/OnePass/TwoPass transparency and outlines | Embedded reflection cubemaps require a runtime supporting extension 1.3. Additional-light passes and Unity shadow parity remain deferred. 2D textures use UV0; `_ReflectionCubeTex` supports power-of-two Cubemap assets with a base level or complete mip chain, retaining HDR and authored mips. Live cube RenderTextures are unsupported; dense animated fur has CPU cost in WebGL2. Lite, Multi, FurOnly and tessellation remain unsupported. |
 
 Component records preserve source roots, settings, conditions and grouped entries; resolved bone pairs are computed by the web runtime. The `@mochiya/avatar-composition` specification defines the wire format and runtime rules. Each VRM retains its own spring/collider groups; cross-asset collider linking is outside this profile.
 

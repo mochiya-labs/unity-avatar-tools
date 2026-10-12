@@ -65,7 +65,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
                     var bytes = System.IO.File.ReadAllBytes(path);
                     var json = System.Text.Encoding.UTF8.GetString(bytes, 20, System.BitConverter.ToInt32(bytes, 12));
                     StringAssert.Contains("\"renderMode\":\"" + mode + "\"", json);
-                    StringAssert.Contains("\"specVersion\":\"1.2\"", json);
+                    StringAssert.Contains("\"specVersion\":\"1.3\"", json);
                     if (mode == "transparent") StringAssert.Contains("\"transparencyMode\":\"" + transparency + "\"", json);
                     if (mode == "fur-cutout") StringAssert.Contains("\"alphaMode\":\"MASK\"", json);
                     Assert.That(UnityEditor.EditorJsonUtility.ToJson(material), Is.EqualTo(before));
