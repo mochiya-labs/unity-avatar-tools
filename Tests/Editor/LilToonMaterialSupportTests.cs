@@ -1,9 +1,58 @@
+using UniJSON;
 using NUnit.Framework;
 
 namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class LilToonMaterialSupportTests
     {
+        [TestCase(false, 2450, 3000)]
+        [TestCase(true, 2450, 3000)]
+        [TestCase(false, -1, -1)]
+        public void ExportPreservesEffectiveQueuesWithoutChangingSource(bool vrm, int innerQueue, int outerQueue)
+        {
+            var shader = UnityEngine.Shader.Find("Hidden/lilToonTransparent");
+            Assert.That(shader, Is.Not.Null, "Queue round-trip requires lilToon.");
+            var root = AvatarConversionTests.CreateAvatar();
+            var inner = new UnityEngine.Material(shader) { name = "QueueInner", renderQueue = innerQueue };
+            var outer = new UnityEngine.Material(shader) { name = "QueueOuter", renderQueue = outerQueue };
+            inner.SetFloat("_ZWrite", 1); outer.SetFloat("_ZWrite", 1);
+            root.GetComponentInChildren<UnityEngine.SkinnedMeshRenderer>().sharedMaterial = inner;
+            var shell = UnityEngine.GameObject.CreatePrimitive(UnityEngine.PrimitiveType.Cube);
+            shell.transform.SetParent(root.transform, false);
+            shell.GetComponent<UnityEngine.Renderer>().sharedMaterial = outer;
+            var innerBefore = UnityEditor.EditorJsonUtility.ToJson(inner);
+            var outerBefore = UnityEditor.EditorJsonUtility.ToJson(outer);
+            var path = System.IO.Path.GetFullPath("MochiyaTests/queues-" + (vrm ? "vrm" : innerQueue < 0 ? "default" : "glb") + (vrm ? ".vrm" : ".glb"));
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+            try
+            {
+                if (vrm) MochiyaLilToonExporter.ExportVrm(root, path);
+                else MochiyaLilToonExporter.ExportGlb(root, path);
+                var bytes = System.IO.File.ReadAllBytes(path);
+                var json = System.Text.Encoding.UTF8.GetString(bytes, 20, System.BitConverter.ToInt32(bytes, 12)).ParseAsJson();
+                var found = 0;
+                foreach (var material in json["materials"].ArrayItems())
+                {
+                    var name = material["name"].GetString();
+                    if (name != "QueueInner" && name != "QueueOuter") continue;
+                    var extension = material["extensions"]["MOCHIYA_materials_liltoon"];
+                    Assert.That(extension["renderQueue"].GetInt32(), Is.EqualTo(name == "QueueInner" ? inner.renderQueue : outer.renderQueue));
+                    Assert.That(extension["renderMode"].GetString(), Is.EqualTo("transparent"));
+                    Assert.That(extension["properties"]["_ZWrite"].GetSingle(), Is.EqualTo(1));
+                    found++;
+                }
+                Assert.That(found, Is.EqualTo(2));
+                Assert.That(UnityEditor.EditorJsonUtility.ToJson(inner), Is.EqualTo(innerBefore));
+                Assert.That(UnityEditor.EditorJsonUtility.ToJson(outer), Is.EqualTo(outerBefore));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+                UnityEngine.Object.DestroyImmediate(inner);
+                UnityEngine.Object.DestroyImmediate(outer);
+            }
+        }
+
         [TestCase("lilToon")]
         [TestCase("Hidden/lilToonOutline")]
         [TestCase("Hidden/lilToonCutout")]
