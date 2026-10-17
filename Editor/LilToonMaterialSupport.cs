@@ -9,24 +9,25 @@ namespace Mochiya.AvatarTools.Editor
     /// </summary>
     public static class LilToonMaterialSupport
     {
-        private static readonly HashSet<string> SupportedShaderNames = new HashSet<string>(StringComparer.Ordinal)
+        private static readonly Dictionary<string, (string Mode, string Transparency)> SupportedShaders =
+            new Dictionary<string, (string Mode, string Transparency)>(StringComparer.Ordinal)
         {
-            "lilToon",
-            "Hidden/lilToonOutline",
-            "Hidden/lilToonCutout",
-            "Hidden/lilToonCutoutOutline",
-            "Hidden/lilToonTransparent",
-            "Hidden/lilToonTransparentOutline",
-            "Hidden/lilToonRefraction",
-            "Hidden/lilToonFur",
-            "Hidden/lilToonGem",
-            "Hidden/lilToonRefractionBlur",
-            "Hidden/lilToonFurCutout",
-            "Hidden/lilToonFurTwoPass",
-            "Hidden/lilToonOnePassTransparent",
-            "Hidden/lilToonOnePassTransparentOutline",
-            "Hidden/lilToonTwoPassTransparent",
-            "Hidden/lilToonTwoPassTransparentOutline",
+            { "lilToon", ("opaque", "normal") },
+            { "Hidden/lilToonOutline", ("opaque", "normal") },
+            { "Hidden/lilToonCutout", ("cutout", "normal") },
+            { "Hidden/lilToonCutoutOutline", ("cutout", "normal") },
+            { "Hidden/lilToonTransparent", ("transparent", "normal") },
+            { "Hidden/lilToonTransparentOutline", ("transparent", "normal") },
+            { "Hidden/lilToonOnePassTransparent", ("transparent", "one-pass") },
+            { "Hidden/lilToonOnePassTransparentOutline", ("transparent", "one-pass") },
+            { "Hidden/lilToonTwoPassTransparent", ("transparent", "two-pass") },
+            { "Hidden/lilToonTwoPassTransparentOutline", ("transparent", "two-pass") },
+            { "Hidden/lilToonRefraction", ("refraction", "normal") },
+            { "Hidden/lilToonRefractionBlur", ("refraction-blur", "normal") },
+            { "Hidden/lilToonFur", ("fur", "normal") },
+            { "Hidden/lilToonFurCutout", ("fur-cutout", "normal") },
+            { "Hidden/lilToonFurTwoPass", ("fur-two-pass", "normal") },
+            { "Hidden/lilToonGem", ("gem", "normal") },
         };
 
         public static bool IsLilToonShaderName(string shaderName)
@@ -37,7 +38,7 @@ namespace Mochiya.AvatarTools.Editor
 
         public static bool IsSupportedShaderName(string shaderName)
         {
-            return SupportedShaderNames.Contains(shaderName);
+            return shaderName != null && SupportedShaders.ContainsKey(shaderName);
         }
 
         public static bool IsLilToonMaterial(Material material)
@@ -57,51 +58,26 @@ namespace Mochiya.AvatarTools.Editor
                 return false;
             }
 
-            if (material.HasProperty("_TransparentMode"))
-            {
-                var mode = Mathf.RoundToInt(material.GetFloat("_TransparentMode"));
-                if (mode < 0 || mode > 2)
-                {
-                    reason = $"Material rendering mode {mode} is outside opaque, cutout, and transparent.";
-                    return false;
-                }
-            }
-
             return true;
         }
 
         public static string GetRenderMode(Material material)
         {
             if (material == null) throw new ArgumentNullException(nameof(material));
-            var shaderName = material.shader != null ? material.shader.name : string.Empty;
-            if (shaderName == "Hidden/lilToonRefractionBlur") return "refraction-blur";
-            if (shaderName == "Hidden/lilToonFurCutout") return "fur-cutout";
-            if (shaderName == "Hidden/lilToonFurTwoPass") return "fur-two-pass";
-            if (shaderName == "Hidden/lilToonRefraction") return "refraction";
-            if (shaderName == "Hidden/lilToonFur") return "fur";
-            if (shaderName == "Hidden/lilToonGem") return "gem";
-            if (shaderName.IndexOf("Cutout", StringComparison.OrdinalIgnoreCase) >= 0) return "cutout";
-            if (shaderName.IndexOf("Transparent", StringComparison.OrdinalIgnoreCase) >= 0) return "transparent";
-
-            if (material.HasProperty("_TransparentMode"))
-            {
-                switch (Mathf.RoundToInt(material.GetFloat("_TransparentMode")))
-                {
-                    case 1: return "cutout";
-                    case 2: return "transparent";
-                }
-            }
-
-            return "opaque";
+            return GetShaderModes(material).Mode;
         }
 
         public static string GetTransparencyMode(Material material)
         {
             if (material == null) throw new ArgumentNullException(nameof(material));
-            var name = material.shader != null ? material.shader.name : string.Empty;
-            if (name.IndexOf("TwoPassTransparent", StringComparison.Ordinal) >= 0) return "two-pass";
-            if (name.IndexOf("OnePassTransparent", StringComparison.Ordinal) >= 0) return "one-pass";
-            return "normal";
+            return GetShaderModes(material).Transparency;
         }
+        private static (string Mode, string Transparency) GetShaderModes(Material material)
+        {
+            var name = material.shader != null ? material.shader.name : string.Empty;
+            if (SupportedShaders.TryGetValue(name, out var modes)) return modes;
+            throw new NotSupportedException($"Unsupported lilToon shader '{name}'.");
+        }
+
     }
 }

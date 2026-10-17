@@ -35,14 +35,6 @@ namespace Mochiya.AvatarTools.Editor
             formatter.Value(source.shader.name);
             formatter.Key("renderQueue");
             formatter.Value(source.renderQueue >= 0 ? source.renderQueue : source.shader.renderQueue);
-            formatter.Key("renderMode");
-            formatter.Value(LilToonMaterialSupport.GetRenderMode(source));
-            if (LilToonMaterialSupport.GetRenderMode(source) == "transparent")
-            {
-                formatter.Key("transparencyMode");
-                formatter.Value(LilToonMaterialSupport.GetTransparencyMode(source));
-            }
-
             formatter.Key("properties");
             WriteProperties(formatter, source);
             formatter.Key("textures");

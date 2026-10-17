@@ -65,6 +65,8 @@ The host enables rendering with `enableLilToon(renderer)` and registers both `Av
 
 The composition extension uses component-based format. The selected export root starts active regardless of its Unity activation; child objects preserve their combined GameObject/renderer activation. The runtime treats a multi-material Unity object as one editable item. See the [Avatar Composition reference](https://github.com/mochiya-labs/avatar-composition/blob/main/specification/README.md) for activation and component behavior.
 
+The lilToon material extension preserves the original shader name in `shaderVariant` and the authored material properties. Shader mode and pass selection follow that name; exports omit the deprecated `renderMode` and `transparencyMode` metadata. This does not modify the source Unity material.
+
 Both Mochiya extensions are optional additions to standard files. Ordinary viewers display standalone geometry and fallback materials without attachment actions. Matching uses bone, armature, mesh and blendshape names; missing names warn and skip only affected operations. It does not check base identity or reshape garments to fit different bodies.
 
 Both converted avatars and attachments carry `MOCHIYA_avatar_composition`, with `assetKind: "avatar"` or `"attachment"`. Attachment exports use `rig.role: "attachmentReference"`. The composition extension stores MA-style component instructions.

@@ -37,7 +37,7 @@ namespace Mochiya.AvatarTools.Editor.Tests
                     if (name != "QueueInner" && name != "QueueOuter") continue;
                     var extension = material["extensions"]["MOCHIYA_materials_liltoon"];
                     Assert.That(extension["renderQueue"].GetInt32(), Is.EqualTo(name == "QueueInner" ? inner.renderQueue : outer.renderQueue));
-                    Assert.That(extension["renderMode"].GetString(), Is.EqualTo("transparent"));
+                    Assert.That(extension["shaderVariant"].GetString(), Is.EqualTo("Hidden/lilToonTransparent"));
                     Assert.That(extension["properties"]["_ZWrite"].GetSingle(), Is.EqualTo(1));
                     found++;
                 }
@@ -84,6 +84,11 @@ namespace Mochiya.AvatarTools.Editor.Tests
             Assert.That(LilToonMaterialSupport.IsSupportedShaderName(shaderName), Is.False);
         }
 
+        [TestCase("lilToon", "opaque")]
+        [TestCase("Hidden/lilToonOutline", "opaque")]
+        [TestCase("Hidden/lilToonCutout", "cutout")]
+        [TestCase("Hidden/lilToonCutoutOutline", "cutout")]
+        [TestCase("Hidden/lilToonTransparentOutline", "transparent")]
         [TestCase("Hidden/lilToonRefraction", "refraction")]
         [TestCase("Hidden/lilToonFur", "fur")]
         [TestCase("Hidden/lilToonGem", "gem")]
@@ -103,7 +108,13 @@ namespace Mochiya.AvatarTools.Editor.Tests
             try
             {
                 Assert.That(LilToonMaterialSupport.IsSupported(material, out var reason), Is.True, reason);
-                Assert.That(LilToonMaterialSupport.GetRenderMode(material), Is.EqualTo(mode));
+                // Dormant Multi-family data must neither select nor reject ordinary shader modes.
+                foreach (var storedMode in new[] { 2, 6 })
+                {
+                    material.SetFloat("_TransparentMode", storedMode);
+                    Assert.That(LilToonMaterialSupport.IsSupported(material, out reason), Is.True, reason);
+                    Assert.That(LilToonMaterialSupport.GetRenderMode(material), Is.EqualTo(mode));
+                }
                 var root = UnityEngine.GameObject.CreatePrimitive(UnityEngine.PrimitiveType.Cube);
                 var path = System.IO.Path.Combine(UnityEngine.Application.temporaryCachePath, "liltoon-mode-" + System.Guid.NewGuid() + ".glb");
                 root.GetComponent<UnityEngine.Renderer>().sharedMaterial = material;
@@ -113,9 +124,13 @@ namespace Mochiya.AvatarTools.Editor.Tests
                     MochiyaLilToonExporter.ExportGlb(root, path);
                     var bytes = System.IO.File.ReadAllBytes(path);
                     var json = System.Text.Encoding.UTF8.GetString(bytes, 20, System.BitConverter.ToInt32(bytes, 12));
-                    StringAssert.Contains("\"renderMode\":\"" + mode + "\"", json);
+                    var extension = json.ParseAsJson()["materials"][0]["extensions"]["MOCHIYA_materials_liltoon"];
+                    Assert.That(extension["shaderVariant"].GetString(), Is.EqualTo(shaderName));
+                    Assert.That(extension["properties"]["_TransparentMode"].GetSingle(), Is.EqualTo(6));
+                    StringAssert.DoesNotContain("\"renderMode\":", json);
+                    StringAssert.DoesNotContain("\"transparencyMode\":", json);
                     StringAssert.Contains("\"specVersion\":\"1.3\"", json);
-                    if (mode == "transparent") StringAssert.Contains("\"transparencyMode\":\"" + transparency + "\"", json);
+
                     if (mode == "fur-cutout") StringAssert.Contains("\"alphaMode\":\"MASK\"", json);
                     Assert.That(UnityEditor.EditorJsonUtility.ToJson(material), Is.EqualTo(before));
                 }
