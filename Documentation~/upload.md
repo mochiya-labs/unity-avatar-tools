@@ -41,7 +41,7 @@ You can upload straight from the original scene object; a separate conversion or
 3. Keep **Model format: VRM** for supported avatar expressions and spring physics. Choose **GLB** when you need general glTF geometry; ordinary GLB does not carry VRM behavior. The tool generates this model file for you.
 4. Complete the fields below. For a first check, keep **Availability: Personal use**.
 5. Click **Upload for personal use**, or **Publish listing** for a marketplace item. Keep Unity open while it prepares the model, uploads files and finishes the upload.
-6. Wait for **Your item is ready.**, then click **View item**. Reaching the file-transfer stage alone does not mean the item has finished publishing.
+6. Wait for **Your item is ready.**, then click **View last uploaded item**. Reaching the file-transfer stage alone does not mean the item has finished publishing.
 
 | Field | What to enter |
 | --- | --- |

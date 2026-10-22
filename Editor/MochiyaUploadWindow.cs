@@ -42,10 +42,12 @@ namespace Mochiya.AvatarTools.Editor
         private readonly Dictionary<string, string> uploadPaths = new Dictionary<string, string>();
         private MochiyaUploadRequest requestData;
         private Texture2D coverPreview;
+        private readonly Dictionary<string, Texture2D> galleryPreviews = new Dictionary<string, Texture2D>();
         private string previewPath;
         private GUIStyle wrappedTextArea;
         private GUIStyle sectionTitle, sectionFoldout, sectionDescription;
         private bool sectionStylesDark;
+        private bool dismissCompletion;
         private float formHeight;
         private float FormWidth => Mathf.Max(1, position.width - (formHeight > position.height ? GUI.skin.verticalScrollbar.fixedWidth : 0));
         private MochiyaUploadAnalysis analysis;
@@ -99,9 +101,11 @@ namespace Mochiya.AvatarTools.Editor
         }
         private void SetLocale()
         {
+            var showCompletion = labels.TryGetValue("done", out var previousCompletion) && message == previousCompletion;
             labels.Clear();
             var selected = contract?.locales.FirstOrDefault(v => v.name == locale);
             if (selected != null) foreach (var pair in selected.labels) labels[pair.name] = pair.value;
+            if (showCompletion) message = L("done");
         }
         private string L(string name) => labels.TryGetValue(name, out var text) ? text : name;
         private void OnDisable()
@@ -113,12 +117,19 @@ namespace Mochiya.AvatarTools.Editor
             EditorApplication.delayCall -= RestoreConnection;
             cancellation?.Cancel(); client?.Dispose(); connected = false; token = "";
             if (coverPreview != null) DestroyImmediate(coverPreview);
+            foreach (var preview in galleryPreviews.Values) if (preview != null) DestroyImmediate(preview);
+            galleryPreviews.Clear();
             // Keep the non-secret recovery ID through assembly reload, but never serialize credentials.
             if (!busy) CleanupLocal();
         }
         private void OnGUI()
         {
             if (contract == null) { EditorGUILayout.HelpBox("Upload contract is missing. Reinstall Mochiya Avatar Tools.", MessageType.Error); return; }
+            if (dismissCompletion && Event.current.type == EventType.Layout)
+            {
+                if (!busy && !failed && message == L("done")) message = "";
+                dismissCompletion = false;
+            }
             if (activeOrigin != null && activeOrigin != origin) SignOut();
             scroll.x = 0;
             scroll = EditorGUILayout.BeginScrollView(scroll, GUIStyle.none, GUI.skin.verticalScrollbar);
@@ -148,6 +159,7 @@ namespace Mochiya.AvatarTools.Editor
                     if (GUILayout.Button(L("retry"))) _ = RefreshConnection(true);
                 }
                 EditorGUILayout.Space(12);
+                var focusedBeforeForm = GUIUtility.keyboardControl;
                 EditorGUI.BeginChangeCheck();
                 SectionHeading("listingBasics", "listingBasicsDescription");
                 item.title = EditorGUILayout.TextField(L("title") + " *", item.title);
@@ -231,7 +243,14 @@ namespace Mochiya.AvatarTools.Editor
                     item.credits = TextArea("credits", item.credits);
                     item.licenseText = TextArea("licenseText", item.licenseText);
                 }
-                if (EditorGUI.EndChangeCheck() && (requestJson != null || !string.IsNullOrEmpty(recoveryId))) { CleanupLocal(); requestJson = null; requestData = null; recoveryId = ""; }
+                var formChanged = EditorGUI.EndChangeCheck();
+                if (formChanged && (requestJson != null || !string.IsNullOrEmpty(recoveryId))) { CleanupLocal(); requestJson = null; requestData = null; recoveryId = ""; }
+                if (!busy && !failed && message == L("done") &&
+                    (formChanged || (GUIUtility.keyboardControl != 0 && GUIUtility.keyboardControl != focusedBeforeForm)))
+                {
+                    dismissCompletion = true;
+                    Repaint();
+                }
             }
             if (!string.IsNullOrEmpty(message)) EditorGUILayout.HelpBox(message, failed ? MessageType.Error : MessageType.Info);
             if (connected && item.status == "public" && price > 0 && capabilities.sellerState != "approved")
@@ -323,8 +342,6 @@ namespace Mochiya.AvatarTools.Editor
                 EditorGUILayout.LabelField(label);
                 if (GUILayout.Button(L("choose"), GUILayout.Width(120))) { var path = EditorUtility.OpenFilePanel(label, "", extension); if (!string.IsNullOrEmpty(path)) { value = path; GUI.changed = true; } }
             }
-            if (!string.IsNullOrEmpty(value))
-                EditorGUILayout.SelectableLabel(value, EditorStyles.wordWrappedLabel, GUILayout.Height(Mathf.Max(18, EditorStyles.wordWrappedLabel.CalcHeight(new GUIContent(value), Mathf.Max(1, FormWidth - 4)))));
             return value;
         }
         private void FileList(string label, List<string> files, string extension, int max)
@@ -335,8 +352,66 @@ namespace Mochiya.AvatarTools.Editor
                 using (new EditorGUI.DisabledScope(files.Count >= max)) if (GUILayout.Button(L("add"), GUILayout.Width(120)))
                 { var path = EditorUtility.OpenFilePanel(L(label), "", extension); if (!string.IsNullOrEmpty(path)) { files.Add(path); GUI.changed = true; } }
             }
+            if (label == "gallery") { GalleryGrid(files); return; }
             for (int i = 0; i < files.Count; i++) using (new EditorGUILayout.HorizontalScope())
-            { EditorGUILayout.LabelField(Path.GetFileName(files[i])); if (GUILayout.Button(L("remove"), GUILayout.Width(80))) { files.RemoveAt(i); GUI.changed = true; break; } }
+            {
+                EditorGUILayout.LabelField(Path.GetFileName(files[i]));
+                if (GUILayout.Button(L("remove"), GUILayout.Width(80))) { files.RemoveAt(i); GUI.changed = true; break; }
+            }
+        }
+        private void GalleryGrid(List<string> files)
+        {
+            if (files.Count == 0) return;
+            const float gap = 6;
+            var width = Mathf.Max(1, FormWidth - 4);
+            var columns = Mathf.Max(1, Mathf.FloorToInt((width + gap) / (110 + gap)));
+            var size = (width - gap * (columns - 1)) / columns;
+            var rows = Mathf.CeilToInt(files.Count / (float)columns);
+            var grid = GUILayoutUtility.GetRect(width, rows * (size + gap) - gap, GUILayout.ExpandWidth(false));
+            grid.x += 2;
+            var removeIndex = -1;
+            for (int i = 0; i < files.Count; i++)
+            {
+                var path = files[i];
+                var rect = new Rect(grid.x + (i % columns) * (size + gap), grid.y + (i / columns) * (size + gap), size, size);
+                if (ImageThumbnail(rect, GalleryPreview(path), path))
+                    removeIndex = i;
+            }
+            if (removeIndex >= 0)
+            {
+                var path = files[removeIndex];
+                files.RemoveAt(removeIndex);
+                if (!files.Contains(path) && galleryPreviews.TryGetValue(path, out var preview))
+                { if (preview != null) DestroyImmediate(preview); galleryPreviews.Remove(path); }
+                GUI.changed = true;
+            }
+        }
+        private bool ImageThumbnail(Rect rect, Texture2D preview, string path)
+        {
+            GUI.Box(rect, GUIContent.none, EditorStyles.helpBox);
+            var imageRect = new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6);
+            if (preview != null) GUI.DrawTexture(imageRect, preview, ScaleMode.ScaleToFit);
+            else GUI.Label(imageRect, EditorGUIUtility.IconContent("Texture Icon"));
+            GUI.Label(rect, new GUIContent("", Path.GetFileName(path)));
+            return GUI.Button(new Rect(rect.xMax - 25, rect.y + 3, 22, 22), new GUIContent("×", L("remove") + ": " + Path.GetFileName(path)));
+        }
+        private Texture2D GalleryPreview(string path)
+        {
+            if (galleryPreviews.TryGetValue(path, out var cached)) return cached;
+            Texture2D preview = null;
+            try
+            {
+                var file = new FileInfo(path);
+                if (file.Exists && file.Length > 0 && file.Length <= contract.limits.imageBytes)
+                {
+                    preview = new Texture2D(2, 2) { hideFlags = HideFlags.HideAndDontSave };
+                    if (!preview.LoadImage(File.ReadAllBytes(path), true)) { DestroyImmediate(preview); preview = null; }
+                }
+            }
+            catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is UnityException)
+            { if (preview != null) DestroyImmediate(preview); preview = null; }
+            galleryPreviews[path] = preview;
+            return preview;
         }
         private void DrawCover()
         {
@@ -347,7 +422,19 @@ namespace Mochiya.AvatarTools.Editor
                 if (File.Exists(cover) && new FileInfo(cover).Length <= contract.limits.imageBytes)
                 { coverPreview = new Texture2D(2, 2); if (!coverPreview.LoadImage(File.ReadAllBytes(cover))) { DestroyImmediate(coverPreview); coverPreview = null; } }
             }
-            if (coverPreview != null) GUI.DrawTexture(EditorGUILayout.GetControlRect(false, 100), coverPreview, ScaleMode.ScaleToFit);
+            if (string.IsNullOrEmpty(cover)) return;
+            var width = Mathf.Max(1, FormWidth - 4);
+            var columns = Mathf.Max(1, Mathf.FloorToInt((width + 6) / 116));
+            var size = (width - 6 * (columns - 1)) / columns;
+            var row = GUILayoutUtility.GetRect(width, size, GUILayout.ExpandWidth(false));
+            var rect = new Rect(row.x + 2 + (width - size) / 2, row.y, size, size);
+            if (ImageThumbnail(rect, coverPreview, cover))
+            {
+                cover = ""; previewPath = null;
+                if (coverPreview != null) DestroyImmediate(coverPreview);
+                coverPreview = null;
+                GUI.changed = true;
+            }
         }
         private void OnFocus()
         {

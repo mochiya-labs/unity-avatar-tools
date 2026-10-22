@@ -484,7 +484,7 @@
         },
         {
           "name": "view",
-          "value": "View item"
+          "value": "View last uploaded item"
         },
         {
           "name": "connected",
@@ -1045,7 +1045,7 @@
         },
         {
           "name": "view",
-          "value": "アイテムを見る"
+          "value": "最後にアップロードしたアイテムを見る"
         },
         {
           "name": "connected",
@@ -1606,7 +1606,7 @@
         },
         {
           "name": "view",
-          "value": "查看物品"
+          "value": "查看上次上传的物品"
         },
         {
           "name": "connected",
@@ -2167,7 +2167,7 @@
         },
         {
           "name": "view",
-          "value": "아이템 보기"
+          "value": "마지막으로 업로드한 아이템 보기"
         },
         {
           "name": "connected",
