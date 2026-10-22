@@ -20,11 +20,15 @@ namespace Mochiya.AvatarTools.Editor
         [SerializeField] private List<string> gallery = new List<string>(), additional = new List<string>();
         [SerializeField] private int outputFormat;
         [SerializeField] private double price;
-        [SerializeField] private bool details, exportSettings, warnings;
+        [SerializeField] private bool details;
+        [SerializeField] private bool exportSettings, warnings;
         [SerializeField] private string recoveryId = "", productId = "";
         [NonSerialized] private string token = "", message = "", temporaryDirectory, requestJson;
         private string origin => MochiyaUploadClient.ConfiguredOrigin;
         private bool busy, connected, failed, closing;
+        private bool refreshing, refreshFailed, incompatibleContract;
+        private double lastRefreshAttempt = double.NegativeInfinity;
+        private CancellationTokenSource refreshCancellation;
         private float progress;
         private Vector2 scroll;
         private MochiyaUploadClient client;
@@ -39,6 +43,11 @@ namespace Mochiya.AvatarTools.Editor
         private MochiyaUploadRequest requestData;
         private Texture2D coverPreview;
         private string previewPath;
+        private GUIStyle wrappedTextArea;
+        private GUIStyle sectionTitle, sectionFoldout, sectionDescription;
+        private bool sectionStylesDark;
+        private float formHeight;
+        private float FormWidth => Mathf.Max(1, position.width - (formHeight > position.height ? GUI.skin.verticalScrollbar.fixedWidth : 0));
         private MochiyaUploadAnalysis analysis;
 
         [MenuItem("Mochiya/Upload to Mochiya")]
@@ -79,6 +88,7 @@ namespace Mochiya.AvatarTools.Editor
         }
         private bool SignOut()
         {
+            refreshCancellation?.Cancel(); refreshFailed = false; incompatibleContract = false;
             cancellation?.Cancel(); client?.Dispose(); client = null;
             connected = false; token = ""; capabilities = null; activeOrigin = null;
             recoveryId = ""; productId = ""; requestJson = null; requestData = null;
@@ -97,6 +107,7 @@ namespace Mochiya.AvatarTools.Editor
         private void OnDisable()
         {
             closing = true;
+            refreshCancellation?.Cancel();
             EditorApplication.update -= UpdateAnalysis;
             analysis?.Dispose(); analysis = null;
             EditorApplication.delayCall -= RestoreConnection;
@@ -109,24 +120,36 @@ namespace Mochiya.AvatarTools.Editor
         {
             if (contract == null) { EditorGUILayout.HelpBox("Upload contract is missing. Reinstall Mochiya Avatar Tools.", MessageType.Error); return; }
             if (activeOrigin != null && activeOrigin != origin) SignOut();
-            scroll = EditorGUILayout.BeginScrollView(scroll);
+            scroll.x = 0;
+            scroll = EditorGUILayout.BeginScrollView(scroll, GUIStyle.none, GUI.skin.verticalScrollbar);
+            scroll.x = 0;
+            EditorGUILayout.BeginVertical(GUILayout.Width(FormWidth));
             using (new EditorGUI.DisabledScope(busy))
             {
-                var selectedLocale = MochiyaPanelText.LanguageField(locale);
-                if (selectedLocale != locale) { locale = selectedLocale; SetLocale(); if (connected) _ = Connect(); }
-                EditorGUILayout.LabelField(MochiyaPanelText.Get(locale, MochiyaPanelText.UploadIntro), EditorStyles.wordWrappedLabel);
-                EditorGUILayout.Space(10);
-                if (origin != MochiyaUploadClient.ProductionOrigin) EditorGUILayout.HelpBox(origin, MessageType.Info);
-                if (!connected) token = EditorGUILayout.PasswordField(L("token"), token);
-                using (new EditorGUILayout.HorizontalScope())
+                using (new EditorGUI.DisabledScope(refreshing))
                 {
-                    if (GUILayout.Button(L(connected ? "disconnect" : "connect")))
-                    { if (connected) { if (SignOut()) message = ""; } else _ = Connect(); }
-                    if (GUILayout.Button(L("profile"))) Application.OpenURL(origin + "/profile");
+                    var selectedLocale = MochiyaPanelText.LanguageField(locale);
+                    if (selectedLocale != locale) { locale = selectedLocale; SetLocale(); if (connected) _ = RefreshConnection(true); }
+                    EditorGUILayout.LabelField(MochiyaPanelText.Get(locale, MochiyaPanelText.UploadIntro), EditorStyles.wordWrappedLabel);
+                    EditorGUILayout.Space(10);
+                    if (origin != MochiyaUploadClient.ProductionOrigin) EditorGUILayout.HelpBox(origin, MessageType.Info);
+                    if (!connected) token = EditorGUILayout.PasswordField(L("token"), token);
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        if (GUILayout.Button(L(refreshing ? "checkingConnection" : connected ? "disconnect" : "connect")))
+                        { if (connected) { if (SignOut()) message = ""; } else _ = Connect(); }
+                        if (GUILayout.Button(L("profile"))) Application.OpenURL(origin + "/profile");
+                    }
                 }
                 if (connected) EditorGUILayout.LabelField(L("connected"), capabilities.displayName);
+                if (!refreshing && refreshFailed)
+                {
+                    EditorGUILayout.HelpBox(L("connectionRefreshFailed"), MessageType.Warning);
+                    if (GUILayout.Button(L("retry"))) _ = RefreshConnection(true);
+                }
                 EditorGUILayout.Space(12);
                 EditorGUI.BeginChangeCheck();
+                SectionHeading("listingBasics", "listingBasicsDescription");
                 item.title = EditorGUILayout.TextField(L("title") + " *", item.title);
                 int category = Math.Max(0, Array.IndexOf(contract.categories, item.category));
                 item.category = contract.categories[EditorGUILayout.Popup(L("category") + " *", category, contract.categories.Select(L).ToArray())];
@@ -154,21 +177,37 @@ namespace Mochiya.AvatarTools.Editor
                         EditorGUILayout.HelpBox(L("processingFee") + " (" + (fees.processingBasisPoints / 100.0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "% + " + Money(fees.processingFixedCents) + "): " + Money(processing) + "\n" + L("commissionFee") + " (" + (fees.commissionBasisPoints / 100.0).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "%): " + Money(commission) + "\n" + L("earnings") + ": " + Money(cents - processing - commission), MessageType.Info);
                     }
                 }
+                EditorGUILayout.Space(16);
+                SectionHeading("modelAndCover", "modelAndCoverDescription");
                 cover = FileField(L("cover") + " *", cover, "png,jpg,jpeg");
                 DrawCover();
-                EditorGUILayout.Space(8);
                 EditorGUI.BeginChangeCheck();
-                target = (GameObject)EditorGUILayout.ObjectField(L("source") + " *", target, typeof(GameObject), true);
-                if (GUILayout.Button(L("useSelection"))) { target = Selection.activeGameObject; GUI.changed = true; }
-                if (EditorGUI.EndChangeCheck() && target != null) item.title = target.name.Substring(0, Math.Min(target.name.Length, contract.limits.title));
-                outputFormat = EditorGUILayout.Popup(L("format"), outputFormat, new[] { "VRM", "GLB" });
-                if (target != null && analysis?.Target != null && analysis.Target.Root == target)
+                var sourceLabel = new GUIContent(L("source") + " *");
+                var sourceLabelWidth = EditorStyles.label.CalcSize(sourceLabel).x + 8;
+                if (sourceLabelWidth + 180 > FormWidth)
                 {
-                    var detected = analysis.Target;
-                    EditorGUILayout.HelpBox(detected.Error ?? detected.Reason, detected.Kind == MochiyaTargetKind.Invalid ? MessageType.Error : MessageType.Info);
+                    EditorGUILayout.LabelField(sourceLabel, EditorStyles.wordWrappedLabel);
+                    target = (GameObject)EditorGUILayout.ObjectField(GUIContent.none, target, typeof(GameObject), true);
                 }
+                else
+                {
+                    var previousLabelWidth = EditorGUIUtility.labelWidth;
+                    EditorGUIUtility.labelWidth = Mathf.Max(previousLabelWidth, sourceLabelWidth);
+                    target = (GameObject)EditorGUILayout.ObjectField(sourceLabel, target, typeof(GameObject), true);
+                    EditorGUIUtility.labelWidth = previousLabelWidth;
+                }
+                if (EditorGUI.EndChangeCheck() && target != null) item.title = target.name.Substring(0, Math.Min(target.name.Length, contract.limits.title));
                 exportSettings = FormFoldout(exportSettings, L("exportSettings"));
-                if (exportSettings) MochiyaExportProfileGUI.Draw(ref profile, locale);
+                if (exportSettings)
+                {
+                    outputFormat = EditorGUILayout.Popup(L("format"), outputFormat, new[] { "VRM", "GLB" });
+                    if (target != null && analysis?.Target != null && analysis.Target.Root == target)
+                    {
+                        var detected = analysis.Target;
+                        EditorGUILayout.HelpBox(detected.Error ?? detected.Reason, detected.Kind == MochiyaTargetKind.Invalid ? MessageType.Error : MessageType.Info);
+                    }
+                    MochiyaExportProfileGUI.Draw(ref profile, locale);
+                }
                 warnings = FormFoldout(warnings, L("warnings"));
                 if (warnings && target != null && analysis?.Report != null && analysis.Target?.Root == target)
                 {
@@ -176,7 +215,13 @@ namespace Mochiya.AvatarTools.Editor
                     foreach (var error in report.Errors) EditorGUILayout.HelpBox(error, MessageType.Error);
                     foreach (var warning in report.Warnings) EditorGUILayout.HelpBox(warning, MessageType.Warning);
                 }
-                details = FormFoldout(details, L("details"));
+                EditorGUILayout.Space(16);
+                var changedBeforeDetails = GUI.changed;
+                EnsureSectionStyles();
+                var detailsRect = EditorGUILayout.GetControlRect(false, 26);
+                details = EditorGUI.Foldout(detailsRect, details, L("additionalItemDetails"), true, sectionFoldout);
+                GUI.changed = changedBeforeDetails;
+                SectionDescription("additionalItemDetailsDescription");
                 if (details)
                 {
                     FileList("gallery", gallery, "png,jpg,jpeg", contract.limits.gallery);
@@ -187,18 +232,62 @@ namespace Mochiya.AvatarTools.Editor
                     item.licenseText = TextArea("licenseText", item.licenseText);
                 }
                 if (EditorGUI.EndChangeCheck() && (requestJson != null || !string.IsNullOrEmpty(recoveryId))) { CleanupLocal(); requestJson = null; requestData = null; recoveryId = ""; }
-                EditorGUILayout.HelpBox(L("limits"), MessageType.None);
             }
             if (!string.IsNullOrEmpty(message)) EditorGUILayout.HelpBox(message, failed ? MessageType.Error : MessageType.Info);
+            if (connected && item.status == "public" && price > 0 && capabilities.sellerState != "approved")
+            {
+                var restricted = capabilities.sellerState == "restricted";
+                EditorGUILayout.HelpBox(L(restricted ? "seller_not_ready" : "payoutVerificationNotice"), restricted ? MessageType.Error : MessageType.Warning);
+                if (!restricted && GUILayout.Button(L("completeSellerVerification"))) Application.OpenURL(origin + "/profile?tab=creator");
+            }
             if (busy) { var rect = EditorGUILayout.GetControlRect(false, 20); EditorGUI.ProgressBar(rect, progress, message); if (GUILayout.Button(L("cancel"))) cancellation?.Cancel(); }
-            else using (new EditorGUI.DisabledScope(!connected))
+            else using (new EditorGUI.DisabledScope(!connected || refreshing || incompatibleContract))
             {
                 if (GUILayout.Button(L(requestJson != null || !string.IsNullOrEmpty(recoveryId) ? "retry" : item.status == "private" ? "privateUpload" : "publishButton"), GUILayout.Height(36))) _ = Upload();
                 if ((requestJson != null || !string.IsNullOrEmpty(recoveryId)) && GUILayout.Button(L("prepareAgain")))
                 { CleanupLocal(); requestJson = null; requestData = null; recoveryId = ""; message = ""; }
             }
             if (!string.IsNullOrEmpty(productId) && GUILayout.Button(L("view"))) Application.OpenURL(origin + "/products/" + Uri.EscapeDataString(productId));
+            EditorGUILayout.EndVertical();
+            if (Event.current.type == EventType.Repaint)
+            {
+                var height = GUILayoutUtility.GetLastRect().height;
+                if (!Mathf.Approximately(formHeight, height)) { formHeight = height; Repaint(); }
+            }
             EditorGUILayout.EndScrollView();
+        }
+        private void SectionHeading(string title, string description)
+        {
+            EnsureSectionStyles();
+            EditorGUILayout.LabelField(L(title), sectionTitle, GUILayout.Height(26));
+            SectionDescription(description);
+        }
+        private void EnsureSectionStyles()
+        {
+            var dark = EditorGUIUtility.isProSkin;
+            if (sectionTitle != null && sectionStylesDark == dark) return;
+            sectionStylesDark = dark;
+            var accent = dark ? new Color(0.72f, 0.9f, 0.35f) : new Color(0.30f, 0.43f, 0.10f);
+            sectionTitle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 14 };
+            sectionFoldout = new GUIStyle(EditorStyles.foldoutHeader) { fontSize = 14, fontStyle = FontStyle.Bold, fixedHeight = 0 };
+            foreach (var style in new[] { sectionTitle, sectionFoldout })
+                foreach (var state in new[] { style.normal, style.hover, style.active, style.focused, style.onNormal, style.onHover, style.onActive, style.onFocused })
+                    state.textColor = accent;
+            sectionDescription = new GUIStyle(EditorStyles.helpBox)
+            {
+                fontSize = 12, wordWrap = true,
+                padding = new RectOffset(10, 10, 8, 8)
+            };
+            sectionDescription.normal.textColor = dark ? new Color(0.8f, 0.82f, 0.77f) : new Color(0.28f, 0.31f, 0.25f);
+        }
+        private void SectionDescription(string description)
+        {
+            var content = new GUIContent(L(description));
+            var width = Mathf.Max(1, FormWidth - 4);
+            var rect = GUILayoutUtility.GetRect(width, sectionDescription.CalcHeight(content, width), GUILayout.ExpandWidth(false));
+            rect.x += 2;
+            GUI.Label(rect, content, sectionDescription);
+            EditorGUILayout.Space(6);
         }
         private static bool FormFoldout(bool value, string label)
         {
@@ -206,24 +295,48 @@ namespace Mochiya.AvatarTools.Editor
             GUI.changed = changed; return result;
         }
         private static string Money(double cents) => "$" + (cents / 100).ToString("F2", CultureInfo.InvariantCulture) + " USD";
-        private string TextArea(string key, string value) { EditorGUILayout.LabelField(L(key)); return EditorGUILayout.TextArea(value, GUILayout.MinHeight(65)); }
+        private string TextArea(string key, string value)
+        {
+            EditorGUILayout.LabelField(L(key));
+            if (wrappedTextArea == null) wrappedTextArea = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+            var width = Mathf.Max(1, FormWidth - 4);
+            var height = Mathf.Max(65, wrappedTextArea.CalcHeight(new GUIContent(value ?? ""), width));
+            var rect = GUILayoutUtility.GetRect(width, height, GUILayout.ExpandWidth(false));
+            rect.x += 2;
+            var controlName = "MochiyaUpload-" + key;
+            GUI.SetNextControlName(controlName);
+            var result = EditorGUI.TextArea(rect, value, wrappedTextArea);
+            if (string.IsNullOrEmpty(result) && GUI.GetNameOfFocusedControl() != controlName && Event.current.type == EventType.Repaint)
+            {
+                var placeholder = new GUIStyle(wrappedTextArea);
+                placeholder.normal.background = null;
+                placeholder.normal.textColor = EditorGUIUtility.isProSkin
+                    ? new Color(0.62f, 0.62f, 0.62f) : new Color(0.42f, 0.42f, 0.42f);
+                GUI.Label(rect, L(key == "licenseText" ? "licenseDefault" : key + "Placeholder"), placeholder);
+            }
+            return result;
+        }
         private string FileField(string label, string value, string extension)
         {
-            EditorGUILayout.LabelField(label);
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.SelectableLabel(string.IsNullOrEmpty(value) ? "—" : Path.GetFileName(value), GUILayout.Height(18));
+                EditorGUILayout.LabelField(label);
                 if (GUILayout.Button(L("choose"), GUILayout.Width(120))) { var path = EditorUtility.OpenFilePanel(label, "", extension); if (!string.IsNullOrEmpty(path)) { value = path; GUI.changed = true; } }
             }
+            if (!string.IsNullOrEmpty(value))
+                EditorGUILayout.SelectableLabel(value, EditorStyles.wordWrappedLabel, GUILayout.Height(Mathf.Max(18, EditorStyles.wordWrappedLabel.CalcHeight(new GUIContent(value), Mathf.Max(1, FormWidth - 4)))));
             return value;
         }
         private void FileList(string label, List<string> files, string extension, int max)
         {
-            EditorGUILayout.LabelField(L(label), EditorStyles.boldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(L(label), EditorStyles.boldLabel);
+                using (new EditorGUI.DisabledScope(files.Count >= max)) if (GUILayout.Button(L("add"), GUILayout.Width(120)))
+                { var path = EditorUtility.OpenFilePanel(L(label), "", extension); if (!string.IsNullOrEmpty(path)) { files.Add(path); GUI.changed = true; } }
+            }
             for (int i = 0; i < files.Count; i++) using (new EditorGUILayout.HorizontalScope())
             { EditorGUILayout.LabelField(Path.GetFileName(files[i])); if (GUILayout.Button(L("remove"), GUILayout.Width(80))) { files.RemoveAt(i); GUI.changed = true; break; } }
-            using (new EditorGUI.DisabledScope(files.Count >= max)) if (GUILayout.Button(L("add")))
-            { var path = EditorUtility.OpenFilePanel(L(label), "", extension); if (!string.IsNullOrEmpty(path)) { files.Add(path); GUI.changed = true; } }
         }
         private void DrawCover()
         {
@@ -236,9 +349,52 @@ namespace Mochiya.AvatarTools.Editor
             }
             if (coverPreview != null) GUI.DrawTexture(EditorGUILayout.GetControlRect(false, 100), coverPreview, ScaleMode.ScaleToFit);
         }
+        private void OnFocus()
+        {
+            if (connected && !busy) _ = RefreshConnection();
+        }
+        private async Task RefreshConnection(bool force = false)
+        {
+            if (!connected || busy || refreshing || closing || client == null) return;
+            if (!force && EditorApplication.timeSinceStartup - lastRefreshAttempt < 60) return;
+            lastRefreshAttempt = EditorApplication.timeSinceStartup;
+            refreshing = true; refreshFailed = false;
+            var refreshOrigin = activeOrigin;
+            var refreshToken = token;
+            var refreshLocale = locale;
+            var refreshClient = client;
+            var source = refreshCancellation = new CancellationTokenSource();
+            bool Current() => !closing && !source.IsCancellationRequested && connected
+                && client == refreshClient && token == refreshToken && origin == refreshOrigin && locale == refreshLocale;
+            try
+            {
+                var result = await refreshClient.Api<MochiyaUploadCapabilities>("/api/v1/creator/upload-capabilities?locale=" + refreshLocale, "GET", null, source.Token);
+                if (!Current()) return;
+                if (result?.limits == null || result.labels == null) throw new InvalidOperationException("Missing upload capabilities.");
+                incompatibleContract = result.limits.version != contract.limits.version;
+                if (incompatibleContract) { failed = true; message = L("updateUploadTool"); return; }
+                capabilities = result;
+                contract.limits = result.limits;
+                foreach (var pair in result.labels) labels[pair.name] = pair.value;
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception error)
+            {
+                if (!Current()) return;
+                if (error is MochiyaUploadApiException apiError && apiError.AuthenticationRejected)
+                { SignOut(); failed = true; message = error.Message; }
+                else refreshFailed = true;
+            }
+            finally
+            {
+                if (refreshCancellation == source) { refreshCancellation = null; refreshing = false; }
+                source.Dispose();
+                if (!closing && this != null) Repaint();
+            }
+        }
         private async Task Connect()
         {
-            if (busy) return;
+            if (busy || refreshing) return;
             busy = true; connected = false; failed = false; cancellation = new CancellationTokenSource();
             var cancel = cancellation.Token;
             try
@@ -260,17 +416,27 @@ namespace Mochiya.AvatarTools.Editor
                 }, cancel);
                 contract.limits = capabilities.limits;
                 foreach (var pair in capabilities.labels) labels[pair.name] = pair.value;
-                connected = true; message = L("connected") + " " + capabilities.displayName;
+                connected = true; incompatibleContract = false; refreshFailed = false; lastRefreshAttempt = EditorApplication.timeSinceStartup; message = "";
             }
             catch (OperationCanceledException) { connected = false; client?.Dispose(); }
             catch (Exception error) { SignOut(); failed = true; message = error.Message; }
             finally { busy = false; if (closing || cleanupAfterOperation) CleanupLocal(); cleanupAfterOperation = false; if (this != null) Repaint(); }
         }
+        private void CheckText(string field, string value, int limit)
+        {
+            if ((value ?? "").Length > limit)
+                throw new InvalidOperationException(L("textTooLong").Replace("{field}", L(field)).Replace("{limit}", limit.ToString()).Replace("{count}", value.Length.ToString()));
+        }
         private void Prepare()
         {
             if (target == null) throw new InvalidOperationException(L("noSource"));
-            if (string.IsNullOrWhiteSpace(item.title) || item.title.Length > contract.limits.title) throw new InvalidOperationException(L("title") + ": 1–" + contract.limits.title);
-            if (item.specifications.Length > contract.limits.specifications || item.requirements.Length > contract.limits.requirements || item.credits.Length > contract.limits.credits || item.licenseText.Length > contract.limits.licenseText) throw new InvalidOperationException("An item detail exceeds the form's text limit.");
+            if (string.IsNullOrEmpty(cover)) throw new InvalidOperationException(L("coverRequired"));
+            if (string.IsNullOrWhiteSpace(item.title)) throw new InvalidOperationException(L("title") + ": " + L("required"));
+            CheckText("title", item.title, contract.limits.title);
+            CheckText("specifications", item.specifications, contract.limits.specifications);
+            CheckText("requirements", item.requirements, contract.limits.requirements);
+            CheckText("credits", item.credits, contract.limits.credits);
+            CheckText("licenseText", item.licenseText, contract.limits.licenseText);
             if (double.IsNaN(price) || double.IsInfinity(price) || price < 0 || price > 900000 || (item.status == "public" && price > 0 && price < .5)) throw new InvalidOperationException(L("priceInvalid"));
             item.priceCents = item.status == "private" ? 0 : (int)Math.Floor(price * 100 + .5);
             message = L("prepare"); Repaint();
@@ -281,22 +447,24 @@ namespace Mochiya.AvatarTools.Editor
             Action<string, string> add = (role, path) =>
             {
                 var info = new FileInfo(path); var image = role == "cover" || role == "gallery";
-                if (!info.Exists || info.Length <= 0 || info.Length > (image ? contract.limits.imageBytes : contract.limits.fileBytes)) throw new InvalidOperationException(L("limits"));
+                if (!info.Exists || info.Length <= 0) throw new InvalidOperationException(L("fileMissingOrEmpty").Replace("{name}", info.Name));
+                var limit = image ? contract.limits.imageBytes : contract.limits.fileBytes;
+                if (info.Length > limit) throw new InvalidOperationException(L("fileTooLarge").Replace("{name}", info.Name).Replace("{limit}", (limit / (1024 * 1024)).ToString()));
                 var ext = info.Extension.ToLowerInvariant(); var type = ext == ".png" ? "image/png" : ext == ".jpg" || ext == ".jpeg" ? "image/jpeg" : "application/octet-stream";
-                if (image && type == "application/octet-stream") throw new InvalidOperationException(L("coverInvalid"));
+                if (image && type == "application/octet-stream") throw new InvalidOperationException(info.Name + ": " + L(image && role == "gallery" ? "galleryInvalid" : "coverInvalid"));
                 var id = role + "-" + files.Count;
                 files.Add(new MochiyaUploadFile { id = id, role = role, name = info.Name, size = info.Length, contentType = type }); uploadPaths[id] = path;
             };
             add("cover", cover); add("model", modelPath);
             foreach (var path in gallery) add("gallery", path);
             foreach (var path in additional) add("additional", path);
-            if (files.Sum(f => f.size) > contract.limits.totalBytes) throw new InvalidOperationException(L("limits"));
+            if (files.Sum(f => f.size) > contract.limits.totalBytes) throw new InvalidOperationException(L("totalFilesTooLarge").Replace("{limit}", (contract.limits.totalBytes / (1024 * 1024 * 1024)).ToString()));
             requestData = new MochiyaUploadRequest { idempotencyKey = Guid.NewGuid().ToString(), item = JsonUtility.FromJson<MochiyaItemInput>(JsonUtility.ToJson(item)), files = files.ToArray() };
             requestJson = requestData.ToJson();
         }
         private async Task Upload()
         {
-            if (busy || !connected) return;
+            if (busy || refreshing || incompatibleContract || !connected) return;
             busy = true; failed = false; progress = 0; cancellation = new CancellationTokenSource();
             try
             {

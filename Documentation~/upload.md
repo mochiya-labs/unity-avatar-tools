@@ -29,14 +29,14 @@ You can upload straight from the original scene object; a separate conversion or
 
 ### Connect your account
 
-1. Sign in to [Mochiya](https://www.mochiya.org), then open your [profile](https://www.mochiya.org/profile).
-2. Expand **API key** below the profile tabs and copy the key.
+1. Open [Creator tools](https://www.mochiya.org/profile?tab=creator). Sign in or create an account if needed.
+2. Expand **API key** at the bottom and copy the key.
 3. In Unity, open **Mochiya → Upload to Mochiya**, paste it into **API key**, and click **Connect**.
 4. Check **Connected as** to confirm the correct account.
 
 ### Complete the item and upload
 
-1. Drag the prepared scene object from the Hierarchy into **Avatar or attachment**, or select it in the Hierarchy and click **Use selection**. Selecting a source fills the title with its object name; edit the title afterward.
+1. Drag the prepared scene object from the Hierarchy into **Avatar or attachment**. Selecting a source fills the title with its object name; edit the title afterward.
 2. Review the detection message and expand **Compatibility warnings**. Resolve errors before uploading. Warnings describe behavior that may be approximated or omitted.
 3. Keep **Model format: VRM** for supported avatar expressions and spring physics. Choose **GLB** when you need general glTF geometry; ordinary GLB does not carry VRM behavior. The tool generates this model file for you.
 4. Complete the fields below. For a first check, keep **Availability: Personal use**.
@@ -54,7 +54,7 @@ You can upload straight from the original scene object; a separate conversion or
 | Export settings (optional) | Select a reusable export profile to customize model metadata and export options. See [export settings](avatar-tools.md#export-settings). |
 | Additional item details (optional) | Expand this section for gallery images, additional downloadable files, specifications, requirements, credits and license terms. |
 
-**Paid listings:** open your profile's **Seller information**, submit the seller application and bank destination, and wait for Mochiya approval before listing a paid item. Review the panel's **Payment processing fee**, **Mochiya fee** and **Estimated earnings** for the current deductions.
+**Paid listings:** you can publish and sell before creator verification. The reminder beside Publish links to your profile's **Creator verification** form. Complete that application and obtain approval of your information and bank destination before receiving payouts. Restricted accounts cannot publish paid items or receive new purchases. Review the panel's **Payment processing fee**, **Mochiya fee** and **Estimated earnings** for the current deductions.
 
 In **Additional item details**, describe supported avatars/versions and setup steps under **Requirements & setup**, and state what is included under **Specifications**. Add appropriate credits and license terms. These listing terms are separate from the metadata embedded in the VRM file; review both before distribution.
 
@@ -64,8 +64,8 @@ In **Additional item details**, describe supported avatars/versions and setup st
 | Generated model | One VRM/GLB, 500 MiB maximum |
 | Additional downloadable files | Up to 20 files, 500 MiB each |
 | All uploaded files combined | 2 GiB maximum, including images and the generated model |
-| Specifications / Requirements & setup | 5,000 / 4,000 characters |
-| Credits / License terms | 2,000 / 3,000 characters |
+| Specifications / Requirements & setup | 20,000 characters each |
+| Credits / License terms | 20,000 characters each |
 
 Additional downloadable files are only the files you explicitly select. The generated model is used for Mochiya's 3D preview and editor; it does not replace an installable Unity source package for buyers.
 

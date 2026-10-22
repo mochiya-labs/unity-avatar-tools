@@ -37,9 +37,9 @@ namespace Mochiya.AvatarTools.Editor
                 "为 Mochiya 和兼容应用准备人物模型、服装与配饰。转换或导出模型，也可以导出动画剪辑。",
                 "Mochiya와 호환 앱에서 사용할 아바타, 의상, 액세서리를 준비합니다. 모델을 변환하거나 내보내고, 애니메이션 클립도 내보낼 수 있습니다." } },
             { UploadIntro, new[] {
-                "Unityシーンのアバター・衣装・アクセサリーをMochiyaにアップロードし、Avatar Studioで個人利用したり、マーケットプレイスに出品したりできます。",
-                "将 Unity 场景中的人物模型、服装或配饰上传到 Mochiya，供自己在 Avatar Studio 中使用，或上架到市场。",
-                "Unity 씬의 아바타, 의상 또는 액세서리를 Mochiya에 업로드하여 Avatar Studio에서 개인적으로 사용하거나 마켓플레이스에 등록합니다." } },
+                "Unityシーンのアバター・衣装・アクセサリーをMochiyaにアップロードし、アバタースタジオで個人利用したり、マーケットプレイスに出品したりできます。",
+                "将 Unity 场景中的人物模型、服装或配饰上传到 Mochiya，供自己在虚拟形象工作室中使用，或上架到市场。",
+                "Unity 씬의 아바타, 의상 또는 액세서리를 Mochiya에 업로드하여 아바타 스튜디오에서 개인적으로 사용하거나 마켓플레이스에 등록합니다." } },
             { AnimationIntro, new[] {
                 "HumanoidのAnimationClipをVRM Animation（.vrma）としてエクスポートし、Mochiya Avatar Studioや対応アプリでアバターの動きを再生できます。1フレームのクリップはポーズを保存します。",
                 "将 Humanoid AnimationClip 导出为 VRM Animation（.vrma），用于在 Mochiya Avatar Studio 和兼容应用中播放人物模型动画。单帧剪辑保存的是一个姿势。",

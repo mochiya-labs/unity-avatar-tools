@@ -17,7 +17,7 @@ namespace Mochiya.AvatarTools.Editor
     [Serializable] public sealed class MochiyaUploadPricing { public int processingBasisPoints, processingFixedCents, commissionBasisPoints; }
     [Serializable] public sealed class MochiyaUploadCapabilities
     {
-        public MochiyaUploadLimits limits; public string[] categories; public string displayName;
+        public MochiyaUploadLimits limits; public string[] categories; public string displayName, sellerState;
         public MochiyaUploadPair[] labels; public MochiyaUploadPricing pricing;
     }
     [Serializable] public sealed class MochiyaUploadLocale { public string name; public MochiyaUploadPair[] labels; }
@@ -49,8 +49,9 @@ namespace Mochiya.AvatarTools.Editor
     internal sealed class MochiyaUploadApiException : InvalidOperationException
     {
         internal bool InvalidatesConnection { get; }
+        internal bool AuthenticationRejected { get; }
         internal MochiyaUploadApiException(long status, string message) : base(message)
-        { InvalidatesConnection = status == 0 || status == 401 || status == 403 || status >= 500; }
+        { AuthenticationRejected = status == 401 || status == 403; InvalidatesConnection = status == 0 || AuthenticationRejected || status >= 500; }
     }
 
     internal sealed class MochiyaUploadClient : IDisposable

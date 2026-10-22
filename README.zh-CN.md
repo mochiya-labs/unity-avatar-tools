@@ -31,8 +31,8 @@
 
 **只有使用 Upload to Mochiya 上传时才需要 API 密钥。** 如果只想在电脑上转换或导出文件，请直接查看 [Mochiya Avatar Tools](#local-avatar-tools)，无需账号或 API 密钥。
 
-1. 登录 [Mochiya](https://www.mochiya.org/profile) 并打开个人主页；如果还没有账号，请先注册。
-2. 展开个人主页底部的 **API 密钥**并复制密钥。Unity 工具通过此密钥将文件上传到你的 Mochiya 账号。
+1. 打开[创作者工具](https://www.mochiya.org/profile?tab=creator)。如有需要，请登录或注册账号。
+2. 展开底部的 **API 密钥**并复制密钥。Unity 工具通过此密钥将文件上传到你的 Mochiya 账号。
 3. 在 Unity 中打开 **Mochiya > Upload to Mochiya**，将语言设为**简体中文**，把密钥粘贴到 **API 密钥**字段并点击**连接**。连接成功后再上传。请勿与他人分享密钥。
 
 ![个人主页展开 API 密钥后的画面，显示复制按钮。](Documentation~/images/api-key.png)

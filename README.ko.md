@@ -31,8 +31,8 @@ Unity의 아바타, 의상, 액세서리를 [Mochiya](https://www.mochiya.org/ko
 
 **API 키는 Upload to Mochiya로 업로드할 때만 필요합니다.** 컴퓨터에서 파일을 변환하거나 내보내려면 [Mochiya Avatar Tools](#local-avatar-tools)로 바로 이동하세요. 계정이나 API 키가 필요하지 않습니다.
 
-1. [Mochiya](https://www.mochiya.org/profile)에 로그인하고 프로필을 엽니다. 계정이 없다면 먼저 가입하세요.
-2. 프로필 하단의 **API 키**를 펼쳐 키를 복사합니다. Unity 도구는 이 키를 사용하여 내 Mochiya 계정에 파일을 업로드합니다.
+1. [크리에이터 도구](https://www.mochiya.org/profile?tab=creator)를 엽니다. 필요한 경우 로그인하거나 계정을 만드세요.
+2. 하단의 **API 키**를 펼쳐 키를 복사합니다. Unity 도구는 이 키를 사용하여 내 Mochiya 계정에 파일을 업로드합니다.
 3. Unity에서 **Mochiya > Upload to Mochiya**를 열고 언어를 **한국어**로 선택합니다. **API 키** 필드에 키를 붙여 넣고 **연결**을 누르세요. 연결에 성공한 뒤 업로드합니다. 키를 다른 사람과 공유하지 마세요.
 
 ![프로필의 API 키를 펼쳐 복사 버튼이 보이는 화면.](Documentation~/images/api-key.png)

@@ -31,8 +31,8 @@ UniVRM/UniGLTF 0.131.2以降がすでに導入されている場合は、互換�
 
 **APIキーが必要なのはUpload to Mochiyaを使う場合だけです。** パソコン上で変換・エクスポートする場合は、[Mochiya Avatar Tools](#local-avatar-tools)へ進んでください。アカウントもAPIキーも不要です。
 
-1. [Mochiya](https://www.mochiya.org/profile)にログインし、プロフィールを開きます。アカウントがない場合は作成してください。
-2. プロフィール下部の**APIキー**を開き、キーをコピーします。このキーで、Unityのツールから自分のMochiyaアカウントへアップロードできます。
+1. [クリエイターツール](https://www.mochiya.org/profile?tab=creator)を開きます。必要に応じてログインまたはアカウントを作成してください。
+2. 下部の**APIキー**を開き、キーをコピーします。このキーで、Unityのツールから自分のMochiyaアカウントへアップロードできます。
 3. Unityで**Mochiya > Upload to Mochiya**を開き、言語を**日本語**にします。**APIキー**欄にキーを貼り付けて**接続**を押し、接続が成功してからアップロードしてください。キーは他人に共有しないでください。
 
 ![プロフィールのAPIキーを展開し、コピーボタンが見える画面。](Documentation~/images/api-key.png)

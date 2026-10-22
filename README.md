@@ -31,8 +31,8 @@ If UniVRM/UniGLTF 0.131.2 or newer is already installed, keep the compatible ins
 
 An **API key is required only for Upload to Mochiya**. To convert or export files on your computer, skip to [Mochiya Avatar Tools](#local-avatar-tools); you do not need an account or API key.
 
-1. Sign in to [Mochiya](https://www.mochiya.org/profile), or create an account if needed, and open your profile.
-2. Expand **API key** near the bottom of the profile and copy your key. This key lets the Unity tool upload to your Mochiya account.
+1. Open [Creator tools](https://www.mochiya.org/profile?tab=creator). Sign in or create an account if needed.
+2. Expand **API key** at the bottom and copy your key. This key lets the Unity tool upload to your Mochiya account.
 3. In Unity, open **Mochiya > Upload to Mochiya**, choose your language, paste the key into **API key**, and click **Connect**. Connect successfully before uploading. Keep your key private.
 
 ![The API key section on your Mochiya profile, with the copy button visible.](Documentation~/images/api-key.png)
