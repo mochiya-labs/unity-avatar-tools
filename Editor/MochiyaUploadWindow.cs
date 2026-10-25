@@ -22,6 +22,7 @@ namespace Mochiya.AvatarTools.Editor
         [SerializeField] private double price;
         [SerializeField] private bool details;
         [SerializeField] private bool exportSettings, warnings;
+        private bool showModelHelp;
         [SerializeField] private string recoveryId = "", productId = "";
         [NonSerialized] private string token = "", message = "", temporaryDirectory, requestJson;
         private string origin => MochiyaUploadClient.ConfiguredOrigin;
@@ -176,6 +177,7 @@ namespace Mochiya.AvatarTools.Editor
                 }
                 for (int i = 0; i < item.tags.Length; i++) using (new EditorGUILayout.HorizontalScope())
                 { EditorGUILayout.LabelField(item.tags[i]); if (GUILayout.Button("×", GUILayout.Width(28))) { item.tags = item.tags.Where((_, n) => n != i).ToArray(); GUI.changed = true; break; } }
+                EditorGUILayout.HelpBox(L("tagsHint").Replace("{count}", item.tags.Length.ToString()), MessageType.None);
                 item.status = EditorGUILayout.Popup(L("availability"), item.status == "private" ? 0 : 1, new[] { L("privateItem"), L("sellOnMochiya") }) == 0 ? "private" : "public";
                 EditorGUILayout.HelpBox(L(item.status == "private" ? "personalUseHint" : "marketplaceListingHint") + " " + L("availabilityHint"), MessageType.None);
                 if (item.status == "public")
@@ -193,22 +195,27 @@ namespace Mochiya.AvatarTools.Editor
                 SectionHeading("modelAndCover", "modelAndCoverDescription");
                 cover = FileField(L("cover") + " *", cover, "png,jpg,jpeg");
                 DrawCover();
-                EditorGUI.BeginChangeCheck();
                 var sourceLabel = new GUIContent(L("source") + " *");
                 var sourceLabelWidth = EditorStyles.label.CalcSize(sourceLabel).x + 8;
-                if (sourceLabelWidth + 180 > FormWidth)
-                {
-                    EditorGUILayout.LabelField(sourceLabel, EditorStyles.wordWrappedLabel);
+                var sourceRow = EditorGUILayout.GetControlRect();
+                var stackedSource = sourceLabelWidth + 24 + 180 > FormWidth;
+                GUI.Label(new Rect(sourceRow.x, sourceRow.y, sourceLabelWidth, sourceRow.height), sourceLabel);
+                var helpRect = new Rect(sourceRow.x + sourceLabelWidth, sourceRow.y, 20, sourceRow.height);
+                var helpContent = new GUIContent(EditorGUIUtility.IconContent("_Help")) { tooltip = L("modelSupportHint") };
+                var changedBeforeHelp = GUI.changed;
+                if (GUI.Button(helpRect, helpContent, EditorStyles.iconButton)) showModelHelp = !showModelHelp;
+                GUI.changed = changedBeforeHelp;
+                EditorGUI.BeginChangeCheck();
+                if (stackedSource)
                     target = (GameObject)EditorGUILayout.ObjectField(GUIContent.none, target, typeof(GameObject), true);
-                }
                 else
                 {
-                    var previousLabelWidth = EditorGUIUtility.labelWidth;
-                    EditorGUIUtility.labelWidth = Mathf.Max(previousLabelWidth, sourceLabelWidth);
-                    target = (GameObject)EditorGUILayout.ObjectField(sourceLabel, target, typeof(GameObject), true);
-                    EditorGUIUtility.labelWidth = previousLabelWidth;
+                    var fieldOffset = Mathf.Max(EditorGUIUtility.labelWidth, sourceLabelWidth + 24);
+                    var objectRect = new Rect(sourceRow.x + fieldOffset, sourceRow.y, sourceRow.width - fieldOffset, sourceRow.height);
+                    target = (GameObject)EditorGUI.ObjectField(objectRect, GUIContent.none, target, typeof(GameObject), true);
                 }
                 if (EditorGUI.EndChangeCheck() && target != null) item.title = target.name.Substring(0, Math.Min(target.name.Length, contract.limits.title));
+                if (showModelHelp) EditorGUILayout.HelpBox(L("modelSupportHint"), MessageType.Info);
                 exportSettings = FormFoldout(exportSettings, L("exportSettings"));
                 if (exportSettings)
                 {

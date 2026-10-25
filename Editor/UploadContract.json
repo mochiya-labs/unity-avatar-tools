@@ -116,7 +116,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "Add tags one at a time. {count}/12"
+          "value": "Tag supported base avatars and relevant keywords. {count}/12"
         },
         {
           "name": "addTag",
@@ -236,7 +236,11 @@
         },
         {
           "name": "assetHint",
-          "value": "Upload one .glb or .vrm file for Mochiya's live preview and editor. Maximum 500 MiB."
+          "value": "Upload one .glb or .vrm file for Mochiya's live preview. Maximum 500 MiB."
+        },
+        {
+          "name": "modelSupportHint",
+          "value": "One model per upload for now. For outfits, accessories and hair, upload a version fitted to one base avatar for Avatar Studio try-on, and add its name as a tag. Multiple variants are planned."
         },
         {
           "name": "additionalFiles",
@@ -677,7 +681,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "タグを1つずつ追加します。{count}/12"
+          "value": "対応するベースアバター名や関連キーワードをタグに。{count}/12"
         },
         {
           "name": "addTag",
@@ -797,7 +801,11 @@
         },
         {
           "name": "assetHint",
-          "value": "Mochiyaのライブプレビューとエディターで使う.glbまたは.vrmファイルを1つアップロードします。最大500 MiB。"
+          "value": "Mochiyaのライブプレビューで使う.glbまたは.vrmファイルを1つアップロードします。最大500 MiB。"
+        },
+        {
+          "name": "modelSupportHint",
+          "value": "現在、1回のアップロードで使用できるモデルは1つです。衣装・アクセサリー・髪型は、アバタースタジオで試着できるよう、1種類のベースアバターに対応したモデルをアップロードし、そのアバター名をタグに追加してください。複数バリエーションへの対応は今後予定しています。"
         },
         {
           "name": "additionalFiles",
@@ -1238,7 +1246,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "逐个添加标签。{count}/12"
+          "value": "添加适配的基础模型名称和相关关键词。{count}/12"
         },
         {
           "name": "addTag",
@@ -1358,7 +1366,11 @@
         },
         {
           "name": "assetHint",
-          "value": "上传一个用于 Mochiya 实时预览和编辑器的 .glb 或 .vrm 文件，最大 500 MiB。"
+          "value": "上传一个用于 Mochiya 实时预览的 .glb 或 .vrm 文件，最大 500 MiB。"
+        },
+        {
+          "name": "modelSupportHint",
+          "value": "目前每次上传仅支持一个模型。服装、配饰和发型请上传适配一款基础模型的版本，供用户在虚拟形象工作室中试穿，并将该基础模型名称添加为标签。后续将支持多个适配版本。"
         },
         {
           "name": "additionalFiles",
@@ -1799,7 +1811,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "태그를 하나씩 추가하세요. {count}/12"
+          "value": "호환되는 베이스 아바타 이름과 관련 키워드를 태그로 추가하세요. {count}/12"
         },
         {
           "name": "addTag",
@@ -1919,7 +1931,11 @@
         },
         {
           "name": "assetHint",
-          "value": "Mochiya의 라이브 미리보기와 에디터에 사용할 .glb 또는 .vrm 파일 1개를 업로드하세요. 최대 500 MiB."
+          "value": "Mochiya의 라이브 미리보기에 사용할 .glb 또는 .vrm 파일 1개를 업로드하세요. 최대 500 MiB."
+        },
+        {
+          "name": "modelSupportHint",
+          "value": "현재 한 번에 모델 하나만 업로드할 수 있습니다. 의상·액세서리·헤어는 아바타 스튜디오에서 착용해 볼 수 있도록 베이스 아바타 하나에 맞춘 버전을 업로드하고, 해당 아바타 이름을 태그에 추가하세요. 여러 버전 지원은 추후 추가할 예정입니다."
         },
         {
           "name": "additionalFiles",
