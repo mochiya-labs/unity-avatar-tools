@@ -7,6 +7,26 @@ namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class MochiyaUploadTests
     {
+        [TestCase("Summer Dress", "outfit", "", "moe,chiffon", false, "Summer_Dress_moe_chiffon.glb")]
+        [TestCase("Moe Avatar", "base_avatar", "moe", "any", true, "Moe_Avatar_moe.vrm")]
+        [TestCase("Custom Avatar", "base_avatar", "", "any", true, "Custom_Avatar_none.vrm")]
+        [TestCase("Ribbon / Cute!", "accessory", "", "any", false, "Ribbon_Cute_any.glb")]
+        [TestCase("短い髪", "hair", "", "custom-body", true, "短い髪_custom_body.vrm")]
+        public void ModelNamesUseItemTitleAndBodies(string title, string category, string body, string bodies, bool vrm, string expected)
+        {
+            Assert.AreEqual(expected, MochiyaUploadWindow.ModelFileName(title, category, body, bodies.Split(','), vrm,
+                new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase)));
+        }
+        [Test] public void ModelNamesAreBoundedAndCollisionsDoNotOverwriteExports()
+        {
+            var names = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual("Dress_a_b.glb", MochiyaUploadWindow.ModelFileName("Dress", "outfit", "", new[] { "a-b" }, false, names));
+            Assert.AreEqual("Dress_a_b_2.glb", MochiyaUploadWindow.ModelFileName("Dress", "outfit", "", new[] { "a", "b" }, false, names));
+            var longName = MochiyaUploadWindow.ModelFileName(new string('衣', 80), "outfit", "", new[] { new string('a', 200) }, true, names);
+            Assert.Less(System.Text.Encoding.UTF8.GetByteCount(longName), 240);
+            StringAssert.EndsWith("_more.vrm", longName);
+            StringAssert.DoesNotContain("/", longName);
+        }
         [TestCase("https://preview.vercel.app", "https://preview.vercel.app", true)]
         [TestCase(null, "https://preview.vercel.app", false)]
         [TestCase("https://preview.vercel.app", "https://other.vercel.app", false)]
@@ -88,12 +108,38 @@ namespace Mochiya.AvatarTools.Editor.Tests
             StringAssert.Contains("\"priceCents\":123", request.ToJson());
         }
         [Test]
+        public void BodyTypesMatchSharedFixturesAndRejectAmbiguousVariants()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>("Packages/org.mochiya.avatar-tools/Editor/UploadContract.json");
+            var contract = JsonUtility.FromJson<MochiyaUploadContract>(asset.text);
+            foreach (var fixture in contract.bodyTypeFixtures)
+            {
+                Assert.AreEqual(fixture.normalized, MochiyaBodyTypes.Normalize(fixture.input));
+                Assert.AreEqual(fixture.valid, MochiyaBodyTypes.Concrete(fixture.normalized, contract.limits.bodyType));
+            }
+            Assert.AreEqual(37, contract.bodyCatalog.tags.Length);
+            var a = new MochiyaModelVariant { id = "a", bodyTypes = new[] { "moe", "eku" } };
+            var b = new MochiyaModelVariant { id = "b", bodyTypes = new[] { "any" } };
+            Assert.IsTrue(MochiyaBodyTypes.Valid("outfit", "", new[] { a, b }, contract.limits));
+            b.bodyTypes = new[] { "moe" };
+            Assert.IsFalse(MochiyaBodyTypes.Valid("outfit", "", new[] { a, b }, contract.limits));
+            a.bodyTypes = Array.Empty<string>();
+            Assert.IsTrue(MochiyaBodyTypes.Valid("base_avatar", "moe", new[] { a }, contract.limits));
+            Assert.IsFalse(MochiyaBodyTypes.Valid("base_avatar", "moe", new[] { a, b }, contract.limits));
+            using (var client = new MochiyaUploadClient(null))
+            using (var request = client.CreateApiRequest("/api/avatar-body-tags", "GET", null))
+                Assert.IsNull(request.GetRequestHeader("Authorization"));
+            var payload = new MochiyaUploadRequest { item = new MochiyaItemInput { modelVariants = new[] { a } } }.ToJson();
+            StringAssert.Contains("\"version\":3", payload);
+            StringAssert.Contains("\"baseBodyType\":null", payload);
+        }
+        [Test]
         public void ContractLoadsAllLocalesAndLargeFileBudgetsWithoutIntegerOverflow()
         {
             var asset = AssetDatabase.LoadAssetAtPath<TextAsset>("Packages/org.mochiya.avatar-tools/Editor/UploadContract.json");
             Assert.NotNull(asset);
             var contract = JsonUtility.FromJson<MochiyaUploadContract>(asset.text);
-            Assert.AreEqual(2147483648L, contract.limits.totalBytes);
+            Assert.AreEqual(5368709120L, contract.limits.totalBytes);
             Assert.AreEqual(4, contract.locales.Length);
             Assert.Contains("base_avatar", contract.categories);
             foreach (var locale in contract.locales) Assert.That(locale.labels.Length, Is.GreaterThan(30));

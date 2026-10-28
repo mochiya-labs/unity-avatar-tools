@@ -56,7 +56,7 @@ Hierarchy
 
 For a separate attachment, the base avatar supplies the reference skeleton, but its body and other attachments are not included. You do not need to upload the base avatar first. Specify the intended avatar and version in your item's requirements; clothing is not automatically reshaped to fit other bodies.
 
-1. In **Upload to Mochiya**, drag the model from the **Hierarchy** into **Avatar or attachment**. Check the title, select a category and cover image, and choose **Personal use** or **Listed on marketplace**. Add gallery images or buyer files under **Additional item details** if needed. Paid listings require seller setup on the website.
+1. In **Upload to Mochiya**, drag the model from the **Hierarchy** into **Model asset**. Check the title, select a category and cover image, and choose **Personal use** or **Listed on marketplace**. Add gallery images or buyer files under **Additional item details** if needed. Paid listings require seller setup on the website.
 2. Resolve any errors, then click **Upload for personal use** or **Publish listing**. The model is exported automatically. When finished, click **View item**; existing items are edited on the website.
 
 ![Uploading an outfit separately from its base avatar with Upload to Mochiya.](Documentation~/images/upload-outfit.webp)

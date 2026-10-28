@@ -11,6 +11,7 @@ namespace Mochiya.AvatarTools.Editor
     [Serializable] public sealed class MochiyaUploadPair { public string name, value; }
     [Serializable] public sealed class MochiyaUploadLimits
     {
+        public int modelVariants, bodyTypes, bodyType;
         public int version, title, tags, tag, gallery, additionalFiles, specifications, requirements, credits, licenseText, maxPriceCents;
         public long imageBytes, fileBytes, totalBytes;
     }
@@ -21,9 +22,13 @@ namespace Mochiya.AvatarTools.Editor
         public MochiyaUploadPair[] labels; public MochiyaUploadPricing pricing;
     }
     [Serializable] public sealed class MochiyaUploadLocale { public string name; public MochiyaUploadPair[] labels; }
-    [Serializable] public sealed class MochiyaUploadContract { public MochiyaUploadLimits limits; public string[] categories; public MochiyaUploadLocale[] locales; }
+    [Serializable] public sealed class MochiyaBodyFixture { public string input, normalized; public bool valid; }
+    [Serializable] public sealed class MochiyaUploadContract { public MochiyaUploadLimits limits; public string[] categories; public MochiyaUploadLocale[] locales; public MochiyaBodyCatalog bodyCatalog; public MochiyaBodyFixture[] bodyTypeFixtures; }
+    [Serializable] public sealed class MochiyaModelVariant { public string id; public string[] bodyTypes = Array.Empty<string>(); }
+    [Serializable] public sealed class MochiyaBodyCatalog { public int schemaVersion; public string revision; public string[] tags; }
     [Serializable] public sealed class MochiyaItemInput
     {
+        public string baseBodyType = ""; public MochiyaModelVariant[] modelVariants = Array.Empty<MochiyaModelVariant>();
         public string title = "", category = "base_avatar", status = "private";
         public string[] tags = Array.Empty<string>(); public int priceCents;
         public string specifications = "", requirements = "", credits = "", licenseText = "";
@@ -34,10 +39,10 @@ namespace Mochiya.AvatarTools.Editor
     }
     [Serializable] public sealed class MochiyaUploadRequest
     {
-        public int version = 2; public string idempotencyKey; public MochiyaItemInput item; public MochiyaUploadFile[] files;
+        public int version = 3; public string idempotencyKey; public MochiyaItemInput item; public MochiyaUploadFile[] files;
         public string ToJson()
         {
-            var json = JsonUtility.ToJson(this);
+            var json = JsonUtility.ToJson(this).Replace("\"baseBodyType\":\"\"", "\"baseBodyType\":null");
             return item.status == "private" ? json.Replace("\"priceCents\":" + item.priceCents, "\"priceCents\":null") : json;
         }
     }
@@ -108,7 +113,7 @@ namespace Mochiya.AvatarTools.Editor
             var request = new UnityWebRequest(origin + path, method);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.redirectLimit = 0; request.timeout = 120;
-            request.SetRequestHeader("Authorization", "Bearer " + token);
+            if (!string.IsNullOrEmpty(token)) request.SetRequestHeader("Authorization", "Bearer " + token);
 #if MOCHIYA_DEVELOPMENT
             if (protectionBypass != null) request.SetRequestHeader("x-vercel-protection-bypass", protectionBypass);
 #endif

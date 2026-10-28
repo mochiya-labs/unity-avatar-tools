@@ -5,6 +5,45 @@ namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class MochiyaUploadAnalysisTests
     {
+        [Test] public void VariantAnalysesKeepSourceFormatAndProfileIndependent()
+        {
+            var first = new GameObject("first");
+            var second = new GameObject("second");
+            var firstProfile = ScriptableObject.CreateInstance<MochiyaExportProfile>();
+            var secondProfile = ScriptableObject.CreateInstance<MochiyaExportProfile>();
+            int firstCalls = 0, secondCalls = 0;
+            using (var firstCache = new MochiyaUploadAnalysis(
+                root => new MochiyaAvatarTarget { Root = root },
+                (root, vrm, profile) => {
+                    Assert.That(root, Is.SameAs(first)); Assert.That(vrm, Is.True);
+                    Assert.That(profile, Is.SameAs(firstProfile)); firstCalls++;
+                    return new MochiyaConversionReport();
+                }))
+            using (var secondCache = new MochiyaUploadAnalysis(
+                root => new MochiyaAvatarTarget { Root = root },
+                (root, vrm, profile) => {
+                    Assert.That(root, Is.SameAs(second)); Assert.That(vrm, Is.False);
+                    Assert.That(profile, Is.SameAs(secondProfile)); secondCalls++;
+                    return new MochiyaConversionReport();
+                }))
+            try
+            {
+                firstCache.Refresh(first, firstProfile, true, true, 0);
+                secondCache.Refresh(second, secondProfile, false, true, 0);
+                Assert.That(firstCalls, Is.EqualTo(1)); Assert.That(secondCalls, Is.EqualTo(1));
+                firstCache.Dispose();
+                secondCache.Invalidate();
+                secondCache.Refresh(second, secondProfile, false, true, 1);
+                Assert.That(secondCalls, Is.EqualTo(2));
+                Assert.That(secondCache.Target.Root, Is.SameAs(second));
+                Assert.That(secondCache.Report, Is.Not.Null);
+            }
+            finally
+            {
+                Object.DestroyImmediate(first); Object.DestroyImmediate(second);
+                Object.DestroyImmediate(firstProfile); Object.DestroyImmediate(secondProfile);
+            }
+        }
         [Test] public void UnchangedInputNeverReanalyzesAndInvalidationsAreThrottled()
         {
             var source = new GameObject("source"); int detections = 0, validations = 0;

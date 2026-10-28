@@ -1,6 +1,6 @@
 {
   "limits": {
-    "version": 2,
+    "version": 3,
     "title": 80,
     "tags": 12,
     "tag": 40,
@@ -8,12 +8,15 @@
     "additionalFiles": 20,
     "imageBytes": 10485760,
     "fileBytes": 524288000,
-    "totalBytes": 2147483648,
+    "totalBytes": 5368709120,
     "specifications": 20000,
     "requirements": 20000,
     "credits": 20000,
     "licenseText": 20000,
-    "maxPriceCents": 90000000
+    "maxPriceCents": 90000000,
+    "modelVariants": 40,
+    "bodyTypes": 64,
+    "bodyType": 40
   },
   "categories": [
     "base_avatar",
@@ -116,7 +119,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "Tag supported base avatars and relevant keywords. {count}/12"
+          "value": "Add keywords for search. Select supported avatar bodies in the Model asset section. {count}/12 tags."
         },
         {
           "name": "addTag",
@@ -208,7 +211,7 @@
         },
         {
           "name": "coverHint",
-          "value": "JPG or PNG. Maximum 10 MiB."
+          "value": "JPG and PNG files are supported. This image is used as the item’s cover."
         },
         {
           "name": "gallery",
@@ -240,7 +243,7 @@
         },
         {
           "name": "modelSupportHint",
-          "value": "One model per upload for now. For outfits, accessories and hair, upload a version fitted to one base avatar for Avatar Studio try-on, and add its name as a tag. Multiple variants are planned."
+          "value": "These models are used in Avatar Studio for 3D preview and try-on. Base avatars use one model; attachments can have variants for different bodies."
         },
         {
           "name": "additionalFiles",
@@ -433,6 +436,126 @@
         {
           "name": "totalFilesTooLarge",
           "value": "All files together must be {limit} GiB or smaller."
+        },
+        {
+          "name": "avatarBody",
+          "value": "Avatar body"
+        },
+        {
+          "name": "fitsBodies",
+          "value": "Fits these avatar bodies"
+        },
+        {
+          "name": "bodyPlaceholder",
+          "value": "Search or enter a body name"
+        },
+        {
+          "name": "addBody",
+          "value": "Add supported body type"
+        },
+        {
+          "name": "removeBody",
+          "value": "Remove {body}"
+        },
+        {
+          "name": "normalizedBody",
+          "value": "Save as: {body}"
+        },
+        {
+          "name": "invalidBody",
+          "value": "Use a unique name with English letters, numbers and hyphens (up to 40 characters)."
+        },
+        {
+          "name": "bodyNone",
+          "value": "None — body type not specified"
+        },
+        {
+          "name": "bodyAny",
+          "value": "Any body"
+        },
+        {
+          "name": "variantHint",
+          "value": "Studio chooses the matching variant. If none matches, it uses the first variant."
+        },
+        {
+          "name": "baseOneModel",
+          "value": "A base avatar must have exactly one model. Remove the other variants before saving."
+        },
+        {
+          "name": "variantNumber",
+          "value": "Model variant {number}"
+        },
+        {
+          "name": "moveUp",
+          "value": "Move up"
+        },
+        {
+          "name": "moveDown",
+          "value": "Move down"
+        },
+        {
+          "name": "removeVariant",
+          "value": "Remove variant"
+        },
+        {
+          "name": "addVariant",
+          "value": "Add model variant"
+        },
+        {
+          "name": "variantLimits",
+          "value": "Up to 40 variants, 500 MiB per model and 5 GiB total for all item files."
+        },
+        {
+          "name": "variantInvalid",
+          "value": "Choose one model for a base avatar, or unique body tags for each attachment variant. Any must be alone and used only once."
+        },
+        {
+          "name": "upload_update_required",
+          "value": "Reload the website or update Unity Avatar Tools before editing this item."
+        },
+        {
+          "name": "bodyFilter",
+          "value": "Filter by avatar body"
+        },
+        {
+          "name": "filterByBody",
+          "value": "Filter"
+        },
+        {
+          "name": "allBodies",
+          "value": "All avatar bodies"
+        },
+        {
+          "name": "declaredBodiesHint",
+          "value": "Shows body support declared by creators."
+        },
+        {
+          "name": "useBody",
+          "value": "Use “{body}”"
+        },
+        {
+          "name": "previewModel",
+          "value": "View 3D model"
+        },
+        {
+          "name": "replaceModel",
+          "value": "Replace model file"
+        },
+        {
+          "name": "selectBodyType",
+          "value": "Select body type (default: None)"
+        },
+        {
+          "name": "bodyMatchingHint",
+          "value": "Each variant needs supported body types, or you can select Any body."
+        },
+        {
+          "name": "modelFormatHint",
+          "value": "GLB and VRM files are supported."
+        },
+        {
+          "name": "variantBodyRequired",
+          "value": "Select at least one supported body type for each model variant, or select “Any body”."
         },
         {
           "name": "connect",
@@ -681,7 +804,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "対応するベースアバター名や関連キーワードをタグに。{count}/12"
+          "value": "検索用のキーワードを追加してください。対応するアバターの体型はモデル欄で選択します。{count}/12 タグ。"
         },
         {
           "name": "addTag",
@@ -773,7 +896,7 @@
         },
         {
           "name": "coverHint",
-          "value": "JPGまたはPNG。最大10 MiB。"
+          "value": "JPGおよびPNGファイルに対応しています。この画像はアイテムのカバー画像として使用されます。"
         },
         {
           "name": "gallery",
@@ -805,7 +928,7 @@
         },
         {
           "name": "modelSupportHint",
-          "value": "現在、1回のアップロードで使用できるモデルは1つです。衣装・アクセサリー・髪型は、アバタースタジオで試着できるよう、1種類のベースアバターに対応したモデルをアップロードし、そのアバター名をタグに追加してください。複数バリエーションへの対応は今後予定しています。"
+          "value": "このモデルはアバタースタジオでの3Dプレビューや試着に使われます。ベースアバターは1モデル、衣装などのパーツは素体ごとに異なるモデルを登録できます。"
         },
         {
           "name": "additionalFiles",
@@ -998,6 +1121,126 @@
         {
           "name": "totalFilesTooLarge",
           "value": "全ファイルの合計は {limit} GiB 以下にしてください。"
+        },
+        {
+          "name": "avatarBody",
+          "value": "アバターの素体"
+        },
+        {
+          "name": "fitsBodies",
+          "value": "対応する素体"
+        },
+        {
+          "name": "bodyPlaceholder",
+          "value": "素体名を検索または入力"
+        },
+        {
+          "name": "addBody",
+          "value": "対応する素体タイプを追加"
+        },
+        {
+          "name": "removeBody",
+          "value": "{body}を削除"
+        },
+        {
+          "name": "normalizedBody",
+          "value": "保存する名前: {body}"
+        },
+        {
+          "name": "invalidBody",
+          "value": "英小文字・数字・ハイフンで重複しない名前を入力してください（40文字以内）。"
+        },
+        {
+          "name": "bodyNone",
+          "value": "なし — 素体の種類は未指定"
+        },
+        {
+          "name": "bodyAny",
+          "value": "すべての素体"
+        },
+        {
+          "name": "variantHint",
+          "value": "Studioは対応するモデルを選びます。一致するモデルがない場合は先頭のモデルを使います。"
+        },
+        {
+          "name": "baseOneModel",
+          "value": "ベースアバターのモデルは1つだけです。保存する前に他のモデルを削除してください。"
+        },
+        {
+          "name": "variantNumber",
+          "value": "モデル {number}"
+        },
+        {
+          "name": "moveUp",
+          "value": "上へ"
+        },
+        {
+          "name": "moveDown",
+          "value": "下へ"
+        },
+        {
+          "name": "removeVariant",
+          "value": "モデルを削除"
+        },
+        {
+          "name": "addVariant",
+          "value": "モデルを追加"
+        },
+        {
+          "name": "variantLimits",
+          "value": "最大40モデル、各500 MiB、アイテムの全ファイル合計5 GiBまで。"
+        },
+        {
+          "name": "variantInvalid",
+          "value": "ベースアバターは1モデル、その他はモデルごとに重複しない素体タグを指定してください。「すべて」は単独で1モデルだけに指定できます。"
+        },
+        {
+          "name": "upload_update_required",
+          "value": "ページを再読み込みするか、Unity Avatar Toolsを更新してから編集してください。"
+        },
+        {
+          "name": "bodyFilter",
+          "value": "アバターの体型で絞り込み"
+        },
+        {
+          "name": "filterByBody",
+          "value": "絞り込む"
+        },
+        {
+          "name": "allBodies",
+          "value": "すべての体型"
+        },
+        {
+          "name": "declaredBodiesHint",
+          "value": "制作者が指定した対応体型で絞り込みます。"
+        },
+        {
+          "name": "useBody",
+          "value": "「{body}」を使用"
+        },
+        {
+          "name": "previewModel",
+          "value": "3Dモデルを見る"
+        },
+        {
+          "name": "replaceModel",
+          "value": "モデルファイルを差し替え"
+        },
+        {
+          "name": "selectBodyType",
+          "value": "素体タイプを選択（初期値：なし）"
+        },
+        {
+          "name": "bodyMatchingHint",
+          "value": "各モデルに対応する素体タイプを指定してください。「すべての素体」も選べます。"
+        },
+        {
+          "name": "modelFormatHint",
+          "value": "GLBおよびVRMファイルに対応しています。"
+        },
+        {
+          "name": "variantBodyRequired",
+          "value": "各モデルに対応する素体タイプを1つ以上指定するか、「すべての素体」を選択してください。"
         },
         {
           "name": "connect",
@@ -1246,7 +1489,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "添加适配的基础模型名称和相关关键词。{count}/12"
+          "value": "添加用于搜索的关键词。在模型区域选择支持的身体类型。{count}/12 个标签。"
         },
         {
           "name": "addTag",
@@ -1338,7 +1581,7 @@
         },
         {
           "name": "coverHint",
-          "value": "JPG 或 PNG，最大 10 MiB。"
+          "value": "支持 JPG 和 PNG 文件。此图片将用作物品的封面。"
         },
         {
           "name": "gallery",
@@ -1370,7 +1613,7 @@
         },
         {
           "name": "modelSupportHint",
-          "value": "目前每次上传仅支持一个模型。服装、配饰和发型请上传适配一款基础模型的版本，供用户在虚拟形象工作室中试穿，并将该基础模型名称添加为标签。后续将支持多个适配版本。"
+          "value": "这些模型用于 虚拟形象工作室 中的 3D 预览和试穿。基础人物模型只能使用一个模型；附属物可以为不同素体提供多个款型。"
         },
         {
           "name": "additionalFiles",
@@ -1563,6 +1806,126 @@
         {
           "name": "totalFilesTooLarge",
           "value": "所有文件总大小不得超过 {limit} GiB。"
+        },
+        {
+          "name": "avatarBody",
+          "value": "基础素体"
+        },
+        {
+          "name": "fitsBodies",
+          "value": "适用的素体"
+        },
+        {
+          "name": "bodyPlaceholder",
+          "value": "搜索或输入素体名称"
+        },
+        {
+          "name": "addBody",
+          "value": "添加支持的素体类型"
+        },
+        {
+          "name": "removeBody",
+          "value": "移除 {body}"
+        },
+        {
+          "name": "normalizedBody",
+          "value": "保存为：{body}"
+        },
+        {
+          "name": "invalidBody",
+          "value": "请输入不重复的名称，仅限英文字母、数字和连字符（最多40个字符）。"
+        },
+        {
+          "name": "bodyNone",
+          "value": "无 — 未指定素体类型"
+        },
+        {
+          "name": "bodyAny",
+          "value": "任意素体"
+        },
+        {
+          "name": "variantHint",
+          "value": "Studio会选择匹配的款型；没有匹配时使用列表中的第一个款型。"
+        },
+        {
+          "name": "baseOneModel",
+          "value": "基础人物模型只能有一个模型文件。请移除其他款型后保存。"
+        },
+        {
+          "name": "variantNumber",
+          "value": "模型款型 {number}"
+        },
+        {
+          "name": "moveUp",
+          "value": "上移"
+        },
+        {
+          "name": "moveDown",
+          "value": "下移"
+        },
+        {
+          "name": "removeVariant",
+          "value": "移除款型"
+        },
+        {
+          "name": "addVariant",
+          "value": "添加模型款型"
+        },
+        {
+          "name": "variantLimits",
+          "value": "最多40个款型，每个模型500 MiB，所有文件合计不超过5 GiB。"
+        },
+        {
+          "name": "variantInvalid",
+          "value": "基础人物模型需保留一个模型，附属物各款型需使用不重复的素体标签。“任意”只能单独用于一个款型。"
+        },
+        {
+          "name": "upload_update_required",
+          "value": "请刷新网页或更新Unity Avatar Tools后再编辑此物品。"
+        },
+        {
+          "name": "bodyFilter",
+          "value": "按人物身体类型筛选"
+        },
+        {
+          "name": "filterByBody",
+          "value": "筛选"
+        },
+        {
+          "name": "allBodies",
+          "value": "所有身体类型"
+        },
+        {
+          "name": "declaredBodiesHint",
+          "value": "根据创作者声明的支持类型筛选。"
+        },
+        {
+          "name": "useBody",
+          "value": "使用“{body}”"
+        },
+        {
+          "name": "previewModel",
+          "value": "查看 3D 模型"
+        },
+        {
+          "name": "replaceModel",
+          "value": "替换模型文件"
+        },
+        {
+          "name": "selectBodyType",
+          "value": "选择素体类型（默认：无）"
+        },
+        {
+          "name": "bodyMatchingHint",
+          "value": "每个款型都需要指定支持的素体类型，也可选择“任意素体”。"
+        },
+        {
+          "name": "modelFormatHint",
+          "value": "支持 GLB 和 VRM 文件。"
+        },
+        {
+          "name": "variantBodyRequired",
+          "value": "请为每个模型款型选择至少一种支持的素体类型，或选择“任意素体”。"
         },
         {
           "name": "connect",
@@ -1811,7 +2174,7 @@
         },
         {
           "name": "tagsHint",
-          "value": "호환되는 베이스 아바타 이름과 관련 키워드를 태그로 추가하세요. {count}/12"
+          "value": "검색용 키워드를 추가하세요. 지원하는 아바타 체형은 모델 영역에서 선택합니다. 태그 {count}/12개."
         },
         {
           "name": "addTag",
@@ -1903,7 +2266,7 @@
         },
         {
           "name": "coverHint",
-          "value": "JPG 또는 PNG. 최대 10 MiB."
+          "value": "JPG 및 PNG 파일을 지원합니다. 이 이미지는 아이템의 커버 이미지로 사용됩니다."
         },
         {
           "name": "gallery",
@@ -1935,7 +2298,7 @@
         },
         {
           "name": "modelSupportHint",
-          "value": "현재 한 번에 모델 하나만 업로드할 수 있습니다. 의상·액세서리·헤어는 아바타 스튜디오에서 착용해 볼 수 있도록 베이스 아바타 하나에 맞춘 버전을 업로드하고, 해당 아바타 이름을 태그에 추가하세요. 여러 버전 지원은 추후 추가할 예정입니다."
+          "value": "이 모델은 아바타 스튜디오의 3D 미리보기와 착용에 사용됩니다. 베이스 아바타는 모델 하나를 사용하며, 부착 아이템은 체형별 모델을 등록할 수 있습니다."
         },
         {
           "name": "additionalFiles",
@@ -2130,6 +2493,126 @@
           "value": "모든 파일의 총 크기는 {limit} GiB 이하여야 합니다."
         },
         {
+          "name": "avatarBody",
+          "value": "아바타 소체"
+        },
+        {
+          "name": "fitsBodies",
+          "value": "호환 소체"
+        },
+        {
+          "name": "bodyPlaceholder",
+          "value": "소체 이름 검색 또는 입력"
+        },
+        {
+          "name": "addBody",
+          "value": "지원하는 소체 유형 추가"
+        },
+        {
+          "name": "removeBody",
+          "value": "{body} 삭제"
+        },
+        {
+          "name": "normalizedBody",
+          "value": "저장할 이름: {body}"
+        },
+        {
+          "name": "invalidBody",
+          "value": "영문, 숫자, 하이픈으로 중복되지 않는 이름을 입력하세요(최대 40자)."
+        },
+        {
+          "name": "bodyNone",
+          "value": "없음 — 소체 미지정"
+        },
+        {
+          "name": "bodyAny",
+          "value": "모든 소체"
+        },
+        {
+          "name": "variantHint",
+          "value": "Studio는 소체에 맞는 모델을 선택합니다. 일치하는 모델이 없으면 첫 번째 모델을 사용합니다."
+        },
+        {
+          "name": "baseOneModel",
+          "value": "베이스 아바타는 모델이 하나여야 합니다. 저장하기 전에 다른 모델을 삭제하세요."
+        },
+        {
+          "name": "variantNumber",
+          "value": "모델 모델 {number}"
+        },
+        {
+          "name": "moveUp",
+          "value": "위로"
+        },
+        {
+          "name": "moveDown",
+          "value": "아래로"
+        },
+        {
+          "name": "removeVariant",
+          "value": "모델 삭제"
+        },
+        {
+          "name": "addVariant",
+          "value": "모델 모델 추가"
+        },
+        {
+          "name": "variantLimits",
+          "value": "최대 40개 모델, 모델당 500 MiB, 모든 파일 합계 5 GiB까지."
+        },
+        {
+          "name": "variantInvalid",
+          "value": "베이스 아바타는 모델 하나, 부착물은 모델마다 중복되지 않는 소체 태그가 필요합니다. 모든 소체는 한 모델에만 단독 지정할 수 있습니다."
+        },
+        {
+          "name": "upload_update_required",
+          "value": "페이지를 새로 고치거나 Unity Avatar Tools를 업데이트한 후 편집하세요."
+        },
+        {
+          "name": "bodyFilter",
+          "value": "아바타 체형으로 필터"
+        },
+        {
+          "name": "filterByBody",
+          "value": "필터"
+        },
+        {
+          "name": "allBodies",
+          "value": "모든 체형"
+        },
+        {
+          "name": "declaredBodiesHint",
+          "value": "제작자가 지정한 지원 체형을 기준으로 표시합니다."
+        },
+        {
+          "name": "useBody",
+          "value": "“{body}” 사용"
+        },
+        {
+          "name": "previewModel",
+          "value": "3D 모델 보기"
+        },
+        {
+          "name": "replaceModel",
+          "value": "모델 파일 교체"
+        },
+        {
+          "name": "selectBodyType",
+          "value": "소체 유형 선택 (기본: 없음)"
+        },
+        {
+          "name": "bodyMatchingHint",
+          "value": "각 모델이 지원하는 소체 유형을 지정하세요. “모든 소체”도 선택할 수 있습니다."
+        },
+        {
+          "name": "modelFormatHint",
+          "value": "GLB 및 VRM 파일을 지원합니다."
+        },
+        {
+          "name": "variantBodyRequired",
+          "value": "각 모델에 지원하는 소체 유형을 하나 이상 지정하거나 “모든 소체”를 선택하세요."
+        },
+        {
           "name": "connect",
           "value": "연결"
         },
@@ -2283,5 +2766,90 @@
         }
       ]
     }
-  ]
+  ],
+  "bodyTypeFixtures": [
+    {
+      "input": "SiuSiu",
+      "normalized": "siusiu",
+      "valid": true
+    },
+    {
+      "input": "LUMINA",
+      "normalized": "lumina",
+      "valid": true
+    },
+    {
+      "input": " Ｍｙ Avatar! ",
+      "normalized": "my-avatar",
+      "valid": true
+    },
+    {
+      "input": "a---b",
+      "normalized": "a-b",
+      "valid": true
+    },
+    {
+      "input": "中文",
+      "normalized": "",
+      "valid": false
+    },
+    {
+      "input": "ANY",
+      "normalized": "any",
+      "valid": false
+    },
+    {
+      "input": "None",
+      "normalized": "none",
+      "valid": false
+    },
+    {
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "valid": false
+    }
+  ],
+  "bodyCatalog": {
+    "schemaVersion": 1,
+    "revision": "2026-10-27",
+    "tags": [
+      "siusiu",
+      "ramune",
+      "mao",
+      "selestia",
+      "moe",
+      "eku",
+      "kaguya",
+      "mizuki",
+      "misaki",
+      "lumina",
+      "shinano",
+      "airi",
+      "shinra",
+      "manuka",
+      "rurune",
+      "chocolat",
+      "chiffon",
+      "plum",
+      "lime",
+      "sio",
+      "lasyusha",
+      "milltina",
+      "kumaly",
+      "milfy",
+      "lapwing",
+      "mayo",
+      "minase",
+      "komano",
+      "kanata",
+      "hanka",
+      "alue",
+      "nakiya",
+      "zev",
+      "suzuya",
+      "baku",
+      "kuuta",
+      "kirisame"
+    ]
+  }
 }

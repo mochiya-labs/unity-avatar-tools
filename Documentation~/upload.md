@@ -36,8 +36,8 @@ You can upload straight from the original scene object; a separate conversion or
 
 ### Complete the item and upload
 
-1. Drag the prepared scene object from the Hierarchy into **Avatar or attachment**. Selecting a source fills the title with its object name; edit the title afterward.
-2. Review the detection message and expand **Compatibility warnings**. Resolve errors before uploading. Warnings describe behavior that may be approximated or omitted.
+1. Drag the prepared scene object from the Hierarchy into the object field under **Model asset**. Selecting a source fills the title with its object name; edit the title afterward.
+2. In each model card, expand **Export settings** to review detection and select an export profile, then expand **Compatibility warnings**. Resolve errors before uploading. Warnings describe behavior that may be approximated or omitted.
 3. Keep **Model format: VRM** for supported avatar expressions and spring physics. Choose **GLB** when you need general glTF geometry; ordinary GLB does not carry VRM behavior. The tool generates this model file for you.
 4. Complete the fields below. For a first check, keep **Availability: Personal use**.
 5. Click **Upload for personal use**, or **Publish listing** for a marketplace item. Keep Unity open while it prepares the model, uploads files and finishes the upload.
@@ -45,7 +45,7 @@ You can upload straight from the original scene object; a separate conversion or
 
 | Field | What to enter |
 | --- | --- |
-| Title (required) | A clear item name, up to 80 characters. Selecting another source replaces it. |
+| Title (required) | A clear item name, up to 80 characters. Selecting another primary source replaces it; reordering variants preserves it. |
 | Category (required) | Avatar body, Outfit, Hair, Accessory or Other. This is the marketplace category, separate from automatic avatar/attachment detection. |
 | Tags (optional) | Add one tag at a time with **Add**; up to 12 distinct tags, 40 characters each. |
 | Availability | **Personal use** keeps it in your library for Avatar Studio. **Listed on marketplace** lets others acquire it for free or buy it. You can change this later on the website. |
@@ -61,9 +61,9 @@ In **Additional item details**, describe supported avatars/versions and setup st
 | File or text | Limit |
 | --- | --- |
 | Required cover and optional gallery | PNG/JPEG, 10 MiB per image; up to 12 gallery images |
-| Generated model | One VRM/GLB, 500 MiB maximum |
+| Generated models | One base model or up to 40 attachment variants; 500 MiB per VRM/GLB |
 | Additional downloadable files | Up to 20 files, 500 MiB each |
-| All uploaded files combined | 2 GiB maximum, including images and the generated model |
+| All uploaded files combined | 5 GiB maximum, including all models, images and additional files |
 | Specifications / Requirements & setup | 20,000 characters each |
 | Credits / License terms | 20,000 characters each |
 
@@ -92,3 +92,25 @@ Keep the key private. If it is exposed, use **Regenerate** in your Mochiya profi
 Raw MA/VRC setups are converted during upload; prepared VRM GameObjects can be exported directly. A change of server clears the remembered sign-in. A temporary model export is kept locally for retries and removed during cleanup.
 
 See [troubleshooting](troubleshooting.md) for installation, connection and upload problems, and [supported behavior and limits](reference.md#supported-behavior-and-limits) for conversion differences.
+
+## Models for different avatar bodies
+
+For an Avatar body item, select one model and optionally choose its **Avatar body** tag. Leave None when the body type is unspecified.
+
+For outfits, hair, accessories and other attachments, add a model version for each supported body or group of bodies. Select its GameObject and VRM/GLB format, then choose **Fits these avatar bodies**. A tag can belong to only one version in an item. You may designate one version **Any body (default version)**; that version cannot also have concrete tags. Any is a fallback, not automatic reshaping or a fit guarantee.
+
+Type a body name to see Mochiya suggestions or add your own normalized name. Names use lowercase English letters, numbers and hyphens; spaces and punctuation become hyphens. Review the preview before adding. You can declare up to 64 distinct concrete body tags per item, each at most 40 characters. General keyword tags are separate.
+
+Use Move up/down to choose the order. Studio first selects the matching body version, then the Any version, then the first version with a **Check fit** message. Switching Category to Avatar body requires keeping exactly one model. Each source exports independently with the export profile selected in its own card, and one item acquisition includes all its variants. Edit existing variants on the website.
+
+Use the body dropdown at the top of each model row to search suggested names or enter a custom name. For an avatar body, choosing a name replaces the previous choice; **None** leaves its body type unspecified. For attachments, **Any body** starts as the default tag. Choose a concrete name to replace it, and use × to remove a tag. The row’s + menu also lets you remove tags that do not fit on the row. Each body name can belong to only one model variant.
+
+Select the scene object beside its body tags. Once selected, its name and the **View 3D model** button appear below; this button frames the object in Unity’s Scene view. Expand **Export settings** within the card to choose the labeled VRM/GLB format, review detection and select a profile. **Compatibility warnings** follows below. The move-up, move-down and remove icons stay on the final line; hover over the icons for their descriptions. **Add model variant** appears at the right of **Model asset** for attachments. The question-mark help beside **Model asset** explains how these models are used in Avatar Studio.
+
+Base avatars do not show move-up/down controls. If changing the category leaves multiple models, remove the extras before uploading; the remove action remains available for that case.
+
+An unassigned base shows **Select body type (default: None)**. For attachments, use **Add supported body type** on each model variant to declare the bodies it fits, or choose **Any body**.
+
+Scroll the body list to see every available matching name. When you type a custom name, its **Use** action stays above the scrolling list.
+
+Generated model filenames use `item_name_body_tags.vrm` or `.glb` for every category. Spaces and punctuation become underscores; Unicode letters and numbers are preserved. A base without a body name uses `none`, and universal attachments use `any`. Long names are shortened and duplicate names receive a numeric suffix.
