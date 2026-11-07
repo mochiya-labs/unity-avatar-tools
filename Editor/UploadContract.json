@@ -4,10 +4,11 @@
     "title": 80,
     "tags": 12,
     "tag": 40,
-    "gallery": 12,
+    "gallery": 30,
     "additionalFiles": 20,
     "imageBytes": 10485760,
     "fileBytes": 524288000,
+    "additionalFileBytes": 2147483648,
     "totalBytes": 5368709120,
     "specifications": 20000,
     "requirements": 20000,
@@ -223,7 +224,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "Add up to 12 JPG or PNG images. Maximum 10 MiB each."
+          "value": "Add up to 30 JPG or PNG images. Maximum 10 MiB each."
         },
         {
           "name": "clearImage",
@@ -238,10 +239,6 @@
           "value": "Model asset"
         },
         {
-          "name": "assetHint",
-          "value": "Upload one .glb or .vrm file for Mochiya's live preview. Maximum 500 MiB."
-        },
-        {
           "name": "modelSupportHint",
           "value": "These models are used in Avatar Studio for 3D preview and try-on. Base avatars use one model; attachments can have variants for different bodies."
         },
@@ -251,7 +248,7 @@
         },
         {
           "name": "additionalFilesHint",
-          "value": "Optional. Add multiple source files, packages, textures, documents, or archives. Maximum 500 MiB each."
+          "value": "Optional. Add source files, packages, textures, documents, or archives."
         },
         {
           "name": "licenseText",
@@ -307,7 +304,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "Add no more than 12 preview images."
+          "value": "Add no more than 30 preview images."
         },
         {
           "name": "galleryInvalid",
@@ -327,7 +324,7 @@
         },
         {
           "name": "additionalFileTooLarge",
-          "value": "Each additional file must be 500 MiB or smaller."
+          "value": "Each additional file must be 2 GiB or smaller."
         },
         {
           "name": "priceInvalid",
@@ -395,7 +392,7 @@
         },
         {
           "name": "fileLimits",
-          "value": "Up to 20 additional files, 500 MiB each; all files together up to 2 GiB."
+          "value": "Up to 20 additional files, 2 GiB each; all item files together up to 5 GiB."
         },
         {
           "name": "additionalFilesTooMany",
@@ -658,10 +655,6 @@
           "value": "Language"
         },
         {
-          "name": "limits",
-          "value": "Images: 10 MiB each. Model and buyer files: 500 MiB each. Total: 2 GiB. Up to 12 gallery images and 20 additional files."
-        },
-        {
           "name": "earnings",
           "value": "Estimated earnings"
         },
@@ -908,7 +901,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "JPGまたはPNG画像を最大12枚追加できます。各10 MiBまで。"
+          "value": "JPGまたはPNG画像を最大30枚追加できます。各10 MiBまで。"
         },
         {
           "name": "clearImage",
@@ -923,10 +916,6 @@
           "value": "モデルアセット"
         },
         {
-          "name": "assetHint",
-          "value": "Mochiyaのライブプレビューで使う.glbまたは.vrmファイルを1つアップロードします。最大500 MiB。"
-        },
-        {
           "name": "modelSupportHint",
           "value": "このモデルはアバタースタジオでの3Dプレビューや試着に使われます。ベースアバターは1モデル、衣装などのパーツは素体ごとに異なるモデルを登録できます。"
         },
@@ -936,7 +925,7 @@
         },
         {
           "name": "additionalFilesHint",
-          "value": "任意。ソースファイル、パッケージ、テクスチャ、説明書、アーカイブなどを複数追加できます。各500 MiBまで。"
+          "value": "任意。ソースファイル、パッケージ、テクスチャ、説明書、アーカイブなどを追加できます。"
         },
         {
           "name": "licenseText",
@@ -992,7 +981,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "プレビュー画像は12枚以内にしてください。"
+          "value": "プレビュー画像は30枚以内にしてください。"
         },
         {
           "name": "galleryInvalid",
@@ -1012,7 +1001,7 @@
         },
         {
           "name": "additionalFileTooLarge",
-          "value": "追加ファイルは1つ500 MiB以下にしてください。"
+          "value": "追加ファイルは1つ2 GiB以下にしてください。"
         },
         {
           "name": "priceInvalid",
@@ -1080,7 +1069,7 @@
         },
         {
           "name": "fileLimits",
-          "value": "追加ファイルは最大20個、各500 MiB、全ファイル合計2 GiBまでです。"
+          "value": "追加ファイルは最大20個、各2 GiB、アイテムの全ファイル合計5 GiBまでです。"
         },
         {
           "name": "additionalFilesTooMany",
@@ -1343,10 +1332,6 @@
           "value": "言語"
         },
         {
-          "name": "limits",
-          "value": "画像は各10 MiB、モデルと購入者向けファイルは各500 MiB、合計2 GiBまで。ギャラリー12枚、追加ファイル20個まで。"
-        },
-        {
           "name": "earnings",
           "value": "受取額の目安"
         },
@@ -1593,7 +1578,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "最多添加 12 张 JPG 或 PNG 图片，每张最大 10 MiB。"
+          "value": "最多添加 30 张 JPG 或 PNG 图片，每张最大 10 MiB。"
         },
         {
           "name": "clearImage",
@@ -1608,10 +1593,6 @@
           "value": "模型资产"
         },
         {
-          "name": "assetHint",
-          "value": "上传一个用于 Mochiya 实时预览的 .glb 或 .vrm 文件，最大 500 MiB。"
-        },
-        {
           "name": "modelSupportHint",
           "value": "这些模型用于 虚拟形象工作室 中的 3D 预览和试穿。基础人物模型只能使用一个模型；附属物可以为不同素体提供多个款型。"
         },
@@ -1621,7 +1602,7 @@
         },
         {
           "name": "additionalFilesHint",
-          "value": "可选。可添加多个源文件、软件包、贴图、文档或压缩包，每个最大 500 MiB。"
+          "value": "可选。可添加源文件、软件包、贴图、文档或压缩包。"
         },
         {
           "name": "licenseText",
@@ -1677,7 +1658,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "预览图不能超过 12 张。"
+          "value": "预览图不能超过 30 张。"
         },
         {
           "name": "galleryInvalid",
@@ -1697,7 +1678,7 @@
         },
         {
           "name": "additionalFileTooLarge",
-          "value": "每个其他文件不能超过 500 MiB。"
+          "value": "每个附加文件不能超过 2 GiB。"
         },
         {
           "name": "priceInvalid",
@@ -1765,7 +1746,7 @@
         },
         {
           "name": "fileLimits",
-          "value": "最多20个附加文件，每个不超过500 MiB；所有文件总计不超过2 GiB。"
+          "value": "最多20个附加文件，每个不超过2 GiB；商品所有文件合计不超过5 GiB。"
         },
         {
           "name": "additionalFilesTooMany",
@@ -2028,10 +2009,6 @@
           "value": "语言"
         },
         {
-          "name": "limits",
-          "value": "图片每个10 MiB，模型和买家文件每个500 MiB，总计2 GiB。最多12张展示图片和20个附加文件。"
-        },
-        {
           "name": "earnings",
           "value": "预计收入"
         },
@@ -2278,7 +2255,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "JPG 또는 PNG 이미지를 최대 12장 추가하세요. 각 10 MiB 이하."
+          "value": "JPG 또는 PNG 이미지를 최대 30장 추가하세요. 각 10 MiB 이하."
         },
         {
           "name": "clearImage",
@@ -2293,10 +2270,6 @@
           "value": "모델 에셋"
         },
         {
-          "name": "assetHint",
-          "value": "Mochiya의 라이브 미리보기에 사용할 .glb 또는 .vrm 파일 1개를 업로드하세요. 최대 500 MiB."
-        },
-        {
           "name": "modelSupportHint",
           "value": "이 모델은 아바타 스튜디오의 3D 미리보기와 착용에 사용됩니다. 베이스 아바타는 모델 하나를 사용하며, 부착 아이템은 체형별 모델을 등록할 수 있습니다."
         },
@@ -2306,7 +2279,7 @@
         },
         {
           "name": "additionalFilesHint",
-          "value": "선택 사항. 소스 파일, 패키지, 텍스처, 문서 또는 압축 파일을 여러 개 추가할 수 있습니다. 각 500 MiB 이하."
+          "value": "선택 사항. 소스 파일, 패키지, 텍스처, 문서 또는 압축 파일을 추가할 수 있습니다."
         },
         {
           "name": "licenseText",
@@ -2362,7 +2335,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "미리보기 이미지는 12장 이하로 추가하세요."
+          "value": "미리보기 이미지는 30장 이하로 추가하세요."
         },
         {
           "name": "galleryInvalid",
@@ -2382,7 +2355,7 @@
         },
         {
           "name": "additionalFileTooLarge",
-          "value": "추가 파일은 각각 500 MiB 이하여야 합니다."
+          "value": "추가 파일은 각각 2 GiB 이하여야 합니다."
         },
         {
           "name": "priceInvalid",
@@ -2450,7 +2423,7 @@
         },
         {
           "name": "fileLimits",
-          "value": "추가 파일은 최대 20개, 파일당 500 MiB, 전체 파일 합계 2 GiB까지 가능해요."
+          "value": "추가 파일은 최대 20개, 파일당 2 GiB, 아이템의 전체 파일 합계 5 GiB까지 가능해요."
         },
         {
           "name": "additionalFilesTooMany",
@@ -2713,10 +2686,6 @@
           "value": "언어"
         },
         {
-          "name": "limits",
-          "value": "이미지당 10 MiB, 모델 및 구매자 파일당 500 MiB, 전체 2 GiB. 갤러리 12개, 추가 파일 20개까지."
-        },
-        {
           "name": "earnings",
           "value": "예상 수익"
         },
@@ -2811,7 +2780,7 @@
   ],
   "bodyCatalog": {
     "schemaVersion": 1,
-    "revision": "2026-10-27",
+    "revision": "2026-11-04",
     "tags": [
       "siusiu",
       "ramune",
@@ -2849,7 +2818,12 @@
       "suzuya",
       "baku",
       "kuuta",
-      "kirisame"
+      "kirisame",
+      "kipfel",
+      "mamehinata",
+      "nochica",
+      "fyuett",
+      "shiratsume"
     ]
   }
 }

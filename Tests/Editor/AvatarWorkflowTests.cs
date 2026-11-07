@@ -41,6 +41,42 @@ namespace Mochiya.AvatarTools.Editor.Tests
             assets.Clear();
         }
 
+        [TestCase(".vrm", false, false)]
+        [TestCase(".glb", false, false)]
+        [TestCase(".vrm", true, false)]
+        [TestCase(".vrm", false, true)]
+        public void ExportTemporarilyReadsImportedMeshesAndRestoresSettings(string extension, bool fail, bool initiallyReadable)
+        {
+            var assetPath = "Assets/MochiyaReadable-" + Guid.NewGuid().ToString("N") + ".obj";
+            assets.Add(assetPath);
+            File.WriteAllText(assetPath, "o ReadabilityFixture\nv 0 0 0\nv 1 0 0\nv 0 1 0\nvt 0 0\nvt 1 0\nvt 0 1\nvn 0 0 1\nf 1/1/1 2/2/1 3/3/1\n");
+            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+            var importer = (ModelImporter)AssetImporter.GetAtPath(assetPath);
+            importer.isReadable = initiallyReadable;
+            importer.SaveAndReimport();
+            var before = File.ReadAllText(assetPath + ".meta");
+            var avatar = Avatar();
+            var instance = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(assetPath), avatar.transform);
+            var filter = instance.GetComponentInChildren<MeshFilter>();
+            var originalMesh = filter.sharedMesh;
+            var meshName = originalMesh.name;
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(originalMesh, out string originalGuid, out long originalId);
+            Assert.That(originalMesh.isReadable, Is.EqualTo(initiallyReadable));
+            var path = Path.GetFullPath("MochiyaTests/" + (fail ? Guid.NewGuid().ToString("N") + "/" : "") + "readable" + extension);
+            if (fail) Assert.Throws<DirectoryNotFoundException>(() => MochiyaAvatarWorkflow.Export(avatar, path));
+            else
+            {
+                MochiyaAvatarWorkflow.Export(avatar, path);
+                Assert.That(Gltf(path).meshes.Any(mesh => mesh.name == meshName), Is.True, "The imported mesh must survive export.");
+            }
+            Assert.That(((ModelImporter)AssetImporter.GetAtPath(assetPath)).isReadable, Is.EqualTo(initiallyReadable));
+            Assert.That(File.ReadAllText(assetPath + ".meta"), Is.EqualTo(before));
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(filter.sharedMesh, out string restoredGuid, out long restoredId);
+            Assert.That(restoredGuid, Is.EqualTo(originalGuid));
+            Assert.That(restoredId, Is.EqualTo(originalId));
+            Assert.That(filter.sharedMesh.isReadable, Is.EqualTo(initiallyReadable));
+        }
+
         [TestCase(0, AssetKind.Avatar)]
         [TestCase(1, AssetKind.Attachment)]
         public void LoadsSavedKindsUsingOnlyAvatarAndAttachmentChoices(int storedKind, AssetKind expected)

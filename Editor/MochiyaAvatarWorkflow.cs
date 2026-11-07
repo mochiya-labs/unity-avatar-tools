@@ -114,6 +114,9 @@ namespace Mochiya.AvatarTools.Editor
             var asVrm = string.Equals(extension, ".vrm", StringComparison.OrdinalIgnoreCase);
             if (!asVrm && !string.Equals(extension, ".glb", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("Choose a .vrm or .glb output path.", nameof(path));
+            if (root == null) throw new ArgumentNullException(nameof(root));
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Export requires Edit Mode.");
+            using var readableMeshes = new MochiyaReadableMeshes(root);
             var detected = Detect(root);
             RequireValid(root, asVrm, profile);
             profile = profile != null ? profile : MochiyaExportProfile.Default;

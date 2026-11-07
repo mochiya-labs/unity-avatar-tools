@@ -21,6 +21,21 @@ namespace Mochiya.AvatarTools.Editor.Tests
         [TearDown] public void TearDown() { foreach (var obj in objects.AsEnumerable().Reverse()) if (obj != null) Object.DestroyImmediate(obj); objects.Clear(); }
         private GameObject Keep(GameObject go) { objects.Add(go); return go; }
 
+        [Test] public void MissingBlendshapeReportsFullPathAndDuplicateSiblingIndex()
+        {
+            var parent = Keep(new GameObject("Avatar A"));
+            var otherParent = Keep(new GameObject("Avatar B"));
+            var target = new GameObject("tops"); target.transform.SetParent(parent.transform);
+            var sibling = new GameObject("tops"); sibling.transform.SetParent(parent.transform);
+            var other = new GameObject("tops"); other.transform.SetParent(otherParent.transform);
+            var context = new ConversionContext(parent, parent, false, new Dictionary<Object, Object>(), null, null, new MochiyaConversionReport(), new List<Object>());
+            var error = Assert.Throws<InvalidOperationException>(() => context.Select(target.transform, "Breasts_big"));
+            StringAssert.Contains("/Avatar A/tops [sibling 0]", error.Message);
+            StringAssert.Contains("Breasts_big", error.Message);
+            StringAssert.Contains("/Avatar B/tops", MochiyaDiagnosticPath.Of(other.transform));
+            StringAssert.Contains("/Avatar A/tops [sibling 1]", MochiyaDiagnosticPath.Of(sibling.transform));
+        }
+
         private sealed class PathReference { public GameObject targetObject; public string referencePath; }
         [TestCase(true, true, true)]
         [TestCase(true, false, false)]

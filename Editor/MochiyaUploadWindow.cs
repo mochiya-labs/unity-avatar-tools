@@ -776,7 +776,7 @@ namespace Mochiya.AvatarTools.Editor
             {
                 var info = new FileInfo(path); var image = role == "cover" || role == "gallery";
                 if (!info.Exists || info.Length <= 0) throw new InvalidOperationException(L("fileMissingOrEmpty").Replace("{name}", info.Name));
-                var limit = image ? contract.limits.imageBytes : contract.limits.fileBytes;
+                var limit = contract.limits.FileSizeLimit(role);
                 if (info.Length > limit) throw new InvalidOperationException(L("fileTooLarge").Replace("{name}", info.Name).Replace("{limit}", (limit / (1024 * 1024)).ToString()));
                 var ext = info.Extension.ToLowerInvariant(); var type = ext == ".png" ? "image/png" : ext == ".jpg" || ext == ".jpeg" ? "image/jpeg" : "application/octet-stream";
                 if (image && type == "application/octet-stream") throw new InvalidOperationException(info.Name + ": " + L(image && role == "gallery" ? "galleryInvalid" : "coverInvalid"));
@@ -800,12 +800,12 @@ namespace Mochiya.AvatarTools.Editor
                 }
                 catch (Exception error) when (!(error is OperationCanceledException))
                 {
-                    throw new InvalidOperationException(variant.source.name + ": " + error.Message, error);
+                    var bodies = item.category == "base_avatar" ? item.baseBodyType : string.Join(", ", variant.bodies);
+                    throw new InvalidOperationException($"Model variant {modelSources.IndexOf(variant) + 1} [{bodies}], source '{MochiyaDiagnosticPath.Of(variant.source.transform)}': {error.Message}", error);
                 }
             }
             foreach (var path in gallery) add("gallery", path, null);
             foreach (var path in additional) add("additional", path, null);
-            if (files.Sum(f => f.size) > contract.limits.totalBytes) throw new InvalidOperationException(L("totalFilesTooLarge").Replace("{limit}", (contract.limits.totalBytes / (1024 * 1024 * 1024)).ToString()));
             requestData = new MochiyaUploadRequest { idempotencyKey = Guid.NewGuid().ToString(), item = JsonUtility.FromJson<MochiyaItemInput>(JsonUtility.ToJson(item)), files = files.ToArray() };
             requestJson = requestData.ToJson();
         }

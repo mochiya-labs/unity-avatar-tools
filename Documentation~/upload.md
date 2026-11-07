@@ -4,7 +4,11 @@
 
 ## Prepare your asset
 
+Missing scripts do not block upload. They are skipped during conversion and listed in compatibility warnings with the owning object's full hierarchy path. Their behavior is not exported, and the source components are left unchanged.
+
 Work in **Edit Mode**: Unity's Play button should be off. Drag the asset's prefab from the **Project** panel into the scene's **Hierarchy** panel, then select its top-level object in the Hierarchy.
+
+During model export, the upload tool temporarily enables **Read/Write** on source model imports when needed, then restores the original setting, including when export fails. Models already readable are left unchanged. Allow export and cleanup to finish; forcibly closing Unity can interrupt restoration.
 
 - **Whole avatar:** select the avatar root. Clothing and accessories already inside that root are included in the uploaded model.
 - **Separate outfit, hair or accessory:** configure it on its intended base avatar using the asset creator's instructions. Keep the attachment directly beneath the avatar root, with its original MA components intact. Select only the attachment root for upload. Do not run MA Manual Bake before this workflow.
@@ -60,9 +64,9 @@ In **Additional item details**, describe supported avatars/versions and setup st
 
 | File or text | Limit |
 | --- | --- |
-| Required cover and optional gallery | PNG/JPEG, 10 MiB per image; up to 12 gallery images |
+| Required cover and optional gallery | PNG/JPEG, 10 MiB per image; up to 30 gallery images |
 | Generated models | One base model or up to 40 attachment variants; 500 MiB per VRM/GLB |
-| Additional downloadable files | Up to 20 files, 500 MiB each |
+| Additional downloadable files | Up to 20 files, 2 GiB each |
 | All uploaded files combined | 5 GiB maximum, including all models, images and additional files |
 | Specifications / Requirements & setup | 20,000 characters each |
 | Credits / License terms | 20,000 characters each |

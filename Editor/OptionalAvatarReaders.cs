@@ -44,7 +44,7 @@ namespace Mochiya.AvatarTools.Editor
                 {
                     var renderer = target.GetComponent<SkinnedMeshRenderer>();
                     result.MorphIndex = renderer != null && renderer.sharedMesh != null ? renderer.sharedMesh.GetBlendShapeIndex(shape) : -1;
-                    if (result.MorphIndex < 0) throw new InvalidOperationException($"Local blendshape '{shape}' is missing on '{target.name}'.");
+                    if (result.MorphIndex < 0) throw new InvalidOperationException($"Local blendshape '{shape}' is missing on GameObject '{MochiyaDiagnosticPath.Of(target)}'. Check this object's Skinned Mesh Renderer and correct the authoring blendshape reference.");
                 }
             }
             if (!external && result.Node == null) throw new InvalidOperationException("A local target is outside the converted hierarchy.");
@@ -83,9 +83,15 @@ namespace Mochiya.AvatarTools.Editor
             MochiyaParentDependency.Resolve(reference, owner != null ? MochiyaParentDependency.ReferenceRoot(owner, c.Source) : c.Source.transform);
         internal static void Inspect(GameObject scope, MochiyaConversionReport report, Transform[] excluded)
         {
-            foreach (var component in scope.GetComponentsInChildren<Component>(true))
+            foreach (var entry in scope.GetComponentsInChildren<Transform>(true)
+                .SelectMany(node => node.GetComponents<Component>().Select(component => (node, component))))
             {
-                if (component == null) { report.Errors.Add("The hierarchy contains a missing script. Remove or restore it first."); continue; }
+                var component = entry.component;
+                if (component == null)
+                {
+                    report.Warnings.Add($"Missing script on GameObject '{MochiyaDiagnosticPath.Of(entry.node)}' is ignored during export. Its behavior is not included; the source component is left unchanged.");
+                    continue;
+                }
                 if (excluded.Any(x => component.transform.IsChildOf(x))) continue;
                 if (component is Behaviour b && !b.enabled) continue;
                 var type = component.GetType();
@@ -179,7 +185,10 @@ namespace Mochiya.AvatarTools.Editor
                     break;
                 case "ModularAvatarMergeArmature":
                     var target = Reference(Read(component, "mergeTarget"), c, component);
-                    if (target == null) throw new InvalidOperationException($"{component.name}: MA Merge Armature target is missing.");
+                    if (target == null)
+                    {
+                        throw new InvalidOperationException($"MA Merge Armature target is missing on GameObject '{MochiyaDiagnosticPath.Of(component.transform)}'. Select this object's Modular Avatar Merge Armature component and assign its merge target to the intended armature.");
+                    }
                     var merge = Record(component, c, ComponentKind.MergeArmature, false);
                     merge.Target = c.Select(target, bone: true); merge.Prefix = String(component, "prefix"); merge.Suffix = String(component, "suffix"); merge.MangleNames = Bool(component, "mangleNames");
                     var mode = String(component, "LockMode");

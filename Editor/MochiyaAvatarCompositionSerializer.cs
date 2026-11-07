@@ -79,8 +79,14 @@ namespace Mochiya.AvatarTools.Editor
                         var shape = selector.BlendshapeKeywords.FirstOrDefault();
                         var mesh = meshIndex < 0 ? null : gltf.meshes[meshIndex];
                         var readable = mesh == null ? null : new glTFMesh { extras = mesh.extras is glTFExtensionExport exported ? exported.Deserialize() : mesh.extras, primitives = mesh.primitives };
-                        if (readable == null || !gltf_mesh_extras_targetNames.TryGet(readable, out var names))
-                            throw new InvalidOperationException("A local morph target mesh was removed by the exporter.");
+                        string MorphError(string reason)
+                        {
+                            return $"Cannot export blendshape '{shape}' on export hierarchy '{MochiyaDiagnosticPath.Of(selector.Node)}' (source blendshape index {selector.MorphIndex}): {reason}";
+                        }
+                        if (readable == null)
+                            throw new InvalidOperationException(MorphError("the exported object has no mesh. Check that the referenced Skinned Mesh Renderer has a mesh and is included in the export. If it does, the exporter may have removed it."));
+                        if (!gltf_mesh_extras_targetNames.TryGet(readable, out var names))
+                            throw new InvalidOperationException(MorphError("the exported mesh exists, but its blendshape-name list is missing. Check that the referenced mesh contains this blendshape and that blendshapes are preserved during export. If both are correct, this requires an exporter fix; it does not mean your source GameObject was deleted."));
                         var exportedIndex = names.ToList().IndexOf(shape);
                         if (exportedIndex < 0) throw new InvalidOperationException($"Local morph '{shape}' was removed by the exporter. Exported names: [{string.Join(", ", names)}]. Preserve blendshapes in export settings.");
                         Int("morphIndex", exportedIndex);

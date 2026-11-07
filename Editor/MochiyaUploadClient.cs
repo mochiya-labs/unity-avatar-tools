@@ -13,7 +13,13 @@ namespace Mochiya.AvatarTools.Editor
     {
         public int modelVariants, bodyTypes, bodyType;
         public int version, title, tags, tag, gallery, additionalFiles, specifications, requirements, credits, licenseText, maxPriceCents;
-        public long imageBytes, fileBytes, totalBytes;
+        public long imageBytes, fileBytes, additionalFileBytes, totalBytes;
+        public long FileSizeLimit(string role)
+        {
+            if (role == "cover" || role == "gallery") return imageBytes;
+            // Older v3 servers omit the additive buyer-file limit.
+            return role == "additional" && additionalFileBytes > 0 ? additionalFileBytes : fileBytes;
+        }
     }
     [Serializable] public sealed class MochiyaUploadPricing { public int processingBasisPoints, processingFixedCents, commissionBasisPoints; }
     [Serializable] public sealed class MochiyaUploadCapabilities

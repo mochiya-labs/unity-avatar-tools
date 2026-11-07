@@ -88,7 +88,9 @@ namespace Mochiya.AvatarTools.Editor
                             var path = property.FindPropertyRelative("referencePath")?.stringValue;
                             var target = Resolve(direct, path, root);
                             if (target == null && !string.IsNullOrEmpty(path))
-                                result.Errors.Add($"{component.name}: MA reference '{path}' cannot be resolved. Repair the reference before conversion.");
+                            {
+                                result.Errors.Add($"Unresolved MA reference '{path}' on GameObject '{MochiyaDiagnosticPath.Of(component.transform)}', component {component.GetType().Name}, field '{property.propertyPath}'. Searched relative to '{MochiyaDiagnosticPath.Of(root)}'. Reassign this reference to the intended object before conversion.");
+                            }
                             Check(target, component, property.propertyPath);
                             enter = false;
                         }

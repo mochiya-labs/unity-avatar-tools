@@ -7,6 +7,22 @@ namespace Mochiya.AvatarTools.Editor.Tests
 {
     public sealed class MochiyaUploadTests
     {
+        [Test] public void AdditionalFileLimitsAndJsonPreserveTwoGiB()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>("Packages/org.mochiya.avatar-tools/Editor/UploadContract.json");
+            var limits = JsonUtility.FromJson<MochiyaUploadContract>(asset.text).limits;
+            Assert.AreEqual(2147483648L, limits.FileSizeLimit("additional"));
+            Assert.AreEqual(524288000L, limits.FileSizeLimit("model"));
+            Assert.AreEqual(10485760L, limits.FileSizeLimit("cover"));
+            Assert.AreEqual(10485760L, limits.FileSizeLimit("gallery"));
+            Assert.AreEqual(5368709120L, limits.totalBytes);
+            var request = new MochiyaUploadRequest { item = new MochiyaItemInput(), files = new[] {
+                new MochiyaUploadFile { id = "source", role = "additional", name = "source.zip", size = limits.additionalFileBytes, contentType = "application/zip" }
+            } };
+            Assert.AreEqual(2147483648L, JsonUtility.FromJson<MochiyaUploadRequest>(request.ToJson()).files[0].size);
+            limits.additionalFileBytes = 0;
+            Assert.AreEqual(limits.fileBytes, limits.FileSizeLimit("additional"));
+        }
         [TestCase("Summer Dress", "outfit", "", "moe,chiffon", false, "Summer_Dress_moe_chiffon.glb")]
         [TestCase("Moe Avatar", "base_avatar", "moe", "any", true, "Moe_Avatar_moe.vrm")]
         [TestCase("Custom Avatar", "base_avatar", "", "any", true, "Custom_Avatar_none.vrm")]
