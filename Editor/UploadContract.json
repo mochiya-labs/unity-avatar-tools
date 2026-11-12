@@ -4,8 +4,8 @@
     "title": 80,
     "tags": 12,
     "tag": 40,
-    "gallery": 30,
-    "additionalFiles": 20,
+    "gallery": 50,
+    "additionalFiles": 40,
     "imageBytes": 10485760,
     "fileBytes": 524288000,
     "additionalFileBytes": 2147483648,
@@ -224,7 +224,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "Add up to 30 JPG or PNG images. Maximum 10 MiB each."
+          "value": "Add up to 50 JPG or PNG images. Maximum 10 MiB each."
         },
         {
           "name": "clearImage",
@@ -304,7 +304,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "Add no more than 30 preview images."
+          "value": "Add no more than 50 preview images."
         },
         {
           "name": "galleryInvalid",
@@ -392,11 +392,11 @@
         },
         {
           "name": "fileLimits",
-          "value": "Up to 20 additional files, 2 GiB each; all item files together up to 5 GiB."
+          "value": "Up to 40 additional files, 2 GiB each; all item files together up to 5 GiB."
         },
         {
           "name": "additionalFilesTooMany",
-          "value": "Choose at most 20 additional files."
+          "value": "Choose at most 40 additional files."
         },
         {
           "name": "personalUseHint",
@@ -901,7 +901,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "JPGまたはPNG画像を最大30枚追加できます。各10 MiBまで。"
+          "value": "JPGまたはPNG画像を最大50枚追加できます。各10 MiBまで。"
         },
         {
           "name": "clearImage",
@@ -981,7 +981,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "プレビュー画像は30枚以内にしてください。"
+          "value": "プレビュー画像は50枚以内にしてください。"
         },
         {
           "name": "galleryInvalid",
@@ -1069,11 +1069,11 @@
         },
         {
           "name": "fileLimits",
-          "value": "追加ファイルは最大20個、各2 GiB、アイテムの全ファイル合計5 GiBまでです。"
+          "value": "追加ファイルは最大40個、各2 GiB、アイテムの全ファイル合計5 GiBまでです。"
         },
         {
           "name": "additionalFilesTooMany",
-          "value": "???????20??????????"
+          "value": "追加ファイルは40個以内にしてください。"
         },
         {
           "name": "personalUseHint",
@@ -1578,7 +1578,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "最多添加 30 张 JPG 或 PNG 图片，每张最大 10 MiB。"
+          "value": "最多添加 50 张 JPG 或 PNG 图片，每张最大 10 MiB。"
         },
         {
           "name": "clearImage",
@@ -1658,7 +1658,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "预览图不能超过 30 张。"
+          "value": "预览图不能超过 50 张。"
         },
         {
           "name": "galleryInvalid",
@@ -1746,11 +1746,11 @@
         },
         {
           "name": "fileLimits",
-          "value": "最多20个附加文件，每个不超过2 GiB；商品所有文件合计不超过5 GiB。"
+          "value": "最多40个附加文件，每个不超过2 GiB；商品所有文件合计不超过5 GiB。"
         },
         {
           "name": "additionalFilesTooMany",
-          "value": "????20??????"
+          "value": "附加文件不能超过 40 个。"
         },
         {
           "name": "personalUseHint",
@@ -2255,7 +2255,7 @@
         },
         {
           "name": "galleryHint",
-          "value": "JPG 또는 PNG 이미지를 최대 30장 추가하세요. 각 10 MiB 이하."
+          "value": "JPG 또는 PNG 이미지를 최대 50장 추가하세요. 각 10 MiB 이하."
         },
         {
           "name": "clearImage",
@@ -2335,7 +2335,7 @@
         },
         {
           "name": "galleryTooMany",
-          "value": "미리보기 이미지는 30장 이하로 추가하세요."
+          "value": "미리보기 이미지는 50장 이하로 추가하세요."
         },
         {
           "name": "galleryInvalid",
@@ -2423,11 +2423,11 @@
         },
         {
           "name": "fileLimits",
-          "value": "추가 파일은 최대 20개, 파일당 2 GiB, 아이템의 전체 파일 합계 5 GiB까지 가능해요."
+          "value": "추가 파일은 최대 40개, 파일당 2 GiB, 아이템의 전체 파일 합계 5 GiB까지 가능해요."
         },
         {
           "name": "additionalFilesTooMany",
-          "value": "?? ??? ?? 20??? ??? ? ????."
+          "value": "추가 파일은 최대 40개까지 선택할 수 있습니다."
         },
         {
           "name": "personalUseHint",

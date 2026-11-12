@@ -77,6 +77,60 @@ namespace Mochiya.AvatarTools.Editor.Tests
             Assert.That(filter.sharedMesh.isReadable, Is.EqualTo(initiallyReadable));
         }
 
+        [TestCase(false, false)]
+        [TestCase(true, false)]
+        [TestCase(false, true)]
+        public void VrmExportsSharedSkinnedMeshesAndDisposesTemporaryCopies(bool includeStatic, bool fail)
+        {
+            var avatar = Avatar();
+            var original = avatar.GetComponentInChildren<SkinnedMeshRenderer>();
+            var mesh = original.sharedMesh;
+            mesh.name = "Shared Wing " + Guid.NewGuid().ToString("N");
+            var wing = new GameObject("Second Wing"); wing.transform.SetParent(avatar.transform, false);
+            var renderer = wing.AddComponent<SkinnedMeshRenderer>();
+            renderer.sharedMesh = mesh;
+            var head = avatar.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Head);
+            renderer.bones = new[] { head }; renderer.rootBone = head;
+            renderer.sharedMaterial = Keep(new Material(original.sharedMaterial) { name = "Second Wing Material", color = Color.red });
+            renderer.SetBlendShapeWeight(0, 25);
+            if (includeStatic)
+            {
+                var staticWing = new GameObject("Static Wing"); staticWing.transform.SetParent(avatar.transform, false);
+                staticWing.AddComponent<MeshFilter>().sharedMesh = mesh;
+                staticWing.AddComponent<MeshRenderer>().sharedMaterial = original.sharedMaterial;
+            }
+            var profile = Keep(ScriptableObject.CreateInstance<MochiyaExportProfile>());
+            profile.FreezeMesh = false;
+            var meshCount = Resources.FindObjectsOfTypeAll<Mesh>().Count(value => value.name == mesh.name);
+            var path = Path.GetFullPath("MochiyaTests/" + (fail ? Guid.NewGuid().ToString("N") + "/" : "") + "shared-wing.vrm");
+            if (fail) Assert.Throws<DirectoryNotFoundException>(() => MochiyaAvatarWorkflow.Export(avatar, path, profile));
+            else
+            {
+                MochiyaAvatarWorkflow.Export(avatar, path, profile);
+                var gltf = Gltf(path);
+                var first = gltf.nodes.Single(node => node.name == original.name);
+                var second = gltf.nodes.Single(node => node.name == "Second Wing");
+                Assert.That(first.mesh, Is.GreaterThanOrEqualTo(0));
+                Assert.That(second.mesh, Is.GreaterThanOrEqualTo(0));
+                Assert.That(second.mesh, Is.Not.EqualTo(first.mesh));
+                var firstMesh = gltf.meshes[first.mesh]; var secondMesh = gltf.meshes[second.mesh];
+                Assert.That(secondMesh.primitives[0].material, Is.Not.EqualTo(firstMesh.primitives[0].material));
+                Assert.That(gltf.nodes[gltf.skins[first.skin].joints[0]].name, Is.EqualTo("Hips"));
+                Assert.That(gltf.nodes[gltf.skins[second.skin].joints[0]].name, Is.EqualTo("Head"));
+                Assert.That(gltf_mesh_extras_targetNames.TryGet(firstMesh, out var firstNames), Is.True);
+                Assert.That(gltf_mesh_extras_targetNames.TryGet(secondMesh, out var secondNames), Is.True);
+                Assert.That(secondNames, Is.EqualTo(firstNames));
+                Assert.That(secondNames, Does.Contain("Body_Slim"));
+                Assert.That(secondMesh.primitives[0].targets.Count, Is.EqualTo(firstMesh.primitives[0].targets.Count));
+                if (includeStatic) Assert.That(gltf.nodes.Single(node => node.name == "Static Wing").mesh, Is.GreaterThanOrEqualTo(0));
+            }
+            Assert.That(original.sharedMesh, Is.SameAs(mesh));
+            Assert.That(renderer.sharedMesh, Is.SameAs(mesh));
+            Assert.That(renderer.bones[0], Is.SameAs(head));
+            Assert.That(renderer.GetBlendShapeWeight(0), Is.EqualTo(25));
+            Assert.That(Resources.FindObjectsOfTypeAll<Mesh>().Count(value => value.name == mesh.name), Is.EqualTo(meshCount));
+        }
+
         [TestCase(0, AssetKind.Avatar)]
         [TestCase(1, AssetKind.Attachment)]
         public void LoadsSavedKindsUsingOnlyAvatarAndAttachmentChoices(int storedKind, AssetKind expected)

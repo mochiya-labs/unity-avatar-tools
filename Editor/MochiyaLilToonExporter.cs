@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UniGLTF;
@@ -81,12 +82,26 @@ namespace Mochiya.AvatarTools.Editor
             WarnShapeDeletionLimits(root, exportSettings.FreezeMesh, exportSettings.FreezeMeshUseCurrentBlendShapeWeight);
 
             var exportRoot = CreateOriginNormalizedExportCopy(root);
+            var sharedMeshCopies = new List<UnityEngine.Mesh>();
             try
             {
                 MochiyaAvatarCompositionSerializer.PrepareCopy(exportRoot);
                 if (exportSettings.FreezeMesh)
                 {
                     FreezeVrmMesh(exportRoot, exportSettings);
+                }
+
+                // UniVRM's skinned-mesh dictionary requires a unique Mesh key per renderer.
+                // Isolate repeated meshes only on this private copy, retaining each renderer's skin/materials.
+                var usedMeshes = new HashSet<UnityEngine.Mesh>(exportRoot.GetComponentsInChildren<MeshFilter>(true)
+                    .Select(filter => filter.sharedMesh).Where(mesh => mesh != null));
+                foreach (var renderer in exportRoot.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                {
+                    if (renderer.sharedMesh == null || usedMeshes.Add(renderer.sharedMesh)) continue;
+                    var mesh = UnityEngine.Object.Instantiate(renderer.sharedMesh);
+                    mesh.name = renderer.sharedMesh.name;
+                    sharedMeshCopies.Add(mesh);
+                    renderer.sharedMesh = mesh;
                 }
 
                 using (var arrayManager = new NativeArrayManager())
@@ -122,6 +137,8 @@ namespace Mochiya.AvatarTools.Editor
             finally
             {
                 UnityEngine.Object.DestroyImmediate(exportRoot);
+                foreach (var mesh in sharedMeshCopies)
+                    if (mesh != null) UnityEngine.Object.DestroyImmediate(mesh);
             }
 
             RefreshAssetDatabase(path);
